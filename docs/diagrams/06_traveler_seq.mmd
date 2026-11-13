@@ -1,0 +1,25 @@
+sequenceDiagram
+  autonumber
+  actor U as 여행객
+  participant H as HomePage
+  participant P as PlaceDetailPage
+  participant N as 외부 내비 앱
+  participant G as GuidePage
+  participant API as FastAPI
+  U->>H: 검색어 입력
+  H->>API: GET /places?q= (300ms 디바운스)
+  U->>P: 장소 선택
+  P->>API: GET /places/{id}, /buildings, /walk-routes
+  U->>P: [주차장까지 길안내]
+  P->>P: localStorage 에 진행 중 여행 저장
+  P->>N: 딥링크 (navigation_target 좌표)
+  N-->>P: 주차 후 웹앱으로 복귀 (visibilitychange)
+  P->>P: Geolocation 거리 <= arrival_radius_m ? (서버로 보내지 않음)
+  P->>G: /places/{id}/guide?parking_lot_id=..&start=1
+  G->>API: GET /walk-routes (If-None-Match)
+  API-->>G: 304 또는 200
+  loop 단계마다
+    U->>G: [다음]
+    G->>G: 단계 카메라로 flyTo, 지나온 구간 칠하기
+  end
+  G-->>U: 입구 도착

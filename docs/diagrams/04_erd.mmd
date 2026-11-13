@@ -1,0 +1,79 @@
+erDiagram
+  place ||--o{ building : "place_id (CASCADE)"
+  place ||--|{ entrance : "place_id (CASCADE)"
+  place ||--|{ parking_lot : "place_id (CASCADE)"
+  place ||--o{ landmark : "place_id (CASCADE)"
+  parking_lot ||--o{ walk_route : "parking_lot_id (CASCADE)"
+  entrance ||--o{ walk_route : "entrance_id (CASCADE)"
+  walk_route ||--|{ walk_route_step : "walk_route_id (CASCADE)"
+  landmark |o--o{ walk_route_step : "landmark_id (SET NULL)"
+
+  place {
+    bigint id PK
+    varchar seed_key UK
+    varchar name
+    varchar category "CHECK 8개 값"
+    geometry location "Point 4326"
+    float camera_bearing "0~360, 3개 모두 또는 없음"
+    float camera_pitch "0~85"
+    float camera_zoom "0~22"
+    int arrival_radius_m "10~1000, 기본 150"
+    timestamptz last_verified_at
+    timestamptz created_at
+  }
+  building {
+    bigint id PK
+    bigint place_id FK
+    varchar name
+    geometry footprint "Polygon, ST_IsValid"
+    float height_m
+    int floor_count
+    boolean is_target
+    varchar source "osm, public_data, vworld, manual"
+  }
+  entrance {
+    bigint id PK
+    bigint place_id FK "UK(place_id, name)"
+    varchar name
+    geometry location "Point"
+    boolean is_main
+    timestamptz updated_at
+  }
+  parking_lot {
+    bigint id PK
+    bigint place_id FK "UK(place_id, name)"
+    varchar name
+    geometry location "Point, 내비 목적지"
+    geometry area "Polygon"
+    smallint priority ">= 1"
+    int capacity
+    boolean is_free
+    float camera_bearing
+  }
+  landmark {
+    bigint id PK
+    bigint place_id FK
+    varchar name
+    geometry location "Point"
+    text image_url
+  }
+  walk_route {
+    bigint id PK
+    bigint parking_lot_id FK "UK(parking_lot_id, entrance_id)"
+    bigint entrance_id FK
+    geometry path "LineString, 점 2개 이상"
+    float distance_m "적재 시 ST_Length(geography)"
+    int walk_time_min
+    timestamptz updated_at "경로 버전, ETag"
+  }
+  walk_route_step {
+    bigint id PK
+    bigint walk_route_id FK "UK(walk_route_id, step_order)"
+    int step_order ">= 1"
+    bigint landmark_id FK
+    text instruction "1~200자"
+    geometry location "Point, 경로에서 30m 이내"
+    float camera_bearing "없으면 서버 계산"
+    timestamptz updated_at
+    varchar updated_by
+  }

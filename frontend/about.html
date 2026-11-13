@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#E0482B" />
+  <title>서비스 정보, 출처 - 마중길</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<!-- 정적 정보 페이지. 스크립트 없음 (서버 호출, 관리자 편집 없음). 출처를 바꾸면 이 파일을 직접 고친다.
+     지도 화면의 출처는 이 페이지와 별도로 지도 모서리에 항상 표시한다 (js/map.js ATTRIBUTION_OPTIONS).
+     장소별 건물 데이터 출처는 API 응답(attributions)으로 장소 상세 화면에 표시한다. -->
+<body>
+  <div class="app">
+    <header class="topbar"><a class="btn btn-icon" href="/" aria-label="처음으로">←</a></header>
+    <h1>서비스 정보</h1>
+    <section class="stack about-section">
+      <p>마중길은 외곽 여행지에서 주차한 뒤 목적 건물 입구까지 걸어가는 길을 3D 지도와 단계별 안내로 미리 보여 주는 학생 프로젝트입니다.</p>
+      <!-- TODO: 팀 이름, 문의처(메일 또는 저장소 주소) -->
+      <p class="empty">문의: 준비 중</p>
+    </section>
+
+    <h2>지도와 데이터 출처</h2>
+    <ul class="list about-list">
+      <li class="card">
+        <b>지도 데이터</b>
+        <p>© <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap contributors</a>. 데이터는 Open Database License(ODbL) 1.0 을 따릅니다.</p>
+      </li>
+      <li class="card">
+        <b>배경 지도 타일</b>
+        <p><a href="https://openfreemap.org" rel="noopener">OpenFreeMap</a> © <a href="https://www.openmaptiles.org/" rel="noopener">OpenMapTiles</a>, 데이터 OpenStreetMap.</p>
+      </li>
+      <li class="card">
+        <b>캠퍼스 대체 지도</b>
+        <p>배경 지도를 받지 못할 때 쓰는 저장본입니다. OpenFreeMap 벡터 타일(2026-11-01 판)에서 만들었으며 © OpenMapTiles © OpenStreetMap contributors (ODbL).</p>
+      </li>
+      <li class="card">
+        <b>건물 데이터</b>
+        <p>장소마다 OpenStreetMap, 브이월드, 공공 건물 데이터, 직접 조사 중 사용한 출처를 장소 상세 화면에 표시합니다.</p>
+      </li>
+    </ul>
+
+    <h2>사용한 소프트웨어</h2>
+    <ul class="list about-list">
+      <li class="card">
+        <b>MapLibre GL JS 4.7.1</b>
+        <p>© MapLibre contributors. BSD 3-Clause License. <a href="/vendor/maplibre-gl-4.7.1/LICENSE.txt">라이선스 전문</a></p>
+      </li>
+      <li class="card">
+        <b>IBM Plex Sans KR, IBM Plex Mono</b>
+        <p>© IBM Corp. SIL Open Font License 1.1. <a href="https://fonts.google.com/specimen/IBM+Plex+Sans+KR" rel="noopener">Google Fonts</a> 로 불러옵니다.</p>
+      </li>
+    </ul>
+  </div>
+</body>
+</html>

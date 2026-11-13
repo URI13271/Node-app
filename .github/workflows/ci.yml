@@ -1,0 +1,48 @@
+# 자동 검사 (GitHub 에 올리면 push, PR 마다 돈다). 로컬에서는 README "실행" 의 명령을 그대로 쓰면 된다.
+name: ci
+on: [push, pull_request]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - name: 백엔드 설치
+        working-directory: backend
+        run: pip install -r requirements-dev.txt
+      - name: 코드 검사 (ruff)
+        working-directory: backend
+        run: ruff check app scripts tests
+      - name: 백엔드 테스트 (DB 없이, 통합 테스트는 건너뜀)
+        working-directory: backend
+        run: pytest
+      - name: 프론트 단위 테스트
+        working-directory: frontend
+        run: node --test
+
+  # 통합 테스트 (실제 PostGIS). patches/01 (DDL, 시드)을 적용하고 scripts/migrate.py, load_seed.py 를 구현한 뒤 아래 주석을 푼다.
+  # integration:
+  #   runs-on: ubuntu-latest
+  #   services:
+  #     db:
+  #       image: postgis/postgis:16-3.4
+  #       env: { POSTGRES_DB: majunggil_test, POSTGRES_USER: majunggil_owner, POSTGRES_PASSWORD: owner_ci }
+  #       ports: ["5432:5432"]
+  #       options: --health-cmd "pg_isready -U majunggil_owner" --health-interval 5s --health-retries 10
+  #   env:
+  #     TEST_DATABASE_URL: postgresql+psycopg://majunggil_app:app_ci@localhost:5432/majunggil_test
+  #     TEST_MIGRATION_DATABASE_URL: postgresql+psycopg://majunggil_owner:owner_ci@localhost:5432/majunggil_test
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-python@v5
+  #       with: { python-version: "3.12" }
+  #     - name: 앱 계정 만들기 (infra/db-init/01_roles.sql 과 같은 내용, 비밀번호만 CI 용)
+  #       run: |
+  #         sed -e "s/DATABASE majunggil /DATABASE majunggil_test /g; s/app_local_only/app_ci/" infra/db-init/01_roles.sql \
+  #           | PGPASSWORD=owner_ci psql -h localhost -U majunggil_owner -d majunggil_test
+  #     - working-directory: backend
+  #       run: pip install -r requirements-dev.txt && pytest tests/integration

@@ -1,0 +1,26 @@
+sequenceDiagram
+  autonumber
+  actor M as 관리자
+  participant W as AdminPage
+  participant R as api/admin.py
+  participant S as AdminWalkRouteService
+  participant D as domain/steps.py
+  participant DB as PostgreSQL
+  M->>W: 문장 수정 후 [전체 저장]
+  W->>R: PUT /admin/walk-routes/{id}/steps<br/>X-Admin-Key, expected_updated_at
+  R->>R: require_admin (키 비교, 5회 실패 잠금)
+  R->>R: Pydantic 검사 (unknown_field, incomplete_camera ...)
+  R->>S: replace_steps()
+  S->>D: check_steps (개수, 순서, 문장 길이) 위반을 한 번에
+  S->>DB: BEGIN, SELECT ... FOR UPDATE (walk_route)
+  alt updated_at != expected_updated_at
+    S-->>W: 409 CONFLICT (reason: stale)
+  else 같음
+    S->>DB: 랜드마크 소속 확인, 지점과 경로 거리 30m 확인
+    S->>DB: DELETE 단계, INSERT 새 단계
+    S->>DB: UPDATE walk_route SET updated_at = clock_timestamp()
+    S->>DB: COMMIT
+    S-->>W: 200 새 경로 (새 updated_at, 새 단계 id)
+    W->>W: walkRoutes 쿼리 무효화
+  end
+  Note over W,DB: 여행객 화면은 다음 조회 때 If-None-Match 로 재검증 → ETag 가 바뀌었으므로 200 새 문장

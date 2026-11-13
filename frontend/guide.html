@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#E0482B" />
+  <title>3D 안내 - 마중길</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" />
+  <!-- 3D 지도 라이브러리 (MapLibre GL JS 4.7.1, vendor/ 에 받아 둔 파일). js/map.js 에서 전역 maplibregl 로 쓴다 -->
+  <link rel="stylesheet" href="/vendor/maplibre-gl-4.7.1/maplibre-gl.css" />
+  <script src="/vendor/maplibre-gl-4.7.1/maplibre-gl.js"></script>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<!-- F-02 도착 방향 3D 시점, F-03 강조, F-04 도보 경로와 거리, F-05 랜드마크 단계 안내. 주소 예: guide.html?id=1&parking_lot_id=2&route=3&start=1 -->
+<body>
+  <div class="app">
+    <div id="map" class="map map-full"></div>
+    <header class="topbar overlay"><a class="btn btn-icon" href="/" aria-label="뒤로">←</a></header>
+    <!-- 아래 안내 카드: 개요 → 단계 1..n → 도착 완료 -->
+    <section id="guide-card" class="card guide-card">
+      <!-- 단계 진행 막대: 단계 수만큼 <i>, 지나온 단계는 .on (guide.js render) -->
+      <div id="step-seg" class="seg" aria-hidden="true"></div>
+      <!-- 큰 단계 번호 "2 / 4". 개요(-1)와 도착 완료(n)에는 글자로 -->
+      <div id="step-num" class="step-num"></div>
+      <!-- 낭독기는 이 문장만 읽는다 (막대, 번호는 aria-hidden 또는 문장에 포함) -->
+      <p id="step-text" class="step-text" aria-live="polite">불러오는 중</p>
+      <div id="step-actions" class="actions">
+        <button id="btn-prev" class="btn">이전</button>
+        <button id="btn-next" class="btn btn-primary">다음</button>
+      </div>
+      <!-- 도착 완료(step = n)에만 보인다 -->
+      <div id="done-actions" class="actions" hidden>
+        <a id="btn-detail" class="btn" href="#">장소 정보</a>
+        <a class="btn btn-primary" href="/">처음으로</a>
+      </div>
+      <div id="map-legend" class="legend" aria-label="지도 범례"></div>
+    </section>
+
+    <!-- 뼈대 전용: 이 화면에서 만들 것. 구현하면 이 블록을 지운다 -->
+    <section class="skeleton">
+      <h2>만들 것</h2>
+      <ul>
+        <li>F-02 도착 방향 개요 시점 (#map)</li>
+        <li>F-04 도보 경로 선, 거리, 예상 시간</li>
+        <li>F-05 단계 카드 (이전, 다음), 단계별 카메라 이동</li>
+        <li>도착 완료 화면</li>
+        <li>경로 선택 (주차장별)</li>
+      </ul>
+    </section>
+    <nav class="skeleton-nav" aria-label="뼈대 화면 이동">
+      <a class="btn btn-sm" href="/">홈</a>
+      <a class="btn btn-sm" href="/place.html?id=1">장소 상세</a>
+      <a class="btn btn-sm" href="/guide.html?id=1">3D 안내</a>
+      <a class="btn btn-sm" href="/admin.html">관리자</a>
+    </nav>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script type="module" src="/js/pages/guide.js"></script>
+</body>
+</html>

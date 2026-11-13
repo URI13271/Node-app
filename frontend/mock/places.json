@@ -1,0 +1,59 @@
+{
+ "total": 4,
+ "limit": 20,
+ "offset": 0,
+ "items": [
+  {
+   "id": 3,
+   "name": "교양학관",
+   "category": "campus",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     128.09903,
+     35.15204
+    ]
+   },
+   "cover_image_url": null
+  },
+  {
+   "id": 1,
+   "name": "중앙도서관",
+   "category": "campus",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     128.099442,
+     35.153219
+    ]
+   },
+   "cover_image_url": null
+  },
+  {
+   "id": 2,
+   "name": "학생회관",
+   "category": "campus",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     128.097286,
+     35.153605
+    ]
+   },
+   "cover_image_url": null
+  },
+  {
+   "id": 4,
+   "name": "경로 준비 중 예시 (mock 전용)",
+   "category": "campus",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     128.09903,
+     35.15204
+    ]
+   },
+   "cover_image_url": null
+  }
+ ]
+}

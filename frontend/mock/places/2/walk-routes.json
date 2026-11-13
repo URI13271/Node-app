@@ -1,0 +1,288 @@
+{
+ "items": [
+  {
+   "id": 3,
+   "parking_lot_id": 2,
+   "entrance_id": 4,
+   "path": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      128.094848,
+      35.154033
+     ],
+     [
+      128.095113,
+      35.154172
+     ],
+     [
+      128.096762,
+      35.153921
+     ],
+     [
+      128.097112,
+      35.153623
+     ]
+    ]
+   },
+   "distance_m": 227.1,
+   "walk_time_min": 4,
+   "description": "큰길 남쪽 인도를 따라 동쪽으로 약 150m, 횡단보도 1곳",
+   "updated_at": "2026-11-12T05:54:08.126789Z",
+   "steps": [
+    {
+     "id": 12,
+     "step_order": 1,
+     "instruction": "주차장 북동쪽 끝으로 나와 큰길 쪽 인도로 올라가기",
+     "landmark": null,
+     "location": {
+      "type": "Point",
+      "coordinates": [
+       128.094848,
+       35.154033
+      ]
+     },
+     "camera": {
+      "bearing": 61.7,
+      "pitch": 55,
+      "zoom": 18.5
+     },
+     "camera_is_default": true
+    },
+    {
+     "id": 13,
+     "step_order": 2,
+     "instruction": "인도를 따라 동쪽으로 약 150m 직진. 중간의 골목은 횡단보도로 건너기",
+     "landmark": null,
+     "location": {
+      "type": "Point",
+      "coordinates": [
+       128.09515,
+       35.154166
+      ]
+     },
+     "camera": {
+      "bearing": 100.5,
+      "pitch": 55,
+      "zoom": 18.5
+     },
+     "camera_is_default": true
+    },
+    {
+     "id": 14,
+     "step_order": 3,
+     "instruction": "사거리에서 횡단보도로 남북 방향 도로를 건너기",
+     "landmark": null,
+     "location": {
+      "type": "Point",
+      "coordinates": [
+       128.096759,
+       35.153921
+      ]
+     },
+     "camera": {
+      "bearing": 135.9,
+      "pitch": 55,
+      "zoom": 18.5
+     },
+     "camera_is_default": true
+    },
+    {
+     "id": 15,
+     "step_order": 4,
+     "instruction": "오른쪽 앞에 보이는 학생회관 서쪽 벽 출입구로 들어가기",
+     "landmark": null,
+     "location": {
+      "type": "Point",
+      "coordinates": [
+       128.097073,
+       35.153656
+      ]
+     },
+     "camera": {
+      "bearing": 136,
+      "pitch": 55,
+      "zoom": 18.5
+     },
+     "camera_is_default": true
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "parking_lot_id": 3,
+   "entrance_id": 3,
+   "path": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      128.098815,
+      35.154262
+     ],
+     [
+      128.099082,
+      35.154176
+     ],
+     [
+      128.09902,
+      35.15392
+     ],
+     [
+      128.098648,
+      35.153976
+     ],
+     [
+      128.098744,
+      35.153877
+     ],
+     [
+      128.098777,
+      35.153782
+     ],
+     [
+      128.10025,
+      35.153549
+     ],
+     [
+      128.100218,
+      35.153405
+     ],
+     [
+      128.097648,
+      35.153789
+     ],
+     [
+      128.097645,
+      35.153776
+     ]
+    ]
+   },
+   "distance_m": 506.2,
+   "walk_time_min": 8,
+   "description": "큰길 횡단보도가 도서관 동쪽에만 있어 돌아가는 길 (약 500m). 가까운 횡단보도가 확인되면 짧아진다",
+   "updated_at": "2026-11-12T05:54:08.127900Z",
+   "steps": [
+    {
+     "id": 16,
+     "step_order": 1,
+     "instruction": "주차장 남쪽 출구로 나와 짧은 계단을 지나 큰길 인도까지 걷기",
+     "landmark": null,
+     "location": {
+      "type": "Point",
+      "coordinates": [
+       128.098815,
+       35.154262
+      ]
+     },
+     "camera": {
+      "bearing": 155.8,
+      "pitch": 55,
+      "zoom": 18.5
+     },
+     "camera_is_default": true
+    },
+    {
+     "id": 17,
+     "step_order": 2,
+     "instruction": "횡단보도로 옆 도로를 건넌 뒤 큰길 인도를 따라 동쪽으로 걷기",
+     "landmark": null,
+     "location": {
+      "type": "Point",
+      "coordinates": [
+       128.099108,
+       35.15373
+      ]
+     },
+     "camera": {
+      "bearing": 105.4,
+      "pitch": 55,
+      "zoom": 18.5
+     },
+     "camera_is_default": true
+    },
+    {
+     "id": 18,
+     "step_order": 3,
+     "instruction": "도서관 동쪽 끝 너머 횡단보도로 큰길 건너기",
+     "landmark": null,
+     "location": {
+      "type": "Point",
+      "coordinates": [
+       128.100234,
+       35.153476
+      ]
+     },
+     "camera": {
+      "bearing": 235.2,
+      "pitch": 55,
+      "zoom": 18.5
+     },
+     "camera_is_default": true
+    },
+    {
+     "id": 19,
+     "step_order": 4,
+     "instruction": "건너서 오른쪽(서쪽)으로 꺾어 도서관을 왼쪽에 두고 인도를 따라 직진",
+     "landmark": {
+      "id": 3,
+      "name": "중앙도서관 건물"
+     },
+     "location": {
+      "type": "Point",
+      "coordinates": [
+       128.100132,
+       35.153418
+      ]
+     },
+     "camera": {
+      "bearing": 280.3,
+      "pitch": 55,
+      "zoom": 18.5
+     },
+     "camera_is_default": true
+    },
+    {
+     "id": 20,
+     "step_order": 5,
+     "instruction": "분수대를 지나 학생회관이 보일 때까지 서쪽으로 계속 직진",
+     "landmark": {
+      "id": 4,
+      "name": "도서관 앞 분수대"
+     },
+     "location": {
+      "type": "Point",
+      "coordinates": [
+       128.098932,
+       35.153597
+      ]
+     },
+     "camera": {
+      "bearing": 280.3,
+      "pitch": 55,
+      "zoom": 18.5
+     },
+     "camera_is_default": true
+    },
+    {
+     "id": 21,
+     "step_order": 6,
+     "instruction": "학생회관 북쪽 벽 동쪽 끝 출입구로 들어가기",
+     "landmark": null,
+     "location": {
+      "type": "Point",
+      "coordinates": [
+       128.097699,
+       35.153781
+      ]
+     },
+     "camera": {
+      "bearing": 263.5,
+      "pitch": 55,
+      "zoom": 18.5
+     },
+     "camera_is_default": true
+    }
+   ]
+  }
+ ]
+}

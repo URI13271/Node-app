@@ -1,0 +1,315 @@
+diff --git a/backend/app/schemas/admin.py b/backend/app/schemas/admin.py
+index e0f3389..2c9ddf5 100644
+--- a/backend/app/schemas/admin.py
++++ b/backend/app/schemas/admin.py
+@@ -1,29 +1,39 @@
+-"""관리자 입력, 출력 DTO (API 명세서 3.6~3.8).
++"""관리자 입력, 출력 DTO (API 명세서 3.6~3.8)."""
+ 
+-뼈대: 본문은 비어 있다. 함수마다 NotImplementedError 를 구현으로 바꾼다.
+-"""
+ 
+-from pydantic import BaseModel
++from pydantic import AwareDatetime, BaseModel, Field
+ 
+-from app.schemas.common import InModel
++from app.schemas.common import Camera, GeoPointIn, InModel
+ from app.schemas.walk_route import StepOut
+ 
+ 
+ class AdminMeOut(BaseModel):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    role: str = "admin"
+ 
+ 
+ class StepIn(InModel):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    step_order: int = Field(ge=1)
++    instruction: str                 # 길이 규칙은 domain/steps.py 가 한 번에 검사
++    landmark_id: int | None          # 키는 필수, 값은 null 허용
++    location: GeoPointIn
++    camera: Camera | None            # 키는 필수, null 이면 서버 기본 카메라
+ 
+ 
+ class StepsReplaceIn(InModel):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    expected_updated_at: AwareDatetime
++    updated_by: str = Field(min_length=1, max_length=50)
++    steps: list[StepIn]
+ 
+ 
+ class StepPatchIn(InModel):
+     """키가 없으면 그대로 두고, null 이면 지운다. model_fields_set 으로 구분한다."""
++    updated_by: str = Field(min_length=1, max_length=50)
++    expected_updated_at: AwareDatetime | None = None
++    instruction: str | None = None
++    landmark_id: int | None = None
++    camera: Camera | None = None
+ 
+ 
+ class StepPatchOut(StepOut):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    walk_route_id: int
++    walk_route_updated_at: str
+diff --git a/backend/app/schemas/building.py b/backend/app/schemas/building.py
+index 4a37229..6e2d36c 100644
+--- a/backend/app/schemas/building.py
++++ b/backend/app/schemas/building.py
+@@ -1,18 +1,26 @@
+-"""건물 GeoJSON DTO (API 명세서 3.4).
+-
+-뼈대: 본문은 비어 있다. 함수마다 NotImplementedError 를 구현으로 바꾼다.
+-"""
++"""건물 GeoJSON DTO (API 명세서 3.4)."""
++from typing import Literal
+ 
+ from pydantic import BaseModel
+ 
++from app.schemas.common import GeoJSON
++
+ 
+ class BuildingProps(BaseModel):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    name: str | None
++    floor_count: int | None
++    render_height_m: float
++    is_target: bool
+ 
+ 
+ class BuildingFeature(BaseModel):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    type: Literal["Feature"] = "Feature"
++    id: int
++    geometry: GeoJSON
++    properties: BuildingProps
+ 
+ 
+ class BuildingCollection(BaseModel):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    type: Literal["FeatureCollection"] = "FeatureCollection"
++    features: list[BuildingFeature]
++    attributions: list[str]
+diff --git a/backend/app/schemas/common.py b/backend/app/schemas/common.py
+index 5e420fc..9b168b3 100644
+--- a/backend/app/schemas/common.py
++++ b/backend/app/schemas/common.py
+@@ -1,24 +1,33 @@
+-"""공통 DTO: GeoPoint, Camera, ErrorBody (API 명세서 2장, 1.11).
++"""공통 DTO: GeoPoint, Camera, ErrorBody (API 명세서 2장, 1.11)."""
++from datetime import UTC, datetime
++from typing import Annotated, Any, Literal
+ 
+-뼈대: 본문은 비어 있다. 함수마다 NotImplementedError 를 구현으로 바꾼다.
+-"""
+-
+-from datetime import datetime
+-from typing import Any
+-
+-from pydantic import BaseModel
++from pydantic import AfterValidator, BaseModel, ConfigDict, Field
++from pydantic_core import PydanticCustomError
+ 
+ 
+ class InModel(BaseModel):
+     """모든 입력 DTO: 정의되지 않은 필드 거부, 문자열 앞뒤 공백 제거 (설계서 2.4.3)."""
++    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
++
++
++def _check_coords(v: list[float]) -> list[float]:
++    if len(v) != 2 or not (-180 <= v[0] <= 180) or not (-90 <= v[1] <= 90):
++        raise PydanticCustomError("invalid_geometry", "좌표는 [경도, 위도] 범위 안이어야 합니다.")
++    return v
+ 
+ 
+ class GeoPointIn(InModel):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    type: Literal["Point"]
++    coordinates: Annotated[list[float], AfterValidator(_check_coords)]
+ 
+ 
+ class Camera(BaseModel):
+     """방위각 0 이상 360 미만, 기울기 0~85, 줌 0~22."""
++    model_config = ConfigDict(extra="forbid")
++    bearing: float = Field(ge=0, lt=360)
++    pitch: float = Field(ge=0, le=85)
++    zoom: float = Field(ge=0, le=22)
+ 
+ 
+ GeoJSON = dict[str, Any]
+@@ -26,25 +35,33 @@ GeoJSON = dict[str, Any]
+ 
+ def iso_seconds(dt: datetime | None) -> str | None:
+     """ISO 8601 UTC, 초 단위. 예: 2026-11-12T05:20:00Z"""
+-    raise NotImplementedError("TODO: app.schemas.common.iso_seconds")
++    return dt.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ") if dt else None
+ 
+ 
+ def iso_micros(dt: datetime) -> str:
+     """경로 버전용. 마이크로초까지. 예: 2026-11-12T05:20:00.123456Z"""
+-    raise NotImplementedError("TODO: app.schemas.common.iso_micros")
++    return dt.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+ 
+ 
+ class ErrorDetail(BaseModel):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    field: str
++    reason: str
++    message: str
+ 
+ 
+ class ErrorInner(BaseModel):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    code: str
++    message: str
++    request_id: str
++    timestamp: str
++    details: list[ErrorDetail] = []
+ 
+ 
+ class ErrorBody(BaseModel):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    error: ErrorInner
+ 
+ 
+ class HealthOut(BaseModel):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    status: Literal["ok", "error"]
++    db: Literal["ok", "unavailable"]
++    version: str
+diff --git a/backend/app/schemas/place.py b/backend/app/schemas/place.py
+index 231a733..e5a1599 100644
+--- a/backend/app/schemas/place.py
++++ b/backend/app/schemas/place.py
+@@ -1,38 +1,71 @@
+-"""장소 DTO (API 명세서 3.2, 3.3 / 설계서 2.4.3).
+-
+-뼈대: 본문은 비어 있다. 함수마다 NotImplementedError 를 구현으로 바꾼다.
+-"""
+-
++"""장소 DTO (API 명세서 3.2, 3.3 / 설계서 2.4.3)."""
+ from typing import Literal
+ 
+ from pydantic import BaseModel
+ 
++from app.schemas.common import Camera, GeoJSON
++
+ Category = Literal["pension", "campsite", "temple", "restaurant", "trailhead", "attraction", "campus", "other"]
+ 
+ 
+ class PlaceSummary(BaseModel):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    id: int
++    name: str
++    category: Category
++    location: GeoJSON
++    cover_image_url: str | None
+ 
+ 
+ class PlaceListOut(BaseModel):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    total: int
++    limit: int
++    offset: int
++    items: list[PlaceSummary]
+ 
+ 
+ class EntranceOut(BaseModel):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    id: int
++    name: str
++    is_main: bool
++    description: str | None
++    location: GeoJSON
+ 
+ 
+ class ParkingOut(BaseModel):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    id: int
++    name: str
++    priority: int
++    capacity: int | None
++    is_free: bool | None
++    description: str | None
++    location: GeoJSON
++    area: GeoJSON | None
++    camera: Camera                 # v1.1: 항상 값이 있다. 저장값이 없으면 서버 계산값
++    camera_is_default: bool        # v1.1: true 면 camera 는 "이 주차장 → 장소" 방향 계산값
+ 
+ 
+ class LandmarkOut(BaseModel):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    id: int
++    name: str
++    image_url: str | None
++    location: GeoJSON
+ 
+ 
+ class NavigationTarget(BaseModel):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    parking_lot_id: int
++    name: str
++    lng: float
++    lat: float
+ 
+ 
+ class PlaceDetail(PlaceSummary):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    address: str | None
++    description: str | None
++    camera: Camera
++    entrances: list[EntranceOut]
++    parking_lots: list[ParkingOut]
++    landmarks: list[LandmarkOut]
++    navigation_target: NavigationTarget
++    arrival_radius_m: int
++    attributions: list[str]
++    last_verified_at: str | None
+diff --git a/backend/app/schemas/walk_route.py b/backend/app/schemas/walk_route.py
+index 5c57e21..dbf958b 100644
+--- a/backend/app/schemas/walk_route.py
++++ b/backend/app/schemas/walk_route.py
+@@ -1,22 +1,35 @@
+-"""도보 경로, 단계 DTO (API 명세서 3.5).
+-
+-뼈대: 본문은 비어 있다. 함수마다 NotImplementedError 를 구현으로 바꾼다.
+-"""
+-
++"""도보 경로, 단계 DTO (API 명세서 3.5)."""
+ from pydantic import BaseModel
+ 
++from app.schemas.common import Camera, GeoJSON
++
+ 
+ class LandmarkRef(BaseModel):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    id: int
++    name: str
+ 
+ 
+ class StepOut(BaseModel):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    id: int
++    step_order: int
++    instruction: str
++    landmark: LandmarkRef | None
++    location: GeoJSON
++    camera: Camera
++    camera_is_default: bool
+ 
+ 
+ class WalkRouteOut(BaseModel):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    id: int
++    parking_lot_id: int
++    entrance_id: int
++    path: GeoJSON
++    distance_m: float
++    walk_time_min: int
++    description: str | None
++    updated_at: str
++    steps: list[StepOut]
+ 
+ 
+ class WalkRouteListOut(BaseModel):
+-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
++    items: list[WalkRouteOut]

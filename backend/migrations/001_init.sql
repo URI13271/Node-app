@@ -1,0 +1,2 @@
+-- 001_init: place, building, entrance, parking_lot, landmark, walk_route, walk_route_step
+-- TODO: 테이블 정의서 v1.1 기준으로 작성한다. 제약, 인덱스 이름은 app/db.py NAMING_CONVENTION 과 맞춘다.

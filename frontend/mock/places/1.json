@@ -1,0 +1,167 @@
+{
+ "id": 1,
+ "name": "중앙도서관",
+ "category": "campus",
+ "address": "경상남도 진주시 진주대로 501 경상국립대학교 가좌캠퍼스",
+ "location": {
+  "type": "Point",
+  "coordinates": [
+   128.099442,
+   35.153219
+  ]
+ },
+ "description": "주차장은 건물 북쪽에 있고, 분수대가 있는 서쪽에도 출입구가 있습니다 (입구 위치는 현장 확인 전 초안)",
+ "cover_image_url": null,
+ "camera": {
+  "bearing": 168.2,
+  "pitch": 60,
+  "zoom": 17.5
+ },
+ "entrances": [
+  {
+   "id": 1,
+   "name": "북쪽 출입구",
+   "is_main": true,
+   "description": "주차장 쪽 출입구 (현장 확인 필요)",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     128.099492,
+     35.153435
+    ]
+   }
+  },
+  {
+   "id": 2,
+   "name": "서쪽 출입구",
+   "is_main": false,
+   "description": "분수대 쪽 출입구. 도서관과 붙은 서쪽 건물의 벽 (현장 확인 필요)",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     128.098942,
+     35.153349
+    ]
+   }
+  }
+ ],
+ "parking_lots": [
+  {
+   "id": 1,
+   "name": "중앙도서관 북쪽 주차장",
+   "priority": 1,
+   "capacity": null,
+   "is_free": null,
+   "description": "주말 무료 개방",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     128.09918,
+     35.15424
+    ]
+   },
+   "area": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       128.098815,
+       35.154262
+      ],
+      [
+       128.099043,
+       35.154227
+      ],
+      [
+       128.099082,
+       35.154176
+      ],
+      [
+       128.099164,
+       35.15407
+      ],
+      [
+       128.099258,
+       35.15406
+      ],
+      [
+       128.099546,
+       35.154214
+      ],
+      [
+       128.099393,
+       35.154405
+      ],
+      [
+       128.099209,
+       35.154433
+      ],
+      [
+       128.09912,
+       35.154397
+      ],
+      [
+       128.099024,
+       35.154358
+      ],
+      [
+       128.098859,
+       35.154383
+      ],
+      [
+       128.098843,
+       35.154385
+      ],
+      [
+       128.098815,
+       35.154262
+      ]
+     ]
+    ]
+   },
+   "camera": {
+    "bearing": 168.2,
+    "pitch": 60,
+    "zoom": 17.5
+   },
+   "camera_is_default": true
+  }
+ ],
+ "landmarks": [
+  {
+   "id": 1,
+   "name": "도서관 앞 분수대",
+   "image_url": null,
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     128.098874,
+     35.153359
+    ]
+   }
+  },
+  {
+   "id": 2,
+   "name": "학생회관 건물",
+   "image_url": null,
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     128.097286,
+     35.153605
+    ]
+   }
+  }
+ ],
+ "navigation_target": {
+  "parking_lot_id": 1,
+  "name": "중앙도서관 북쪽 주차장",
+  "lng": 128.09918,
+  "lat": 35.15424
+ },
+ "arrival_radius_m": 150,
+ "attributions": [
+  "© OpenStreetMap contributors"
+ ],
+ "last_verified_at": null
+}

@@ -1,0 +1,36 @@
+# 로컬 개발용 (설계서 2.2.2: Docker Compose 서비스 이름 majunggil-api, majunggil-db)
+# 실행: docker compose up -d → 아래 README 의 "마이그레이션, 시드" 순서
+services:
+  majunggil-db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: majunggil
+      POSTGRES_USER: majunggil_owner          # 마이그레이션, 시드 계정 (DDL 권한)
+      POSTGRES_PASSWORD: owner_local_only
+    ports: ["5432:5432"]
+    volumes:
+      - majunggil-db-data:/var/lib/postgresql/data
+      - ./infra/db-init:/docker-entrypoint-initdb.d:ro   # 앱 계정 생성, UTC 고정
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U majunggil_owner -d majunggil"]
+      interval: 5s
+      retries: 10
+
+  majunggil-api:
+    build:
+      context: .                          # frontend/ 도 이미지에 넣으려고 맨 위 폴더에서 빌드
+      dockerfile: backend/Dockerfile
+    environment:
+      ENV: local
+      DATABASE_URL: postgresql+psycopg://majunggil_app:app_local_only@majunggil-db:5432/majunggil
+      MIGRATION_DATABASE_URL: postgresql+psycopg://majunggil_owner:owner_local_only@majunggil-db:5432/majunggil
+      ADMIN_KEY: ${ADMIN_KEY:-local-dev-admin-key-change-me-32chars}
+    volumes:
+      - ./frontend:/app/frontend:ro         # 개발용: 이미지 안 화면 파일을 내 폴더로 덮어써서, 고치면 새로고침만 하면 된다
+    ports: ["8000:8000"]
+    depends_on:
+      majunggil-db:
+        condition: service_healthy
+
+volumes:
+  majunggil-db-data:

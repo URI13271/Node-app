@@ -1,0 +1,2 @@
+-- 002_walk_network: walk_network (보행망)
+-- TODO: 테이블 정의서 v1.1 기준으로 작성한다. 제약, 인덱스 이름은 app/db.py NAMING_CONVENTION 과 맞춘다.

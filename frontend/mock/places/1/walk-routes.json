@@ -1,0 +1,316 @@
+{
+ "items": [
+  {
+   "id": 1,
+   "parking_lot_id": 1,
+   "entrance_id": 1,
+   "path": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      128.099258,
+      35.15406
+     ],
+     [
+      128.099305,
+      35.153864
+     ],
+     [
+      128.09941,
+      35.153799
+     ],
+     [
+      128.099709,
+      35.153787
+     ],
+     [
+      128.099822,
+      35.153769
+     ],
+     [
+      128.099786,
+      35.153623
+     ],
+     [
+      128.10025,
+      35.153549
+     ],
+     [
+      128.100218,
+      35.153405
+     ],
+     [
+      128.099509,
+      35.153511
+     ],
+     [
+      128.099492,
+      35.153435
+     ]
+    ]
+   },
+   "distance_m": 221.8,
+   "walk_time_min": 4,
+   "description": "큰길 횡단보도를 쓰려고 도서관 동쪽으로 돌아가는 길, 짧은 계단 1곳",
+   "updated_at": "2026-11-12T05:54:08.124567Z",
+   "steps": [
+    {
+     "id": 1,
+     "step_order": 1,
+     "instruction": "주차장 남쪽으로 나와 인도까지 내려간 뒤 왼쪽(동쪽)으로 걷기",
+     "landmark": null,
+     "location": {
+      "type": "Point",
+      "coordinates": [
+       128.099258,
+       35.15406
+      ]
+     },
+     "camera": {
+      "bearing": 133,
+      "pitch": 55,
+      "zoom": 18.5
+     },
+     "camera_is_default": true
+    },
+    {
+     "id": 2,
+     "step_order": 2,
+     "instruction": "짧은 계단을 지나 큰길 쪽 인도로 나가기",
+     "landmark": null,
+     "location": {
+      "type": "Point",
+      "coordinates": [
+       128.099793,
+       35.153652
+      ]
+     },
+     "camera": {
+      "bearing": 112.9,
+      "pitch": 55,
+      "zoom": 18.5
+     },
+     "camera_is_default": true
+    },
+    {
+     "id": 3,
+     "step_order": 3,
+     "instruction": "도서관 동쪽 끝 너머 횡단보도로 큰길 건너기",
+     "landmark": null,
+     "location": {
+      "type": "Point",
+      "coordinates": [
+       128.100239,
+       35.153498
+      ]
+     },
+     "camera": {
+      "bearing": 204.2,
+      "pitch": 55,
+      "zoom": 18.5
+     },
+     "camera_is_default": true
+    },
+    {
+     "id": 4,
+     "step_order": 4,
+     "instruction": "건너서 오른쪽(서쪽)으로 꺾어 도서관 북쪽 인도를 따라 걷기",
+     "landmark": null,
+     "location": {
+      "type": "Point",
+      "coordinates": [
+       128.10019,
+       35.153409
+      ]
+     },
+     "camera": {
+      "bearing": 275.9,
+      "pitch": 55,
+      "zoom": 18.5
+     },
+     "camera_is_default": true
+    },
+    {
+     "id": 5,
+     "step_order": 5,
+     "instruction": "도서관 북쪽 벽 가운데 출입구로 들어가기",
+     "landmark": null,
+     "location": {
+      "type": "Point",
+      "coordinates": [
+       128.099499,
+       35.153467
+      ]
+     },
+     "camera": {
+      "bearing": 190.1,
+      "pitch": 55,
+      "zoom": 18.5
+     },
+     "camera_is_default": true
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "parking_lot_id": 1,
+   "entrance_id": 2,
+   "path": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      128.099082,
+      35.154176
+     ],
+     [
+      128.098988,
+      35.15375
+     ],
+     [
+      128.10025,
+      35.153549
+     ],
+     [
+      128.100218,
+      35.153405
+     ],
+     [
+      128.098984,
+      35.153589
+     ],
+     [
+      128.098931,
+      35.153351
+     ],
+     [
+      128.098942,
+      35.153349
+     ]
+    ]
+   },
+   "distance_m": 323.3,
+   "walk_time_min": 5,
+   "description": "큰길 횡단보도로 건너 도서관 북쪽 인도를 따라 분수대 쪽으로",
+   "updated_at": "2026-11-12T05:54:08.125678Z",
+   "steps": [
+    {
+     "id": 6,
+     "step_order": 1,
+     "instruction": "주차장 서쪽 출구에서 남쪽으로 내려가 짧은 계단을 지나 큰길 인도까지 걷기",
+     "landmark": null,
+     "location": {
+      "type": "Point",
+      "coordinates": [
+       128.099082,
+       35.154176
+      ]
+     },
+     "camera": {
+      "bearing": 178.4,
+      "pitch": 55,
+      "zoom": 18.5
+     },
+     "camera_is_default": true
+    },
+    {
+     "id": 7,
+     "step_order": 2,
+     "instruction": "왼쪽 횡단보도로 옆 도로를 건넌 뒤 큰길 인도를 따라 동쪽으로 걷기",
+     "landmark": null,
+     "location": {
+      "type": "Point",
+      "coordinates": [
+       128.099097,
+       35.153733
+      ]
+     },
+     "camera": {
+      "bearing": 105.4,
+      "pitch": 55,
+      "zoom": 18.5
+     },
+     "camera_is_default": true
+    },
+    {
+     "id": 8,
+     "step_order": 3,
+     "instruction": "도서관 동쪽 끝 너머 횡단보도로 큰길 건너기",
+     "landmark": null,
+     "location": {
+      "type": "Point",
+      "coordinates": [
+       128.100234,
+       35.153477
+      ]
+     },
+     "camera": {
+      "bearing": 216.2,
+      "pitch": 55,
+      "zoom": 18.5
+     },
+     "camera_is_default": true
+    },
+    {
+     "id": 9,
+     "step_order": 4,
+     "instruction": "건너서 오른쪽(서쪽)으로 꺾어 도서관 북쪽 인도를 끝까지 걷기",
+     "landmark": null,
+     "location": {
+      "type": "Point",
+      "coordinates": [
+       128.100175,
+       35.153411
+      ]
+     },
+     "camera": {
+      "bearing": 278.9,
+      "pitch": 55,
+      "zoom": 18.5
+     },
+     "camera_is_default": true
+    },
+    {
+     "id": 10,
+     "step_order": 5,
+     "instruction": "도서관 서쪽 모퉁이에서 왼쪽(남쪽)으로 꺾기",
+     "landmark": null,
+     "location": {
+      "type": "Point",
+      "coordinates": [
+       128.098978,
+       35.153564
+      ]
+     },
+     "camera": {
+      "bearing": 190.2,
+      "pitch": 55,
+      "zoom": 18.5
+     },
+     "camera_is_default": true
+    },
+    {
+     "id": 11,
+     "step_order": 6,
+     "instruction": "분수대를 오른쪽에 두고 서쪽 벽 출입구로 들어가기",
+     "landmark": {
+      "id": 1,
+      "name": "도서관 앞 분수대"
+     },
+     "location": {
+      "type": "Point",
+      "coordinates": [
+       128.098939,
+       35.153386
+      ]
+     },
+     "camera": {
+      "bearing": 176.2,
+      "pitch": 55,
+      "zoom": 18.5
+     },
+     "camera_is_default": true
+    }
+   ]
+  }
+ ]
+}

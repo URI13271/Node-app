@@ -1,0 +1,53 @@
+flowchart TB
+  subgraph P["Presentation: app/api, app/schemas"]
+    direction LR
+    r1["health.py<br/>GET /health"]
+    r2["places.py<br/>GET /places<br/>GET /places/{id}"]
+    r3["buildings.py<br/>GET /places/{id}/buildings"]
+    r4["walk_routes.py<br/>GET /places/{id}/walk-routes<br/>ETag, 304"]
+    r5["admin.py<br/>GET /admin/me<br/>PUT .../steps<br/>PATCH .../walk-route-steps/{id}"]
+    deps["deps.py<br/>require_admin<br/>(5회 실패 → 10분 429)"]
+  end
+  subgraph S["Application: app/services (트랜잭션 경계)"]
+    direction LR
+    s1["PlaceService"]
+    s2["BuildingService"]
+    s3["WalkRouteService<br/>build_routes()"]
+    s4["AdminWalkRouteService<br/>행 잠금 + 버전 검사"]
+  end
+  subgraph D["Domain: app/domain (순수 함수, 의존성 없음)"]
+    direction LR
+    d1["camera.py<br/>기본 카메라"]
+    d2["navigation.py<br/>내비 목적지, 도보 시간"]
+    d3["building.py<br/>표시 높이"]
+    d4["steps.py<br/>단계 검사"]
+    d5["attribution.py<br/>출처 표기"]
+    d6["geo.py<br/>방위각"]
+  end
+  subgraph I["Infrastructure: app/repositories"]
+    direction LR
+    t["tables.py<br/>Table 메타데이터 7개"]
+    q["geo_sql.py<br/>ST_AsGeoJSON, geography 거리"]
+    pr["place_repo"]
+    br["building_repo"]
+    wr["walk_route_repo<br/>(쓰기 함수는 admin 전용)"]
+  end
+  subgraph C["공용: app/core, app/config.py, app/db.py"]
+    direction LR
+    c1["errors.py<br/>오류 본문, 예외 처리기"]
+    c2["security.py<br/>키 비교, 횟수 제한"]
+    c3["logging.py<br/>JSON 로그, 감사 로그"]
+    c4["db.py<br/>read_tx / write_tx"]
+  end
+  DBX[("PostgreSQL + PostGIS")]
+  r2 --> s1
+  r3 --> s2
+  r4 --> s3
+  r5 --> s4
+  r5 -.-> deps
+  s4 --> s3
+  s3 --> s1
+  S --> D
+  S --> I
+  I --> DBX
+  S -.-> c4

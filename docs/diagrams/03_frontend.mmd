@@ -1,0 +1,49 @@
+flowchart TB
+  subgraph R["router.tsx (React Router)"]
+    direction LR
+    h["/<br/>HomePage<br/>F-01"]
+    p["/places/:id<br/>PlaceDetailPage<br/>F-01, F-03, F-04"]
+    g["/places/:id/guide<br/>GuidePage<br/>F-02~F-05"]
+    a["/admin<br/>AdminPage<br/>F-06, N-04"]
+  end
+  subgraph CMP["components/"]
+    direction LR
+    ns["NaviSheet<br/>딥링크 + 여행 저장"]
+    ac["ArrivalCheck<br/>복귀 시 도착 판정"]
+    ui["ui.tsx<br/>Sheet, BackButton, ErrorView"]
+  end
+  subgraph MAP["map/"]
+    direction LR
+    mv["MapView.tsx<br/>MapLibre 지도 1장<br/>props: place, buildings, route, activeStep, view"]
+    st["style.ts<br/>fill-extrusion 건물, 경로 선, 주차장 영역"]
+  end
+  subgraph API["api/"]
+    direction LR
+    qh["queries.ts<br/>TanStack Query 훅<br/>usePlaces, usePlace,<br/>useBuildings, useWalkRoutes(ETag)"]
+    am["admin.ts<br/>useReplaceSteps, usePatchStep<br/>성공 시 walkRoutes 무효화"]
+    cl["client.ts<br/>fetch, ApiError,<br/>X-Request-ID, 재시도 규칙"]
+    ty["types.ts<br/>API 명세서 DTO"]
+  end
+  subgraph LIB["lib/"]
+    direction LR
+    nv["navi.ts<br/>앱별 URL, localStorage 여행"]
+    ar["arrival.ts, geo.ts<br/>거리, 도착 반경"]
+    ak["adminKey.ts<br/>sessionStorage"]
+  end
+  BE[("FastAPI /api/v1")]
+  h --> qh
+  p --> qh
+  p --> ns
+  p --> ac
+  p --> mv
+  g --> qh
+  g --> mv
+  a --> qh
+  a --> am
+  a --> ak
+  ns --> nv
+  ac --> ar
+  mv --> st
+  qh --> cl
+  am --> cl
+  cl --> BE

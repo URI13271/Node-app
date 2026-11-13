@@ -1,0 +1,29 @@
+flowchart TB
+  subgraph DEV["① 사용자 단말 (모바일 브라우저, PWA)"]
+    direction LR
+    T["여행객 화면<br/>/ , /places/:id , /places/:id/guide"]
+    A["관리자 화면<br/>/admin"]
+    LOC["단말 저장소, 기기 기능<br/>localStorage: 진행 중 여행<br/>sessionStorage: 관리자 키<br/>Geolocation: 도착 판정"]
+  end
+  subgraph EXT["② 단말이 직접 쓰는 외부 서비스 (서버를 거치지 않음)"]
+    direction LR
+    NAVI["외부 내비 앱<br/>카카오맵, 네이버지도, 티맵<br/>딥링크로 주차장까지"]
+    TILE["지도 타일 공급원<br/>(미정, VITE_MAP_STYLE_URL)"]
+  end
+  subgraph SRV["③ 서버 1대 (Docker Compose)"]
+    direction LR
+    RP["리버스 프록시<br/>TLS 종료, gzip<br/>/ → frontend/dist (정적 파일)<br/>/api, /health → majunggil-api"]
+    API["majunggil-api<br/>Python 3.12, FastAPI, Uvicorn"]
+    DB[("majunggil-db<br/>PostgreSQL 16 + PostGIS 3.4")]
+    RP --> API
+    API -- "SQLAlchemy Core + GeoAlchemy2<br/>psycopg 3, 앱 계정 (DDL 없음)" --> DB
+  end
+  SEED["④ 시드 적재, 마이그레이션<br/>scripts/migrate.py, load_seed.py<br/>소유자 계정, 데이터 담당이 실행"]
+
+  T -- "HTTPS GET (공개)" --> RP
+  A -- "HTTPS + X-Admin-Key (PUT, PATCH)" --> RP
+  T -. "딥링크" .-> NAVI
+  T -. "타일 요청" .-> TILE
+  T --- LOC
+  A --- LOC
+  SEED --> DB

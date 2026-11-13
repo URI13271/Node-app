@@ -1,0 +1,16 @@
+[project]
+name = "majunggil-backend"
+version = "1.0.0"
+description = "외곽 여행 3D 길 안내 MVP 백엔드"
+requires-python = ">=3.12,<3.14"  # pydantic-core 2.23.4 는 3.14 휠이 없다. 기준은 3.12 (Dockerfile, .python-version)
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 140
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
