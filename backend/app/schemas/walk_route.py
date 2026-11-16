@@ -1,22 +1,35 @@
-"""도보 경로, 단계 DTO (API 명세서 3.5).
-
-뼈대: 본문은 비어 있다. 함수마다 NotImplementedError 를 구현으로 바꾼다.
-"""
-
+"""도보 경로, 단계 DTO (API 명세서 3.5)."""
 from pydantic import BaseModel
+
+from app.schemas.common import Camera, GeoJSON
 
 
 class LandmarkRef(BaseModel):
-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
+    id: int
+    name: str
 
 
 class StepOut(BaseModel):
-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
+    id: int
+    step_order: int
+    instruction: str
+    landmark: LandmarkRef | None
+    location: GeoJSON
+    camera: Camera
+    camera_is_default: bool
 
 
 class WalkRouteOut(BaseModel):
-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
+    id: int
+    parking_lot_id: int
+    entrance_id: int
+    path: GeoJSON
+    distance_m: float
+    walk_time_min: int
+    description: str | None
+    updated_at: str
+    steps: list[StepOut]
 
 
 class WalkRouteListOut(BaseModel):
-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
+    items: list[WalkRouteOut]

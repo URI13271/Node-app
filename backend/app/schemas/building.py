@@ -1,18 +1,26 @@
-"""건물 GeoJSON DTO (API 명세서 3.4).
-
-뼈대: 본문은 비어 있다. 함수마다 NotImplementedError 를 구현으로 바꾼다.
-"""
+"""건물 GeoJSON DTO (API 명세서 3.4)."""
+from typing import Literal
 
 from pydantic import BaseModel
 
+from app.schemas.common import GeoJSON
+
 
 class BuildingProps(BaseModel):
-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
+    name: str | None
+    floor_count: int | None
+    render_height_m: float
+    is_target: bool
 
 
 class BuildingFeature(BaseModel):
-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
+    type: Literal["Feature"] = "Feature"
+    id: int
+    geometry: GeoJSON
+    properties: BuildingProps
 
 
 class BuildingCollection(BaseModel):
-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
+    type: Literal["FeatureCollection"] = "FeatureCollection"
+    features: list[BuildingFeature]
+    attributions: list[str]
