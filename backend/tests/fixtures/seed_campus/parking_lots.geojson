@@ -1,0 +1,193 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     127.001856,
+     36.999928
+    ]
+   },
+   "properties": {
+    "place_key": "eng-hall",
+    "name": "공학관 앞 주차장",
+    "priority": 1,
+    "capacity": 30,
+    "is_free": true,
+    "description": "평일 낮에는 자리가 자주 찹니다",
+    "area": {
+     "type": "Polygon",
+     "coordinates": [
+      [
+       [
+        127.001575,
+        36.99982
+       ],
+       [
+        127.002137,
+        36.99982
+       ],
+       [
+        127.002137,
+        37.000036
+       ],
+       [
+        127.001575,
+        37.000036
+       ],
+       [
+        127.001575,
+        36.99982
+       ]
+      ]
+     ]
+    },
+    "camera": null
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     127.0027,
+     36.999099
+    ]
+   },
+   "properties": {
+    "place_key": "eng-hall",
+    "name": "체육관 옆 주차장",
+    "priority": 2,
+    "capacity": 60,
+    "is_free": true,
+    "description": null,
+    "area": {
+     "type": "Polygon",
+     "coordinates": [
+      [
+       [
+        127.002497,
+        36.998874
+       ],
+       [
+        127.002902,
+        36.998874
+       ],
+       [
+        127.002902,
+        36.999324
+       ],
+       [
+        127.002497,
+        36.999324
+       ],
+       [
+        127.002497,
+        36.998874
+       ]
+      ]
+     ]
+    },
+    "camera": {
+     "bearing": 330,
+     "pitch": 60,
+     "zoom": 17.2
+    }
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     126.998144,
+     37.000225
+    ]
+   },
+   "properties": {
+    "place_key": "central-library",
+    "name": "도서관 주차장",
+    "priority": 1,
+    "capacity": 40,
+    "is_free": false,
+    "description": "방문객 1시간 무료",
+    "area": {
+     "type": "Polygon",
+     "coordinates": [
+      [
+       [
+        126.997919,
+        37.000045
+       ],
+       [
+        126.998369,
+        37.000045
+       ],
+       [
+        126.998369,
+        37.000405
+       ],
+       [
+        126.997919,
+        37.000405
+       ],
+       [
+        126.997919,
+        37.000045
+       ]
+      ]
+     ]
+    },
+    "camera": null
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     126.99955,
+     36.998964
+    ]
+   },
+   "properties": {
+    "place_key": "student-union",
+    "name": "학생회관 주차장",
+    "priority": 1,
+    "capacity": 25,
+    "is_free": true,
+    "description": null,
+    "area": {
+     "type": "Polygon",
+     "coordinates": [
+      [
+       [
+        126.999269,
+        36.998865
+       ],
+       [
+        126.999831,
+        36.998865
+       ],
+       [
+        126.999831,
+        36.999063
+       ],
+       [
+        126.999269,
+        36.999063
+       ],
+       [
+        126.999269,
+        36.998865
+       ]
+      ]
+     ]
+    },
+    "camera": null
+   }
+  }
+ ]
+}

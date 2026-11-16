@@ -1,0 +1,560 @@
+[
+ {
+  "walk_route": {
+   "place_key": "gnu-central-library",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "북쪽 출입구"
+  },
+  "step_order": 1,
+  "instruction": "주차장 남쪽으로 나와 인도까지 내려간 뒤 왼쪽(동쪽)으로 걷기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.099258,
+    35.15406
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-central-library",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "북쪽 출입구"
+  },
+  "step_order": 2,
+  "instruction": "짧은 계단을 지나 큰길 쪽 인도로 나가기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.099793,
+    35.153652
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-central-library",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "북쪽 출입구"
+  },
+  "step_order": 3,
+  "instruction": "도서관 동쪽 끝 너머 횡단보도로 큰길 건너기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.100239,
+    35.153498
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-central-library",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "북쪽 출입구"
+  },
+  "step_order": 4,
+  "instruction": "건너서 오른쪽(서쪽)으로 꺾어 도서관 북쪽 인도를 따라 걷기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.10019,
+    35.153409
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-central-library",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "북쪽 출입구"
+  },
+  "step_order": 5,
+  "instruction": "도서관 북쪽 벽 가운데 출입구로 들어가기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.099499,
+    35.153467
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-central-library",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "서쪽 출입구"
+  },
+  "step_order": 1,
+  "instruction": "주차장 서쪽 출구에서 남쪽으로 내려가 짧은 계단을 지나 큰길 인도까지 걷기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.099082,
+    35.154176
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-central-library",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "서쪽 출입구"
+  },
+  "step_order": 2,
+  "instruction": "왼쪽 횡단보도로 옆 도로를 건넌 뒤 큰길 인도를 따라 동쪽으로 걷기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.099097,
+    35.153733
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-central-library",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "서쪽 출입구"
+  },
+  "step_order": 3,
+  "instruction": "도서관 동쪽 끝 너머 횡단보도로 큰길 건너기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.100234,
+    35.153477
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-central-library",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "서쪽 출입구"
+  },
+  "step_order": 4,
+  "instruction": "건너서 오른쪽(서쪽)으로 꺾어 도서관 북쪽 인도를 끝까지 걷기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.100175,
+    35.153411
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-central-library",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "서쪽 출입구"
+  },
+  "step_order": 5,
+  "instruction": "도서관 서쪽 모퉁이에서 왼쪽(남쪽)으로 꺾기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.098978,
+    35.153564
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-central-library",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "서쪽 출입구"
+  },
+  "step_order": 6,
+  "instruction": "분수대를 오른쪽에 두고 서쪽 벽 출입구로 들어가기",
+  "landmark_key": "fountain-w",
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.098939,
+    35.153386
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-student-union",
+   "parking_lot_name": "학생회관 서쪽 주차장",
+   "entrance_name": "서쪽 출입구"
+  },
+  "step_order": 1,
+  "instruction": "주차장 북동쪽 끝으로 나와 큰길 쪽 인도로 올라가기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.094848,
+    35.154033
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-student-union",
+   "parking_lot_name": "학생회관 서쪽 주차장",
+   "entrance_name": "서쪽 출입구"
+  },
+  "step_order": 2,
+  "instruction": "인도를 따라 동쪽으로 약 150m 직진. 중간의 골목은 횡단보도로 건너기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.09515,
+    35.154166
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-student-union",
+   "parking_lot_name": "학생회관 서쪽 주차장",
+   "entrance_name": "서쪽 출입구"
+  },
+  "step_order": 3,
+  "instruction": "사거리에서 횡단보도로 남북 방향 도로를 건너기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.096759,
+    35.153921
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-student-union",
+   "parking_lot_name": "학생회관 서쪽 주차장",
+   "entrance_name": "서쪽 출입구"
+  },
+  "step_order": 4,
+  "instruction": "오른쪽 앞에 보이는 학생회관 서쪽 벽 출입구로 들어가기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.097073,
+    35.153656
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-student-union",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "북동쪽 출입구"
+  },
+  "step_order": 1,
+  "instruction": "주차장 남쪽 출구로 나와 짧은 계단을 지나 큰길 인도까지 걷기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.098815,
+    35.154262
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-student-union",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "북동쪽 출입구"
+  },
+  "step_order": 2,
+  "instruction": "횡단보도로 옆 도로를 건넌 뒤 큰길 인도를 따라 동쪽으로 걷기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.099108,
+    35.15373
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-student-union",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "북동쪽 출입구"
+  },
+  "step_order": 3,
+  "instruction": "도서관 동쪽 끝 너머 횡단보도로 큰길 건너기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.100234,
+    35.153476
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-student-union",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "북동쪽 출입구"
+  },
+  "step_order": 4,
+  "instruction": "건너서 오른쪽(서쪽)으로 꺾어 도서관을 왼쪽에 두고 인도를 따라 직진",
+  "landmark_key": "library",
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.100132,
+    35.153418
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-student-union",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "북동쪽 출입구"
+  },
+  "step_order": 5,
+  "instruction": "분수대를 지나 학생회관이 보일 때까지 서쪽으로 계속 직진",
+  "landmark_key": "fountain-w",
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.098932,
+    35.153597
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-student-union",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "북동쪽 출입구"
+  },
+  "step_order": 6,
+  "instruction": "학생회관 북쪽 벽 동쪽 끝 출입구로 들어가기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.097699,
+    35.153781
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-liberal-arts",
+   "parking_lot_name": "교양학관 동쪽 주차장",
+   "entrance_name": "동쪽 출입구"
+  },
+  "step_order": 1,
+  "instruction": "주차장 북쪽 끝으로 나와 횡단보도 쪽으로 걷기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.100831,
+    35.152099
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-liberal-arts",
+   "parking_lot_name": "교양학관 동쪽 주차장",
+   "entrance_name": "동쪽 출입구"
+  },
+  "step_order": 2,
+  "instruction": "횡단보도로 차도 건너기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.101036,
+    35.152397
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-liberal-arts",
+   "parking_lot_name": "교양학관 동쪽 주차장",
+   "entrance_name": "동쪽 출입구"
+  },
+  "step_order": 3,
+  "instruction": "건너서 왼쪽(서쪽) 보행로를 따라 교양학관 쪽으로 걷기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.100952,
+    35.152428
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-liberal-arts",
+   "parking_lot_name": "교양학관 동쪽 주차장",
+   "entrance_name": "동쪽 출입구"
+  },
+  "step_order": 4,
+  "instruction": "교양학관 동쪽 벽 출입구로 들어가기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.09991,
+    35.152134
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-liberal-arts",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "북쪽 출입구"
+  },
+  "step_order": 1,
+  "instruction": "주차장 서쪽 출구에서 남쪽으로 내려가 짧은 계단을 지나 큰길 인도까지 걷기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.099082,
+    35.154176
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-liberal-arts",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "북쪽 출입구"
+  },
+  "step_order": 2,
+  "instruction": "왼쪽 횡단보도로 옆 도로를 건넌 뒤 길 건너 도서관을 오른쪽에 두고 동쪽으로 걷기",
+  "landmark_key": "library",
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.099097,
+    35.153733
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-liberal-arts",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "북쪽 출입구"
+  },
+  "step_order": 3,
+  "instruction": "도서관 동쪽 끝 너머 횡단보도로 큰길 건너기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.100234,
+    35.153477
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-liberal-arts",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "북쪽 출입구"
+  },
+  "step_order": 4,
+  "instruction": "건너자마자 오른쪽 광장 길로 들어가 동쪽 분수대를 왼쪽에 두고 남쪽으로 걷기",
+  "landmark_key": "fountain-e",
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.100084,
+    35.153405
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-liberal-arts",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "북쪽 출입구"
+  },
+  "step_order": 5,
+  "instruction": "광장 끝에서 길 건너기. 횡단보도 표시가 없는 곳이라 좌우를 살핀 뒤 건너기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.099881,
+    35.152795
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-liberal-arts",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "북쪽 출입구"
+  },
+  "step_order": 6,
+  "instruction": "건너편 인도에서 오른쪽 앞 교양학관 북쪽 출입구로 들어가기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.099817,
+    35.152671
+   ]
+  },
+  "camera": null
+ }
+]

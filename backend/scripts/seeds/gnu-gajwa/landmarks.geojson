@@ -1,0 +1,95 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     128.098874,
+     35.153359
+    ]
+   },
+   "properties": {
+    "place_key": "gnu-central-library",
+    "key": "fountain-w",
+    "name": "도서관 앞 분수대"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     128.097286,
+     35.153605
+    ]
+   },
+   "properties": {
+    "place_key": "gnu-central-library",
+    "key": "student-union",
+    "name": "학생회관 건물"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     128.099442,
+     35.153219
+    ]
+   },
+   "properties": {
+    "place_key": "gnu-student-union",
+    "key": "library",
+    "name": "중앙도서관 건물"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     128.098874,
+     35.153359
+    ]
+   },
+   "properties": {
+    "place_key": "gnu-student-union",
+    "key": "fountain-w",
+    "name": "도서관 앞 분수대"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     128.100652,
+     35.153046
+    ]
+   },
+   "properties": {
+    "place_key": "gnu-liberal-arts",
+    "key": "fountain-e",
+    "name": "동쪽 분수대"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     128.099442,
+     35.153219
+    ]
+   },
+   "properties": {
+    "place_key": "gnu-liberal-arts",
+    "key": "library",
+    "name": "중앙도서관 건물"
+   }
+  }
+ ]
+}

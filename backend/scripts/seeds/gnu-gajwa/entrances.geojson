@@ -1,0 +1,101 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     128.099492,
+     35.153435
+    ]
+   },
+   "properties": {
+    "place_key": "gnu-central-library",
+    "name": "북쪽 출입구",
+    "is_main": true,
+    "description": "주차장 쪽 출입구 (현장 확인 필요)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     128.098942,
+     35.153349
+    ]
+   },
+   "properties": {
+    "place_key": "gnu-central-library",
+    "name": "서쪽 출입구",
+    "is_main": false,
+    "description": "분수대 쪽 출입구. 도서관과 붙은 서쪽 건물의 벽 (현장 확인 필요)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     128.097645,
+     35.153776
+    ]
+   },
+   "properties": {
+    "place_key": "gnu-student-union",
+    "name": "북동쪽 출입구",
+    "is_main": true,
+    "description": "도서관 쪽에서 오면 가장 가까운 북쪽 벽 동쪽 끝 출입구 (현장 확인 필요)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     128.097112,
+     35.153623
+    ]
+   },
+   "properties": {
+    "place_key": "gnu-student-union",
+    "name": "서쪽 출입구",
+    "is_main": false,
+    "description": "서쪽 주차장 쪽 출입구 (현장 확인 필요)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     128.099855,
+     35.152103
+    ]
+   },
+   "properties": {
+    "place_key": "gnu-liberal-arts",
+    "name": "동쪽 출입구",
+    "is_main": true,
+    "description": "동쪽 주차장 쪽 출입구 (현장 확인 필요)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     128.099529,
+     35.152559
+    ]
+   },
+   "properties": {
+    "place_key": "gnu-liberal-arts",
+    "name": "북쪽 출입구",
+    "is_main": false,
+    "description": "도서관 쪽 출입구 (현장 확인 필요)"
+   }
+  }
+ ]
+}

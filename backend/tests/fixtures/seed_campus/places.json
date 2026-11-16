@@ -1,0 +1,47 @@
+[
+ {
+  "key": "eng-hall",
+  "name": "공학관",
+  "category": "campus",
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    127.00135,
+    37.00036
+   ]
+  },
+  "description": "입구가 두 곳이고, 주차장에서 정문이 바로 보이지 않는 건물",
+  "arrival_radius_m": 150,
+  "camera": null
+ },
+ {
+  "key": "central-library",
+  "name": "중앙도서관",
+  "category": "campus",
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    126.998875,
+    37.00045
+   ]
+  },
+  "description": "정문과 북문이 반대편에 있어 주차 위치에 따라 걷는 길이 달라집니다",
+  "arrival_radius_m": 150,
+  "camera": null
+ },
+ {
+  "key": "student-union",
+  "name": "학생회관",
+  "category": "campus",
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    126.999325,
+    36.999279
+   ]
+  },
+  "description": "주차장은 남쪽, 정문은 북쪽이라 건물을 돌아가야 합니다",
+  "arrival_radius_m": 150,
+  "camera": null
+ }
+]

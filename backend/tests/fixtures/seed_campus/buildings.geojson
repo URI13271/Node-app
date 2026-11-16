@@ -1,0 +1,917 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       126.999663,
+       36.999865
+      ],
+      [
+       127.000337,
+       36.999865
+      ],
+      [
+       127.000337,
+       37.000135
+      ],
+      [
+       126.999663,
+       37.000135
+      ],
+      [
+       126.999663,
+       36.999865
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "eng-hall",
+    "name": "본관",
+    "floor_count": 6,
+    "height_m": null,
+    "is_target": false,
+    "source": "manual"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       127.000956,
+       37.000203
+      ],
+      [
+       127.001743,
+       37.000203
+      ],
+      [
+       127.001743,
+       37.000518
+      ],
+      [
+       127.000956,
+       37.000518
+      ],
+      [
+       127.000956,
+       37.000203
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "eng-hall",
+    "name": "공학관",
+    "floor_count": 5,
+    "height_m": null,
+    "is_target": true,
+    "source": "manual"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       127.00045,
+       36.999347
+      ],
+      [
+       127.0009,
+       36.999347
+      ],
+      [
+       127.0009,
+       36.999572
+      ],
+      [
+       127.00045,
+       36.999572
+      ],
+      [
+       127.00045,
+       36.999347
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "eng-hall",
+    "name": "인문관",
+    "floor_count": 3,
+    "height_m": null,
+    "is_target": false,
+    "source": "osm"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       126.998566,
+       37.000203
+      ],
+      [
+       126.999185,
+       37.000203
+      ],
+      [
+       126.999185,
+       37.000698
+      ],
+      [
+       126.998566,
+       37.000698
+      ],
+      [
+       126.998566,
+       37.000203
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "eng-hall",
+    "name": "중앙도서관",
+    "floor_count": 4,
+    "height_m": null,
+    "is_target": false,
+    "source": "public_data"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       126.999072,
+       36.999144
+      ],
+      [
+       126.999578,
+       36.999144
+      ],
+      [
+       126.999578,
+       36.999414
+      ],
+      [
+       126.999072,
+       36.999414
+      ],
+      [
+       126.999072,
+       36.999144
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "eng-hall",
+    "name": "학생회관",
+    "floor_count": 3,
+    "height_m": null,
+    "is_target": false,
+    "source": "manual"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       127.001687,
+       36.999009
+      ],
+      [
+       127.002362,
+       36.999009
+      ],
+      [
+       127.002362,
+       36.999369
+      ],
+      [
+       127.001687,
+       36.999369
+      ],
+      [
+       127.001687,
+       36.999009
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "eng-hall",
+    "name": "체육관",
+    "floor_count": null,
+    "height_m": 14,
+    "is_target": false,
+    "source": "osm"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       126.99761,
+       36.999009
+      ],
+      [
+       126.997891,
+       36.999009
+      ],
+      [
+       126.997891,
+       36.99955
+      ],
+      [
+       126.99761,
+       36.99955
+      ],
+      [
+       126.99761,
+       36.999009
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "eng-hall",
+    "name": "기숙사",
+    "floor_count": 8,
+    "height_m": null,
+    "is_target": false,
+    "source": "public_data"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       127.000506,
+       37.000541
+      ],
+      [
+       127.000844,
+       37.000541
+      ],
+      [
+       127.000844,
+       37.000721
+      ],
+      [
+       127.000506,
+       37.000721
+      ],
+      [
+       127.000506,
+       37.000541
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "eng-hall",
+    "name": "공동실험관",
+    "floor_count": null,
+    "height_m": null,
+    "is_target": false,
+    "source": "manual"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       126.999663,
+       36.999865
+      ],
+      [
+       127.000337,
+       36.999865
+      ],
+      [
+       127.000337,
+       37.000135
+      ],
+      [
+       126.999663,
+       37.000135
+      ],
+      [
+       126.999663,
+       36.999865
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "central-library",
+    "name": "본관",
+    "floor_count": 6,
+    "height_m": null,
+    "is_target": false,
+    "source": "manual"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       127.000956,
+       37.000203
+      ],
+      [
+       127.001743,
+       37.000203
+      ],
+      [
+       127.001743,
+       37.000518
+      ],
+      [
+       127.000956,
+       37.000518
+      ],
+      [
+       127.000956,
+       37.000203
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "central-library",
+    "name": "공학관",
+    "floor_count": 5,
+    "height_m": null,
+    "is_target": false,
+    "source": "manual"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       127.00045,
+       36.999347
+      ],
+      [
+       127.0009,
+       36.999347
+      ],
+      [
+       127.0009,
+       36.999572
+      ],
+      [
+       127.00045,
+       36.999572
+      ],
+      [
+       127.00045,
+       36.999347
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "central-library",
+    "name": "인문관",
+    "floor_count": 3,
+    "height_m": null,
+    "is_target": false,
+    "source": "osm"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       126.998566,
+       37.000203
+      ],
+      [
+       126.999185,
+       37.000203
+      ],
+      [
+       126.999185,
+       37.000698
+      ],
+      [
+       126.998566,
+       37.000698
+      ],
+      [
+       126.998566,
+       37.000203
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "central-library",
+    "name": "중앙도서관",
+    "floor_count": 4,
+    "height_m": null,
+    "is_target": true,
+    "source": "public_data"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       126.999072,
+       36.999144
+      ],
+      [
+       126.999578,
+       36.999144
+      ],
+      [
+       126.999578,
+       36.999414
+      ],
+      [
+       126.999072,
+       36.999414
+      ],
+      [
+       126.999072,
+       36.999144
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "central-library",
+    "name": "학생회관",
+    "floor_count": 3,
+    "height_m": null,
+    "is_target": false,
+    "source": "manual"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       127.001687,
+       36.999009
+      ],
+      [
+       127.002362,
+       36.999009
+      ],
+      [
+       127.002362,
+       36.999369
+      ],
+      [
+       127.001687,
+       36.999369
+      ],
+      [
+       127.001687,
+       36.999009
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "central-library",
+    "name": "체육관",
+    "floor_count": null,
+    "height_m": 14,
+    "is_target": false,
+    "source": "osm"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       126.99761,
+       36.999009
+      ],
+      [
+       126.997891,
+       36.999009
+      ],
+      [
+       126.997891,
+       36.99955
+      ],
+      [
+       126.99761,
+       36.99955
+      ],
+      [
+       126.99761,
+       36.999009
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "central-library",
+    "name": "기숙사",
+    "floor_count": 8,
+    "height_m": null,
+    "is_target": false,
+    "source": "public_data"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       127.000506,
+       37.000541
+      ],
+      [
+       127.000844,
+       37.000541
+      ],
+      [
+       127.000844,
+       37.000721
+      ],
+      [
+       127.000506,
+       37.000721
+      ],
+      [
+       127.000506,
+       37.000541
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "central-library",
+    "name": "공동실험관",
+    "floor_count": null,
+    "height_m": null,
+    "is_target": false,
+    "source": "manual"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       126.999663,
+       36.999865
+      ],
+      [
+       127.000337,
+       36.999865
+      ],
+      [
+       127.000337,
+       37.000135
+      ],
+      [
+       126.999663,
+       37.000135
+      ],
+      [
+       126.999663,
+       36.999865
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "student-union",
+    "name": "본관",
+    "floor_count": 6,
+    "height_m": null,
+    "is_target": false,
+    "source": "manual"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       127.000956,
+       37.000203
+      ],
+      [
+       127.001743,
+       37.000203
+      ],
+      [
+       127.001743,
+       37.000518
+      ],
+      [
+       127.000956,
+       37.000518
+      ],
+      [
+       127.000956,
+       37.000203
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "student-union",
+    "name": "공학관",
+    "floor_count": 5,
+    "height_m": null,
+    "is_target": false,
+    "source": "manual"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       127.00045,
+       36.999347
+      ],
+      [
+       127.0009,
+       36.999347
+      ],
+      [
+       127.0009,
+       36.999572
+      ],
+      [
+       127.00045,
+       36.999572
+      ],
+      [
+       127.00045,
+       36.999347
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "student-union",
+    "name": "인문관",
+    "floor_count": 3,
+    "height_m": null,
+    "is_target": false,
+    "source": "osm"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       126.998566,
+       37.000203
+      ],
+      [
+       126.999185,
+       37.000203
+      ],
+      [
+       126.999185,
+       37.000698
+      ],
+      [
+       126.998566,
+       37.000698
+      ],
+      [
+       126.998566,
+       37.000203
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "student-union",
+    "name": "중앙도서관",
+    "floor_count": 4,
+    "height_m": null,
+    "is_target": false,
+    "source": "public_data"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       126.999072,
+       36.999144
+      ],
+      [
+       126.999578,
+       36.999144
+      ],
+      [
+       126.999578,
+       36.999414
+      ],
+      [
+       126.999072,
+       36.999414
+      ],
+      [
+       126.999072,
+       36.999144
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "student-union",
+    "name": "학생회관",
+    "floor_count": 3,
+    "height_m": null,
+    "is_target": true,
+    "source": "manual"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       127.001687,
+       36.999009
+      ],
+      [
+       127.002362,
+       36.999009
+      ],
+      [
+       127.002362,
+       36.999369
+      ],
+      [
+       127.001687,
+       36.999369
+      ],
+      [
+       127.001687,
+       36.999009
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "student-union",
+    "name": "체육관",
+    "floor_count": null,
+    "height_m": 14,
+    "is_target": false,
+    "source": "osm"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       126.99761,
+       36.999009
+      ],
+      [
+       126.997891,
+       36.999009
+      ],
+      [
+       126.997891,
+       36.99955
+      ],
+      [
+       126.99761,
+       36.99955
+      ],
+      [
+       126.99761,
+       36.999009
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "student-union",
+    "name": "기숙사",
+    "floor_count": 8,
+    "height_m": null,
+    "is_target": false,
+    "source": "public_data"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       127.000506,
+       37.000541
+      ],
+      [
+       127.000844,
+       37.000541
+      ],
+      [
+       127.000844,
+       37.000721
+      ],
+      [
+       127.000506,
+       37.000721
+      ],
+      [
+       127.000506,
+       37.000541
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "student-union",
+    "name": "공동실험관",
+    "floor_count": null,
+    "height_m": null,
+    "is_target": false,
+    "source": "manual"
+   }
+  }
+ ]
+}
