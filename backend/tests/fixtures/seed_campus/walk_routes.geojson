@@ -1,0 +1,197 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      127.001631,
+      37.000036
+     ],
+     [
+      127.001485,
+      37.00009
+     ],
+     [
+      127.001361,
+      37.000135
+     ],
+     [
+      127.00135,
+      37.000198
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "eng-hall",
+    "parking_lot_name": "공학관 앞 주차장",
+    "entrance_name": "정문",
+    "description": "평지, 마지막에 계단 5칸"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      127.002531,
+      36.999324
+     ],
+     [
+      127.002531,
+      36.999685
+     ],
+     [
+      127.002306,
+      36.99991
+     ],
+     [
+      127.001968,
+      37.00027
+     ],
+     [
+      127.001766,
+      37.000405
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "eng-hall",
+    "parking_lot_name": "체육관 옆 주차장",
+    "entrance_name": "동쪽 출입구",
+    "description": "차도를 한 번 건넘"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      126.998369,
+      37.000135
+     ],
+     [
+      126.998594,
+      37.000072
+     ],
+     [
+      126.998785,
+      37.00009
+     ],
+     [
+      126.998875,
+      37.000189
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "central-library",
+    "parking_lot_name": "도서관 주차장",
+    "entrance_name": "정문",
+    "description": "완만한 오르막"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      126.998313,
+      37.000405
+     ],
+     [
+      126.998313,
+      37.000793
+     ],
+     [
+      126.998763,
+      37.000793
+     ],
+     [
+      126.998875,
+      37.000721
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "central-library",
+    "parking_lot_name": "도서관 주차장",
+    "entrance_name": "북문",
+    "description": "은행나무 길, 계단 있음"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      126.999775,
+      36.999063
+     ],
+     [
+      126.999719,
+      36.999324
+     ],
+     [
+      126.999663,
+      36.999477
+     ],
+     [
+      126.999381,
+      36.999477
+     ],
+     [
+      126.999325,
+      36.999432
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "student-union",
+    "parking_lot_name": "학생회관 주차장",
+    "entrance_name": "정문",
+    "description": "건물을 반 바퀴 돌아감"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      126.999438,
+      36.999063
+     ],
+     [
+      126.999156,
+      36.999081
+     ],
+     [
+      126.998988,
+      36.999171
+     ],
+     [
+      126.998988,
+      36.999279
+     ],
+     [
+      126.999055,
+      36.999279
+     ]
+    ]
+   },
+   "properties": {
+    "place_key": "student-union",
+    "parking_lot_name": "학생회관 주차장",
+    "entrance_name": "식당 출입구",
+    "description": "화단 사이 좁은 길"
+   }
+  }
+ ]
+}

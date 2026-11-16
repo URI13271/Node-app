@@ -1,0 +1,101 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     127.00135,
+     37.000198
+    ]
+   },
+   "properties": {
+    "place_key": "eng-hall",
+    "name": "정문",
+    "is_main": true,
+    "description": "유리 캐노피 아래 자동문"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     127.001766,
+     37.000405
+    ]
+   },
+   "properties": {
+    "place_key": "eng-hall",
+    "name": "동쪽 출입구",
+    "is_main": false,
+    "description": "철제 문, 22시 이후 닫힘"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     126.998875,
+     37.000189
+    ]
+   },
+   "properties": {
+    "place_key": "central-library",
+    "name": "정문",
+    "is_main": true,
+    "description": "회전문"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     126.998875,
+     37.000712
+    ]
+   },
+   "properties": {
+    "place_key": "central-library",
+    "name": "북문",
+    "is_main": false,
+    "description": "계단 아래 출입구"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     126.999325,
+     36.999432
+    ]
+   },
+   "properties": {
+    "place_key": "student-union",
+    "name": "정문",
+    "is_main": true,
+    "description": "편의점 옆 자동문"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     126.999055,
+     36.999279
+    ]
+   },
+   "properties": {
+    "place_key": "student-union",
+    "name": "식당 출입구",
+    "is_main": false,
+    "description": "점심시간에만 열림"
+   }
+  }
+ ]
+}

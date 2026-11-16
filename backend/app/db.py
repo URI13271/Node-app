@@ -10,8 +10,14 @@ from contextlib import contextmanager
 
 from sqlalchemy import Connection, Engine, MetaData
 
-# TODO: 제약, 인덱스 이름 규칙 (설계서 2.1.5). migrations/*.sql 의 이름과 맞춘다.
-NAMING_CONVENTION: dict[str, str] = {}
+# 제약, 인덱스 이름 규칙 (설계서 2.1.5). migrations/001_init.sql 의 이름과 같다.
+NAMING_CONVENTION = {
+    "pk": "pk_%(table_name)s",
+    "fk": "fk_%(table_name)s_%(column_0_name)s",
+    "uq": "uq_%(table_name)s_%(column_0_N_name)s",
+    "ix": "ix_%(table_name)s_%(column_0_N_name)s",
+    "ck": "ck_%(table_name)s_%(constraint_name)s",
+}
 metadata = MetaData(naming_convention=NAMING_CONVENTION)
 
 

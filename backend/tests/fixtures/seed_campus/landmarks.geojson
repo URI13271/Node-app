@@ -1,0 +1,155 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     127.001473,
+     37.00009
+    ]
+   },
+   "properties": {
+    "place_key": "eng-hall",
+    "key": "vending",
+    "name": "자판기 2대"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     127.002025,
+     36.999189
+    ]
+   },
+   "properties": {
+    "place_key": "eng-hall",
+    "key": "gym-roof",
+    "name": "체육관 흰 지붕"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     127.002205,
+     37.000054
+    ]
+   },
+   "properties": {
+    "place_key": "eng-hall",
+    "key": "bench",
+    "name": "벤치 쉼터"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     126.998673,
+     37.000018
+    ]
+   },
+   "properties": {
+    "place_key": "central-library",
+    "key": "fountain",
+    "name": "분수대"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     126.998313,
+     37.000631
+    ]
+   },
+   "properties": {
+    "place_key": "central-library",
+    "key": "ginkgo",
+    "name": "은행나무 길"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     126.99874,
+     37.000793
+    ]
+   },
+   "properties": {
+    "place_key": "central-library",
+    "key": "bike-rack",
+    "name": "자전거 거치대"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     126.99946,
+     36.999441
+    ]
+   },
+   "properties": {
+    "place_key": "student-union",
+    "key": "store-sign",
+    "name": "편의점 간판"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     127.000675,
+     36.999459
+    ]
+   },
+   "properties": {
+    "place_key": "student-union",
+    "key": "red-brick",
+    "name": "붉은 벽돌 3층 건물"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     126.99991,
+     36.998901
+    ]
+   },
+   "properties": {
+    "place_key": "student-union",
+    "key": "bus-stop",
+    "name": "버스 정류장"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     126.999213,
+     36.999081
+    ]
+   },
+   "properties": {
+    "place_key": "student-union",
+    "key": "flowerbed",
+    "name": "화단"
+   }
+  }
+ ]
+}

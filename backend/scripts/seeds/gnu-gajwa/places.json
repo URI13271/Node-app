@@ -1,0 +1,50 @@
+[
+ {
+  "key": "gnu-central-library",
+  "name": "중앙도서관",
+  "category": "campus",
+  "address": "경상남도 진주시 진주대로 501 경상국립대학교 가좌캠퍼스",
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.099442,
+    35.153219
+   ]
+  },
+  "description": "주차장은 건물 북쪽에 있고, 분수대가 있는 서쪽에도 출입구가 있습니다 (입구 위치는 현장 확인 전 초안)",
+  "arrival_radius_m": 150,
+  "camera": null
+ },
+ {
+  "key": "gnu-student-union",
+  "name": "학생회관",
+  "category": "campus",
+  "address": "경상남도 진주시 진주대로 501 경상국립대학교 가좌캠퍼스",
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.097286,
+    35.153605
+   ]
+  },
+  "description": "서쪽 주차장과 도서관 쪽 주차장 어느 쪽에서도 걸어갈 수 있습니다 (입구 위치는 현장 확인 전 초안)",
+  "arrival_radius_m": 150,
+  "camera": null
+ },
+ {
+  "key": "gnu-liberal-arts",
+  "name": "교양학관",
+  "category": "campus",
+  "address": "경상남도 진주시 진주대로 501 경상국립대학교 가좌캠퍼스",
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.09903,
+    35.15204
+   ]
+  },
+  "description": "건물이 크고 날개가 여러 개라 출입구를 헷갈리기 쉽습니다 (입구 위치는 현장 확인 전 초안)",
+  "arrival_radius_m": 150,
+  "camera": null
+ }
+]
