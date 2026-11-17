@@ -1,11 +1,8 @@
-"""내비 목적지 선택, 예상 도보 시간 (설계서 2.4.5 (1), (4)).
-
-뼈대: 본문은 비어 있다. 함수마다 NotImplementedError 를 구현으로 바꾼다.
-"""
-
+"""내비 목적지 선택, 예상 도보 시간 (설계서 2.4.5 (1), (4))."""
+import math
 from dataclasses import dataclass
 
-WALK_M_PER_MIN = 67
+WALK_M_PER_MIN = 67  # 시속 약 4km
 
 
 class DataIntegrityError(Exception):
@@ -14,12 +11,20 @@ class DataIntegrityError(Exception):
 
 @dataclass(frozen=True)
 class ParkingCandidate:
-    """TODO: 필드 정의 (API 명세서, 설계서 참고)"""
+    id: int
+    name: str
+    priority: int
+    lng: float
+    lat: float
 
 
 def select_navigation_target(parking_lots: list[ParkingCandidate]) -> ParkingCandidate:
-    raise NotImplementedError("TODO: app.domain.navigation.select_navigation_target")
+    if not parking_lots:
+        raise DataIntegrityError("주차장 없음")
+    return min(parking_lots, key=lambda p: (p.priority, p.id))
 
 
 def walk_time_min(stored: int | None, distance_m: float) -> int:
-    raise NotImplementedError("TODO: app.domain.navigation.walk_time_min")
+    if stored is not None:
+        return stored
+    return max(1, math.ceil(distance_m / WALK_M_PER_MIN))
