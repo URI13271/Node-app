@@ -51,7 +51,9 @@ class FrontendFiles(StaticFiles):
     async def get_response(self, path, scope):
         if scope["method"] not in ("GET", "HEAD"):
             raise HTTPException(405)
-        if path == "api" or path.startswith("api/"):
+        # Windows 에서는 StaticFiles 가 경로를 api\v1\nope 처럼 넘겨서 / 로 맞춘 뒤 비교한다
+        url_path = path.replace("\\", "/")
+        if url_path == "api" or url_path.startswith("api/"):
             # 라우터에 안 걸린 /api 요청. HEAD 는 API 가 지원하지 않는 메서드라 405, 나머지는 없는 경로라 404
             # (core/errors.py 처리기가 {"error": {...}} 형식으로 감싼다)
             raise HTTPException(405 if scope["method"] == "HEAD" else 404)
