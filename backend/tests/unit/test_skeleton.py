@@ -10,11 +10,8 @@ from app.main import create_app
 
 client = TestClient(create_app())
 
+# 공개 API 4개는 구현됨 (BE-11, tests/integration/test_public_api.py). 남은 관리자 API 만 501 을 확인한다
 ROUTES = [
-    ("GET", "/api/v1/places"),
-    ("GET", "/api/v1/places/1"),
-    ("GET", "/api/v1/places/1/buildings"),
-    ("GET", "/api/v1/places/1/walk-routes"),
     ("GET", "/api/v1/admin/me"),
     ("PUT", "/api/v1/admin/walk-routes/1/steps"),
     ("PATCH", "/api/v1/admin/walk-route-steps/1"),
