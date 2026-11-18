@@ -56,11 +56,13 @@ class AppError(Exception):
 
 
 def invalid(field: str, reason: str, message: str) -> AppError:
-    raise NotImplementedError("TODO: app.core.errors.invalid")
+    """400 INVALID_INPUT, details 한 건. 서비스에서 raise invalid(...) 로 쓴다 (돌려주기만 하고 던지지 않는다)."""
+    return AppError("INVALID_INPUT", MESSAGE_BY_CODE["INVALID_INPUT"], [{"field": field, "reason": reason, "message": message}])
 
 
 def not_found(what: str) -> AppError:
-    raise NotImplementedError("TODO: app.core.errors.not_found")
+    """404 NOT_FOUND. what 은 "장소", "경로" 처럼 찾지 못한 대상."""
+    return AppError("NOT_FOUND", f"{what}을(를) 찾을 수 없습니다.")
 
 
 def error_response(
