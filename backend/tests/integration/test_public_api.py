@@ -4,7 +4,7 @@
 - 시연 시드(gnu-gajwa) 건물 응답이 gzip 후 200KB 이하인지
 - load_seed 적재 검사(crosses_building, inside_building)가 실제로 막는지 (BE-04 에서 미뤄 둔 테스트)
 
-health(BE-12), 요청 제한과 공통 헤더(BE-17)는 그 작업에서 테스트를 추가한다.
+요청 제한과 공통 헤더(BE-17)는 그 작업에서 테스트를 추가한다.
 conftest 의 client 픽스처는 요청 제한기(BE-17)를 초기화하므로, 여기서는 제한기 없이 쓰는 api 픽스처를 쓴다.
 """
 
@@ -42,6 +42,15 @@ def _same_keys(real, mock, path="") -> list[str]:
 
 def _mock(name: str):
     return json.loads((MOCK_DIR / name).read_text(encoding="utf-8"))
+
+
+# ---------- GET /health (BE-12) ----------
+
+
+def test_health_with_real_db(api):
+    r = api.get("/health")
+    assert r.status_code == 200 and r.json()["db"] == "ok" and r.json()["status"] == "ok"
+    assert r.headers["cache-control"] == "no-store"
 
 
 # ---------- GET /places ----------
