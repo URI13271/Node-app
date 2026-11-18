@@ -18,10 +18,7 @@ ROUTES = [
 ]
 
 
-def test_health():
-    r = client.get("/health")
-    assert r.status_code == 200
-    assert r.json()["status"] == "ok"
+# /health 는 DB 를 확인하므로(BE-12) tests/unit/test_health.py 로 옮겼다
 
 
 @pytest.mark.parametrize("method,path", ROUTES)
@@ -161,6 +158,6 @@ def test_http_exception_keeps_status():
 
 
 def test_head_requests():
-    assert client.head("/health").status_code == 200
+    # HEAD /health 는 tests/unit/test_health.py 에서 본다
     assert client.head("/api/v1/places").status_code == 405
     assert client.head("/index.html").status_code == 200
