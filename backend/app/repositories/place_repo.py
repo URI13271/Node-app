@@ -8,6 +8,10 @@ from sqlalchemy import Connection, func, select
 from app.repositories.geo_sql import as_geojson, camera_of, lat, lng, parse
 from app.repositories.tables import entrance, landmark, parking_lot, place
 
+# 이름 정렬은 DB 기본 로케일에 맡기지 않는다. Docker 이미지 기본값(en_US.utf8, glibc)은 한글을 가나다순으로 정렬하지 않는다
+# (예: 공학관, 학생회관, 중앙도서관). "C" 는 유니코드 순서라 완성형 한글이 가나다순이 되고, 어느 DB에나 있다.
+NAME_COLLATION = "C"
+
 
 def _like_escape(q: str) -> str:
     return q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
@@ -21,7 +25,7 @@ def search_places(conn: Connection, q: str | None, limit: int, offset: int) -> t
     rows = conn.execute(
         select(place.c.id, place.c.name, place.c.category, place.c.cover_image_url,
                as_geojson(place.c.location, "location"))
-        .where(*cond).order_by(place.c.name, place.c.id).limit(limit).offset(offset)
+        .where(*cond).order_by(place.c.name.collate(NAME_COLLATION), place.c.id).limit(limit).offset(offset)
     ).mappings().all()
     return total, [{**r, "location": parse(r["location"])} for r in rows]
 
@@ -50,7 +54,7 @@ def list_entrances(conn: Connection, place_id: int) -> list[dict]:
         select(entrance.c.id, entrance.c.name, entrance.c.is_main, entrance.c.description,
                as_geojson(entrance.c.location, "location"))
         .where(entrance.c.place_id == place_id)
-        .order_by(entrance.c.is_main.desc(), entrance.c.name, entrance.c.id)
+        .order_by(entrance.c.is_main.desc(), entrance.c.name.collate(NAME_COLLATION), entrance.c.id)
     ).mappings().all()
     return [{**r, "location": parse(r["location"])} for r in rows]
 
@@ -72,6 +76,6 @@ def list_parking_lots(conn: Connection, place_id: int) -> list[dict]:
 def list_landmarks(conn: Connection, place_id: int) -> list[dict]:
     rows = conn.execute(
         select(landmark.c.id, landmark.c.name, landmark.c.image_url, as_geojson(landmark.c.location, "location"))
-        .where(landmark.c.place_id == place_id).order_by(landmark.c.name, landmark.c.id)
+        .where(landmark.c.place_id == place_id).order_by(landmark.c.name.collate(NAME_COLLATION), landmark.c.id)
     ).mappings().all()
     return [{**r, "location": parse(r["location"])} for r in rows]
