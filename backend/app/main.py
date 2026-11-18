@@ -1,22 +1,41 @@
 """앱 생성, 미들웨어, 라우터 등록 (설계서 2.4.1).
 
-뼈대: 라우터 등록만 되어 있다. 아직 구현하지 않은 엔드포인트는 501 NOT_IMPLEMENTED 를 돌려준다.
+미들웨어 순서(바깥 → 안): request_id + 접근 로그 + 보안 헤더 → 본문 크기(413), 형식(415) → 요청 횟수(429) (BE-17).
+바깥 미들웨어가 안쪽 오류 응답(413, 415, 429)에도 요청 ID 와 보안 헤더를 붙인다.
 """
 
+import time
+import uuid
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import admin, buildings, health, places, walk_routes
+from app.api.deps import client_ip
 from app.config import APP_VERSION, get_settings
-from app.core.errors import install_handlers
-from app.core.logging import setup_logging
-from app.core.security import FailureLimiter
+from app.core.errors import error_response, install_handlers
+from app.core.http import declared_length
+from app.core.logging import access_log, setup_logging
+from app.core.security import FailureLimiter, SlidingWindowLimiter
 from app.frontend import FrontendFiles
 from app.frontend import router as csp_router
 
-MAX_BODY_BYTES = 64 * 1024  # 요청 본문 상한 (413). 미들웨어에서 쓴다
+MAX_BODY_BYTES = 64 * 1024  # 요청 본문 상한 (413)
 MIN_PROD_ADMIN_KEY_LEN = 32
+REQUEST_ID_MAX = 64
+SECURITY_HEADERS = {
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "same-origin",
+    "X-Frame-Options": "DENY",
+}
+BAD_LENGTH = [{"field": "header.Content-Length", "reason": "invalid_type", "message": "Content-Length 는 0 이상의 정수여야 합니다."}]
+
+
+def _rate_limited(request: Request, wait: int):
+    # reason 이 locked(관리자 키 잠금)와 달라야 관리자 화면이 저장한 키를 지우지 않는다 (API 명세서 1.11)
+    details = [{"field": "", "reason": "too_many_requests", "message": f"{wait}초 뒤 다시 시도하세요."}]
+    return error_response(request, "RATE_LIMITED", "요청이 너무 많습니다. 잠시 후 다시 시도하세요.", details, {"Retry-After": str(wait)})
 
 
 def create_app() -> FastAPI:
@@ -28,7 +47,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="마중길 (majunggil) API",
         version=APP_VERSION,
-        description="외곽 여행 3D 길 안내 MVP 백엔드 (뼈대)",
+        description="외곽 여행 3D 길 안내 MVP 백엔드",
         docs_url=None if s.is_prod else "/docs",
         redoc_url=None,
         openapi_url=None if s.is_prod else "/openapi.json",
@@ -37,12 +56,65 @@ def create_app() -> FastAPI:
 
     # 관리자 키 실패 잠금 (BE-13): 같은 IP 연속 ADMIN_FAIL_LIMIT 회 실패 → ADMIN_LOCK_S 초. deps.require_admin 이 쓴다
     app.state.admin_fail_limiter = FailureLimiter(s.ADMIN_FAIL_LIMIT, s.ADMIN_LOCK_S)
-    # TODO: 분당 요청 수 제한기 (app.state.public_limiter, admin_limiter) - core/security.py SlidingWindowLimiter (BE-17)
-    # TODO: 미들웨어. 순서(바깥 → 안): request_id + 접근 로그 + 보안 헤더 → 본문 크기(413), 형식(415) → 요청 횟수(429)
-    #   Content-Length 는 int() 로 바로 바꾸지 말고 core/http.py declared_length() 를 쓴다.
-    #   None(정수 아님, 음수) → 400 INVALID_INPUT, details [{"field": "header.Content-Length", "reason": "invalid_type"}]
-    #   MAX_BODY_BYTES 초과 → 413 PAYLOAD_TOO_LARGE. 완료 기준은 tests/unit/test_http_layer.py
-    # TODO: CORS (ALLOWED_ORIGINS 가 있을 때만)
+    # 분당 요청 수 (BE-17): 공개 API 와 /csp-report 는 public, 관리자 API 는 admin. 키 잠금과는 따로 센다
+    app.state.public_limiter = SlidingWindowLimiter(s.RATE_LIMIT_PUBLIC_PER_MIN)
+    app.state.admin_limiter = SlidingWindowLimiter(s.RATE_LIMIT_ADMIN_PER_MIN)
+
+    @app.middleware("http")
+    async def guard(request: Request, call_next):
+        """안쪽 미들웨어: 본문 크기(413), 형식(415), 요청 횟수(429). 걸리면 라우터까지 가지 않는다.
+
+        /csp-report 는 브라우저가 보내는 보고라 크기, 형식 검사를 하지 않고 항상 204 로 답한다 (frontend.py 가 8KB 까지만 읽음).
+        """
+        path = request.url.path
+        if path != "/csp-report":
+            length = declared_length(request)
+            if length is None:
+                return error_response(request, "INVALID_INPUT", "입력값을 확인하세요.", BAD_LENGTH)
+            if length > MAX_BODY_BYTES:
+                return error_response(request, "PAYLOAD_TOO_LARGE", "요청 본문은 64KB 이하여야 합니다.")
+            if request.method in ("PUT", "PATCH") and not request.headers.get("content-type", "").startswith("application/json"):
+                return error_response(request, "UNSUPPORTED_MEDIA", "본문은 application/json 이어야 합니다.")
+        if path.startswith("/api/") or path == "/csp-report":
+            limiter = app.state.admin_limiter if path.startswith("/api/v1/admin") else app.state.public_limiter
+            wait = limiter.hit(client_ip(request))
+            if wait:
+                return _rate_limited(request, wait)
+        return await call_next(request)
+
+    @app.middleware("http")
+    async def request_context(request: Request, call_next):
+        """바깥 미들웨어: 요청 ID(받은 값을 64자로 자르거나 새로 만듦), 보안 헤더, 접근 로그."""
+        rid = (request.headers.get("X-Request-ID") or "")[:REQUEST_ID_MAX] or str(uuid.uuid4())
+        request.state.request_id = rid
+        started = time.perf_counter()
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = rid
+        for k, v in SECURITY_HEADERS.items():
+            response.headers.setdefault(k, v)
+        if s.is_prod:
+            response.headers.setdefault("Strict-Transport-Security", "max-age=31536000")
+        route = request.scope.get("route")
+        access_log.info(
+            "request",
+            extra={
+                "request_id": rid,
+                "method": request.method,
+                "path_pattern": getattr(route, "path", "unmatched"),  # 실제 URL, 쿼리 문자열은 남기지 않음 (설계서 2.7.3)
+                "status": response.status_code,
+                "duration_ms": round((time.perf_counter() - started) * 1000, 1),
+            },
+        )
+        return response
+
+    if s.allowed_origins:  # 같은 주소로 화면을 내보내면 필요 없다. 다른 도메인에서 API 를 부를 때만 켠다
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=s.allowed_origins,
+            allow_methods=["GET", "PUT", "PATCH"],
+            allow_headers=["Content-Type", "X-Admin-Key", "X-Request-ID", "If-None-Match"],
+            expose_headers=["ETag", "X-Request-ID", "Retry-After"],
+        )
 
     app.include_router(health.router)
     app.include_router(csp_router)  # POST /csp-report (보안 정책 위반 보고)

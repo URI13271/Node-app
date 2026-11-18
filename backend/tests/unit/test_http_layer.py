@@ -4,8 +4,7 @@
 한계 계수기 클래스 자체는 test_domain.py 가 보고, DB 에 닿는 요청(조회, 저장 성공 경로)은 tests/integration 이 맡는다.
 
 출처: 팀원 보완 backend_supplement.patch (27개).
-뼈대에서는 deps.py, core/security.py, main.py 미들웨어가 아직 없어서 대부분 501 이 난다. 그래서 파일 전체를 건너뛴다.
-백엔드 작성 가이드 단계 9 를 끝내면 아래 pytestmark 줄을 지우고 모두 통과해야 한다 (단계 9 완료 기준).
+백엔드 작성 가이드 단계 9 완료 기준. deps.py(BE-10), core/security.py(BE-13, BE-17), main.py 미들웨어(BE-17)가 들어오면서 건너뛰기를 풀었다.
 지금도 통과하는 2개(Dockerfile, 운영 키 길이)는 test_http_now.py 로 옮겼다.
 """
 
@@ -16,8 +15,6 @@ from fastapi.testclient import TestClient
 
 from app.config import get_settings
 from app.main import MAX_BODY_BYTES, create_app
-
-pytestmark = pytest.mark.skip(reason="백엔드 작성 가이드 단계 9 (deps.py, security.py, main.py 미들웨어) 구현 후 이 줄을 지운다")
 
 KEY = "unit-test-admin-key-0123456789abcdef"
 JSON = {"Content-Type": "application/json"}

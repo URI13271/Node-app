@@ -12,6 +12,7 @@ import re
 
 from fastapi import APIRouter, Request, Response
 from starlette.exceptions import HTTPException
+from starlette.routing import Match, Mount
 from starlette.staticfiles import StaticFiles
 
 from app.core.http import declared_length
@@ -43,6 +44,15 @@ CSP = "; ".join(
 HEADER_BY_MODE = {"report-only": "Content-Security-Policy-Report-Only", "enforce": "Content-Security-Policy"}
 
 
+def _other_method_exists(scope) -> bool:
+    """같은 경로의 API 라우트가 다른 메서드로 있는지. 라우터는 메서드가 안 맞으면 이 화면 mount 로 넘겨 버리므로 여기서 405 를 가린다."""
+    router = scope.get("router")
+    for route in getattr(router, "routes", []):
+        if not isinstance(route, Mount) and route.matches(scope)[0] == Match.PARTIAL:
+            return True
+    return False
+
+
 class FrontendFiles(StaticFiles):
     def __init__(self, *args, csp_mode: str = "report-only", **kwargs):
         super().__init__(*args, **kwargs)
@@ -54,9 +64,9 @@ class FrontendFiles(StaticFiles):
         # Windows 에서는 StaticFiles 가 경로를 api\v1\nope 처럼 넘겨서 / 로 맞춘 뒤 비교한다
         url_path = path.replace("\\", "/")
         if url_path == "api" or url_path.startswith("api/"):
-            # 라우터에 안 걸린 /api 요청. HEAD 는 API 가 지원하지 않는 메서드라 405, 나머지는 없는 경로라 404
-            # (core/errors.py 처리기가 {"error": {...}} 형식으로 감싼다)
-            raise HTTPException(405 if scope["method"] == "HEAD" else 404)
+            # 라우터에 안 걸린 /api 요청. 경로는 있는데 메서드가 다르면(예: PUT 전용 경로에 GET) 405, HEAD 도 405,
+            # 나머지는 없는 경로라 404 (core/errors.py 처리기가 {"error": {...}} 형식으로 감싼다)
+            raise HTTPException(405 if scope["method"] == "HEAD" or _other_method_exists(scope) else 404)
         response = await super().get_response(path, scope)
         response.headers["Cache-Control"] = "no-cache"
         if self.csp_header and response.headers.get("content-type", "").startswith("text/html"):
@@ -70,7 +80,7 @@ class FrontendFiles(StaticFiles):
 #  - 본문은 8KB 까지만 읽는다 (Content-Length 먼저 보고, 실제로 읽으면서도 센다)
 #  - 로그에 넣는 값은 제어 문자(줄바꿈 포함)를 ? 로 바꾸고 300자로 자른다 (가짜 로그 줄 방지)
 #  - 쿼리 문자열은 남기지 않는다 (설계서 2.7.3). 항상 204 로 답한다
-# TODO: 요청 횟수 제한 미들웨어가 생기면 이 경로도 공개 API 와 같은 제한을 건다.
+# 요청 횟수 제한: main.py 미들웨어가 이 경로에도 공개 API 와 같은 분당 제한을 건다 (BE-17).
 router = APIRouter(tags=["csp"], include_in_schema=False)
 MAX_REPORT_BYTES = 8 * 1024
 _CTRL = re.compile(r"[\x00-\x1f\x7f]")
