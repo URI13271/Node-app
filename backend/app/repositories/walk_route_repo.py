@@ -2,14 +2,14 @@
 
 쓰기 함수는 admin 모듈이 쓴다(설계서 2.4.1 모듈 경계 예외). 잠금 순서는 walk_route → walk_route_step.
 
-조회 함수(위쪽 5개)는 BE-07, 쓰기 함수(아래쪽)는 BE-14 에서 구현한다.
+조회 함수(위쪽 5개)는 BE-07, 쓰기 함수(아래쪽 8개)는 BE-14. 쓰기 함수는 write_tx 안에서만 부른다.
 """
 
 from datetime import datetime
 
-from sqlalchemy import Connection, Float, cast, func, select
+from sqlalchemy import Connection, Float, cast, delete, func, insert, select, text, update
 
-from app.repositories.geo_sql import as_geojson, camera_of, length_m, parse
+from app.repositories.geo_sql import as_geojson, camera_of, length_m, make_point, parse
 from app.repositories.tables import entrance, landmark, parking_lot, walk_route, walk_route_step
 
 # ---------- 조회 ----------
@@ -99,35 +99,97 @@ def route_place_id(conn: Connection, route_id: int) -> int | None:
 
 def lock_route(conn: Connection, route_id: int) -> datetime | None:
     """walk_route 행 FOR UPDATE. 없으면 None. 돌려주는 값은 현재 버전(updated_at)."""
-    raise NotImplementedError("TODO: app.repositories.walk_route_repo.lock_route")
+    return conn.execute(select(walk_route.c.updated_at).where(walk_route.c.id == route_id).with_for_update()).scalar()
 
 
 def step_route_id(conn: Connection, step_id: int) -> int | None:
-    raise NotImplementedError("TODO: app.repositories.walk_route_repo.step_route_id")
+    return conn.execute(select(walk_route_step.c.walk_route_id).where(walk_route_step.c.id == step_id)).scalar()
 
 
 def count_landmarks_in_route_place(conn: Connection, route_id: int, landmark_ids: list[int]) -> int:
-    raise NotImplementedError("TODO: app.repositories.walk_route_repo.count_landmarks_in_route_place")
+    """landmark_ids 중 경로가 속한 장소의 랜드마크 수. 서비스가 len(set(ids)) 와 비교해 다른 장소 랜드마크를 막는다."""
+    if not landmark_ids:
+        return 0
+    return conn.execute(
+        select(func.count(func.distinct(landmark.c.id)))
+        .select_from(
+            landmark.join(parking_lot, parking_lot.c.place_id == landmark.c.place_id).join(
+                walk_route, walk_route.c.parking_lot_id == parking_lot.c.id
+            )
+        )
+        .where(walk_route.c.id == route_id, landmark.c.id.in_(landmark_ids))
+    ).scalar_one()
 
 
 def distances_from_path(conn: Connection, route_id: int, points: list[tuple[float, float]]) -> list[float]:
     """각 점과 경로 선 사이 거리(m), geography 기준."""
-    raise NotImplementedError("TODO: app.repositories.walk_route_repo.distances_from_path")
+    path = select(walk_route.c.path).where(walk_route.c.id == route_id).scalar_subquery()
+    out = []
+    for lng_, lat_ in points:
+        d = conn.execute(select(cast(func.ST_Distance(func.Geography(path), func.Geography(make_point(lng_, lat_))), Float))).scalar_one()
+        out.append(float(d))
+    return out
 
 
 def buildings_containing(conn: Connection, route_id: int, points: list[tuple[float, float]], wall_tolerance_m: float) -> list[str | None]:
-    """각 점이 경로가 속한 장소의 건물 안(벽에서 wall_tolerance_m 안쪽)이면 그 건물 이름, 아니면 None."""
-    raise NotImplementedError("TODO: app.repositories.walk_route_repo.buildings_containing")
+    """각 점이 경로가 속한 장소의 건물 안(벽에서 wall_tolerance_m 안쪽)이면 그 건물 이름, 아니면 None.
+
+    벽 위나 벽 바로 앞(입구 지점)은 건물 밖으로 본다. API 명세서 v1.2 부록 C. load_seed 의 inside_building 과 같은 기준.
+    """
+    out: list[str | None] = []
+    for lng_, lat_ in points:
+        name = conn.execute(
+            text("""
+            SELECT coalesce(b.name, '이름 없는 건물') FROM building b
+            JOIN parking_lot l ON l.place_id = b.place_id JOIN walk_route r ON r.parking_lot_id = l.id
+            WHERE r.id = :rid
+              AND ST_Contains(ST_Buffer(b.footprint::geography, -:tol)::geometry,
+                              ST_SetSRID(ST_MakePoint(:lng, :lat), 4326))
+            ORDER BY b.is_target DESC, b.id LIMIT 1"""),
+            {"rid": route_id, "tol": wall_tolerance_m, "lng": lng_, "lat": lat_},
+        ).scalar()
+        out.append(name)
+    return out
+
+
+def _camera_columns(cam: dict | None) -> dict:
+    return {
+        "camera_bearing": cam["bearing"] if cam else None,
+        "camera_pitch": cam["pitch"] if cam else None,
+        "camera_zoom": cam["zoom"] if cam else None,
+    }
 
 
 def replace_steps(conn: Connection, route_id: int, steps: list[dict], updated_by: str) -> None:
-    raise NotImplementedError("TODO: app.repositories.walk_route_repo.replace_steps")
+    """경로의 단계를 모두 지우고 새로 넣는다. steps 원소: step_order, landmark_id, instruction, location(lng, lat), camera."""
+    conn.execute(delete(walk_route_step).where(walk_route_step.c.walk_route_id == route_id))
+    for s in steps:
+        conn.execute(
+            insert(walk_route_step).values(
+                walk_route_id=route_id,
+                step_order=s["step_order"],
+                landmark_id=s["landmark_id"],
+                instruction=s["instruction"],
+                location=make_point(*s["location"]),
+                **_camera_columns(s["camera"]),
+                updated_at=func.clock_timestamp(),
+                updated_by=updated_by,
+            )
+        )
 
 
 def patch_step(conn: Connection, step_id: int, values: dict, updated_by: str) -> None:
-    raise NotImplementedError("TODO: app.repositories.walk_route_repo.patch_step")
+    """values 에 있는 칼럼만 바꾼다. camera 키가 있으면 칼럼 3개로 풀고, None 이면 셋 다 지운다."""
+    v = dict(values)
+    if "camera" in v:
+        v.update(_camera_columns(v.pop("camera")))
+    conn.execute(
+        update(walk_route_step).where(walk_route_step.c.id == step_id).values(**v, updated_at=func.clock_timestamp(), updated_by=updated_by)
+    )
 
 
 def touch_route(conn: Connection, route_id: int) -> datetime:
     """버전 갱신. now()가 아니라 clock_timestamp()를 써야 저장 시점마다 값이 달라진다(설계서 2.7.4)."""
-    raise NotImplementedError("TODO: app.repositories.walk_route_repo.touch_route")
+    return conn.execute(
+        update(walk_route).where(walk_route.c.id == route_id).values(updated_at=func.clock_timestamp()).returning(walk_route.c.updated_at)
+    ).scalar_one()
