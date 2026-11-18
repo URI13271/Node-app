@@ -1,35 +1,58 @@
 """관리자 키 비교, 실패 제한기, 요청 횟수 제한기 (설계서 2.7.1, 2.6.6).
 
 서버 1대 기준의 메모리 계수기다. 서버를 여러 대 띄우면 서버별로 따로 센다(설계서 2.6.6에서 수용).
-
-뼈대: 본문은 비어 있다. 함수마다 NotImplementedError 를 구현으로 바꾼다.
+key_matches, FailureLimiter 는 BE-13, SlidingWindowLimiter(분당 요청 수)는 BE-17 에서 구현한다.
 """
 
+import hmac
+import threading
 import time
 
 
 def key_matches(given: str | None, expected: str) -> bool:
-    raise NotImplementedError("TODO: app.core.security.key_matches")
+    """비교 시간이 내용과 관계없도록 hmac.compare_digest 를 쓴다. 설정 키가 비어 있으면 어떤 값도 통과하지 못한다."""
+    if not given or not expected:
+        return False
+    return hmac.compare_digest(given.encode(), expected.encode())
 
 
 class FailureLimiter:
-    """같은 IP에서 연속 N회 실패하면 lock_s 초 동안 잠근다. 성공하면 계수를 지운다."""
+    """같은 IP에서 연속 N회 실패하면 lock_s 초 동안 잠근다. 성공하면 계수를 지운다.
+
+    여러 요청이 동시에 들어와도 계수가 꼬이지 않게 잠금(threading.Lock) 안에서 센다. clock 은 테스트에서 바꿔 끼운다.
+    """
 
     def __init__(self, limit: int, lock_s: int, clock=time.monotonic):
-        raise NotImplementedError("TODO: app.core.security.FailureLimiter.__init__")
+        self.limit, self.lock_s, self.clock = limit, lock_s, clock
+        self._fails: dict[str, int] = {}
+        self._locked_until: dict[str, float] = {}
+        self._lock = threading.Lock()
 
     def retry_after(self, ip: str) -> int:
-        raise NotImplementedError("TODO: app.core.security.FailureLimiter.retry_after")
+        """잠겨 있으면 남은 초(올림), 아니면 0."""
+        with self._lock:
+            left = self._locked_until.get(ip, 0) - self.clock()
+            return int(left) + 1 if left > 0 else 0
 
     def fail(self, ip: str) -> int:
         """실패 1회 기록. 잠금이 걸리면 남은 초를 돌려준다."""
-        raise NotImplementedError("TODO: app.core.security.FailureLimiter.fail")
+        with self._lock:
+            n = self._fails.get(ip, 0) + 1
+            if n >= self.limit:
+                self._fails.pop(ip, None)
+                self._locked_until[ip] = self.clock() + self.lock_s
+                return self.lock_s
+            self._fails[ip] = n
+            return 0
 
     def success(self, ip: str) -> None:
-        raise NotImplementedError("TODO: app.core.security.FailureLimiter.success")
+        with self._lock:
+            self._fails.pop(ip, None)
 
     def reset(self) -> None:
-        raise NotImplementedError("TODO: app.core.security.FailureLimiter.reset")
+        with self._lock:
+            self._fails.clear()
+            self._locked_until.clear()
 
 
 class SlidingWindowLimiter:

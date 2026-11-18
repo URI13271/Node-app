@@ -11,6 +11,7 @@ from app.api import admin, buildings, health, places, walk_routes
 from app.config import APP_VERSION, get_settings
 from app.core.errors import install_handlers
 from app.core.logging import setup_logging
+from app.core.security import FailureLimiter
 from app.frontend import FrontendFiles
 from app.frontend import router as csp_router
 
@@ -34,7 +35,9 @@ def create_app() -> FastAPI:
     )
     install_handlers(app)
 
-    # TODO: 요청 제한기 준비 (app.state.admin_fail_limiter, public_limiter, admin_limiter) - core/security.py
+    # 관리자 키 실패 잠금 (BE-13): 같은 IP 연속 ADMIN_FAIL_LIMIT 회 실패 → ADMIN_LOCK_S 초. deps.require_admin 이 쓴다
+    app.state.admin_fail_limiter = FailureLimiter(s.ADMIN_FAIL_LIMIT, s.ADMIN_LOCK_S)
+    # TODO: 분당 요청 수 제한기 (app.state.public_limiter, admin_limiter) - core/security.py SlidingWindowLimiter (BE-17)
     # TODO: 미들웨어. 순서(바깥 → 안): request_id + 접근 로그 + 보안 헤더 → 본문 크기(413), 형식(415) → 요청 횟수(429)
     #   Content-Length 는 int() 로 바로 바꾸지 말고 core/http.py declared_length() 를 쓴다.
     #   None(정수 아님, 음수) → 400 INVALID_INPUT, details [{"field": "header.Content-Length", "reason": "invalid_type"}]

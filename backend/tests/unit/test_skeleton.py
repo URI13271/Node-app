@@ -10,7 +10,7 @@ from app.main import create_app
 
 client = TestClient(create_app())
 
-# 공개 API 4개는 구현됨 (BE-11, tests/integration/test_public_api.py). 남은 관리자 API 만 501 을 확인한다
+# 공개 API 4개는 구현됨 (BE-11, tests/integration/test_public_api.py). 남은 관리자 API 는 등록돼 있고 키 검사가 먼저 도는지 본다
 ROUTES = [
     ("GET", "/api/v1/admin/me"),
     ("PUT", "/api/v1/admin/walk-routes/1/steps"),
@@ -23,9 +23,10 @@ ROUTES = [
 
 @pytest.mark.parametrize("method,path", ROUTES)
 def test_routes_registered_not_implemented(method, path):
+    # 관리자 키 검사(BE-10, BE-13)가 먼저 돌아서 키 없이는 401. 키가 맞을 때 501 인지는 tests/unit/test_security.py 에서 본다
     r = client.request(method, path, json={} if method in ("PUT", "PATCH") else None)
-    assert r.status_code == 501
-    assert r.json()["error"]["code"] == "NOT_IMPLEMENTED"
+    assert r.status_code == 401
+    assert r.json()["error"]["code"] == "UNAUTHORIZED"
 
 
 @pytest.mark.parametrize("path", ["/", "/place.html", "/guide.html", "/admin.html", "/about.html", "/css/style.css", "/js/api.js"])

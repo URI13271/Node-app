@@ -103,10 +103,10 @@ def test_admin_key_is_checked_once_per_request(monkeypatch):
 
 
 def test_real_admin_router_runs_require_admin_first():
-    # 뼈대에서는 require_admin 이 NotImplementedError → 501. 키 검사가 먼저 돈다는 것만 본다
+    # 실제 관리자 라우터에서도 키 검사(require_admin, BE-10)가 본문 해석보다 먼저 돈다: 깨진 JSON 이어도 키가 없으면 401
     c = TestClient(create_app())
     r = c.put("/api/v1/admin/walk-routes/1/steps", content="{broken", headers={"Content-Type": "application/json"})
-    assert r.status_code == 501 and "require_admin" in r.json()["error"]["message"]
+    assert (r.status_code, r.json()["error"]["code"]) == (401, "UNAUTHORIZED")
 
 
 def test_swagger_shows_admin_key_input():
