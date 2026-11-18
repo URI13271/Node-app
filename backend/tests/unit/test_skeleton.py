@@ -1,6 +1,6 @@
-"""뼈대 확인: 앱이 뜨고, 라우터가 등록되어 있고, 미구현 엔드포인트는 501 을 돌려준다.
+"""뼈대 확인: 앱이 뜨고, 라우터가 등록되어 있고, 화면 파일과 오류 형식이 맞는지 (DB 없이).
 
-기능을 구현하면 이 파일의 501 검사는 지우고 실제 테스트로 바꾼다.
+API 7개는 모두 구현됐다 (BE-11, BE-16). 501 검사는 없앴고, 기능 테스트는 tests/integration 에 있다.
 """
 
 import pytest
@@ -10,7 +10,7 @@ from app.main import create_app
 
 client = TestClient(create_app())
 
-# 공개 API 4개는 구현됨 (BE-11, tests/integration/test_public_api.py). 남은 관리자 API 는 등록돼 있고 키 검사가 먼저 도는지 본다
+# 관리자 API 3개가 등록돼 있고 키 검사가 먼저 도는지 본다. 기능은 tests/integration/test_admin_api.py (BE-16)
 ROUTES = [
     ("GET", "/api/v1/admin/me"),
     ("PUT", "/api/v1/admin/walk-routes/1/steps"),
@@ -22,8 +22,8 @@ ROUTES = [
 
 
 @pytest.mark.parametrize("method,path", ROUTES)
-def test_routes_registered_not_implemented(method, path):
-    # 관리자 키 검사(BE-10, BE-13)가 먼저 돌아서 키 없이는 401. 키가 맞을 때 501 인지는 tests/unit/test_security.py 에서 본다
+def test_admin_routes_registered_and_need_key(method, path):
+    # 관리자 키 검사(BE-10, BE-13)가 먼저 돌아서 키 없이는 401
     r = client.request(method, path, json={} if method in ("PUT", "PATCH") else None)
     assert r.status_code == 401
     assert r.json()["error"]["code"] == "UNAUTHORIZED"

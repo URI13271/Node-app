@@ -1,6 +1,6 @@
 """관리자 키 비교, 실패 잠금(BE-13)과 require_admin(BE-10). DB 없이 실행된다.
 
-관리자 API 본문(BE-16)은 아직 501 이라, "키 검사를 통과하면 그다음(핸들러)으로 넘어간다"는 것을 501 로 확인한다.
+키 검사를 통과하면 핸들러까지 간다는 것을 GET /admin/me 의 200 으로 확인한다 (DB 를 쓰지 않는 관리자 API).
 요청 ID, 보안 헤더까지 함께 보는 전체 검사는 tests/unit/test_http_layer.py (미들웨어 BE-17 뒤에 켬).
 """
 
@@ -95,8 +95,8 @@ def test_without_key_or_wrong_key_is_401(client):
 
 
 def test_right_key_passes_to_the_handler(client):
-    # 핸들러(BE-16)가 아직 501 이라, 501 이 나오면 키 검사를 통과했다는 뜻이다
-    assert _code(client.get(ME_URL, headers={"X-Admin-Key": KEY})) == (501, "NOT_IMPLEMENTED")
+    r = client.get(ME_URL, headers={"X-Admin-Key": KEY})
+    assert r.status_code == 200 and r.json() == {"role": "admin"}
 
 
 def test_five_wrong_keys_lock_even_the_right_key(client):
@@ -113,7 +113,7 @@ def test_five_wrong_keys_lock_even_the_right_key(client):
 def test_right_key_resets_the_failure_count(client):
     wrong = {"X-Admin-Key": "wrong"}
     assert [client.get(ME_URL, headers=wrong).status_code for _ in range(4)] == [401] * 4
-    assert client.get(ME_URL, headers={"X-Admin-Key": KEY}).status_code == 501  # 통과 → 계수 지움
+    assert client.get(ME_URL, headers={"X-Admin-Key": KEY}).status_code == 200  # 통과 → 계수 지움
     assert [client.get(ME_URL, headers=wrong).status_code for _ in range(4)] == [401] * 4  # 다시 4번까지는 잠기지 않음
 
 
