@@ -34,7 +34,7 @@
 | 분수대 2곳 | OpenStreetMap (node 9422646995, 1314028227) | 실제 데이터 |
 | 건물 층수 | 없음 | **현장 확인 필요.** 지금은 기본 높이 6m로 그려진다 |
 | 입구 위치, 대표 입구 여부 | 지도에서 추정 | **현장 확인 필요.** 2곳은 2026-11-11에 옮김 (아래) |
-| 단계 문장 | 새 경로 기준 초안 | **현장 확인 필요** |
+| 단계 문장 | `scripts/build_walk_steps.py`가 경로 선, OSM 보행망(계단, 횡단보도, 광장, 구내 도로), 건물 이름, landmarks.geojson으로 생성 | 데이터 근거로 생성. 간판, 색 같은 데이터 밖 정보는 쓰지 않음 |
 | 주차 면수, 유료 여부 | 없음 (주말 무료 개방만 기사로 확인) | 현장 또는 학교 시설과 확인 필요 |
 
 **옮긴 입구 2곳 (2026-11-11).** 처음 위치가 다른 건물과 붙은 벽 위라, 밖에서 들어가려면 그 건물을 지나야 했다.
@@ -55,4 +55,12 @@
 7. 건물 3동과 도착 방향에서 보이는 주변 건물의 층수
 8. 주차장 면수, 유료 여부, 출입 제한 시간
 
-조사 뒤에는 `entrances.geojson`, `osm/manual_crossings.json`을 고치고 `python -m scripts.build_walk_routes`로 경로를 다시 만든 다음, 단계 문장을 새 선에 맞춰 고치고 `python -m scripts.load_seed`로 적재한다.
+조사 뒤에는 `entrances.geojson`, `osm/manual_crossings.json`을 고치고 아래 순서로 다시 만든다. 단계 문장은 손으로 고치지 않아도 된다.
+
+```
+python -m scripts.build_walk_routes scripts/seeds/gnu-gajwa     # 경로 선
+python -m scripts.build_walk_steps scripts/seeds/gnu-gajwa      # 단계 지점, 문장, landmark_key (--check --diff 로 미리 보기)
+python -m scripts.load_seed                                     # 적재
+```
+
+카메라 값을 손으로 넣은 단계는 다시 만들어도 10m 안에 같은 단계가 있으면 값을 이어 받는다.
