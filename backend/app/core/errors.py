@@ -2,17 +2,28 @@
 
 모든 오류 응답은 {"error": {code, message, request_id, timestamp, details}} 한 가지 모양이다.
 
-뼈대: AppError, 검증 오류(400), 404, 405, 501 처리는 있다. DB 오류(503), 그 밖의 예외(500) 처리기는 TODO.
+DB 연결 실패, 시간 초과는 503 + Retry-After, 그 밖의 예외는 500 (BE-18). 로그에는 DB 접속 문자열을 가린다.
+501(NOT_IMPLEMENTED)은 뼈대 전용이라 QA-03 에서 지운다.
 검증 오류를 처음부터 명세 형식(400 INVALID_INPUT)으로 내보내서, 프론트 api.js 는 오류 형식 한 가지만 다루면 된다.
 """
 
+import logging
+import re
 from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import DBAPIError, OperationalError
+from sqlalchemy.exc import TimeoutError as PoolTimeoutError
 from starlette.exceptions import HTTPException as StarletteHTTPException
+
+log = logging.getLogger("app")
+RETRY_AFTER_S = "3"
+# lock_timeout(55P03), statement_timeout(57014): 다시 시도하면 되는 오류
+RETRYABLE_SQLSTATES = {"55P03", "57014"}
+_DB_URL = re.compile(r"postgresql(\+\w+)?://[^@\s]+@")
 
 STATUS_BY_CODE = {
     "INVALID_INPUT": 400,
@@ -118,6 +129,24 @@ def _reason(err: dict) -> str:
     return _REASON_BY_TYPE.get(t, "invalid_type")
 
 
+def mask(msg: str) -> str:
+    """postgresql://계정:비밀번호@ 부분을 가린다. 오류 메시지를 로그에 남기기 전에 쓴다."""
+    return _DB_URL.sub("postgresql://***@", msg)
+
+
+def _rid(request: Request) -> str:
+    """로그와 오류 응답을 같은 요청 ID 로 이어 찾을 수 있게 한다."""
+    return getattr(request.state, "request_id", "-")
+
+
+def _unavailable(request: Request) -> JSONResponse:
+    return error_response(request, "SERVICE_UNAVAILABLE", MESSAGE_BY_CODE["SERVICE_UNAVAILABLE"], headers={"Retry-After": RETRY_AFTER_S})
+
+
+def _internal(request: Request) -> JSONResponse:
+    return error_response(request, "INTERNAL", MESSAGE_BY_CODE["INTERNAL"])
+
+
 def install_handlers(app: FastAPI) -> None:
     @app.exception_handler(AppError)
     async def _app_error(request: Request, exc: AppError):
@@ -142,5 +171,26 @@ def install_handlers(app: FastAPI) -> None:
             request, code, MESSAGE_BY_CODE.get(code, "요청을 처리하지 못했습니다."), headers=getattr(exc, "headers", None)
         )
 
-    # TODO: DB 연결 실패, 시간 초과 → 503 SERVICE_UNAVAILABLE + Retry-After
-    # TODO: 그 밖의 예외 → 500 INTERNAL (로그에 DB 접속 문자열 가리기)
+    # --- DB 오류, 그 밖의 예외 (BE-18). 응답에는 오류 내용을 넣지 않고 로그에만 (가려서) 남긴다 ---
+
+    @app.exception_handler(PoolTimeoutError)
+    @app.exception_handler(OperationalError)
+    async def _db_unavailable(request: Request, exc: Exception):
+        # 연결 실패, 연결 풀 대기 시간 초과, statement_timeout, lock_timeout (psycopg 는 모두 OperationalError 로 온다)
+        log.error("db_unavailable", extra={"request_id": _rid(request), "error": mask(str(exc))[:300]})
+        return _unavailable(request)
+
+    @app.exception_handler(DBAPIError)
+    async def _db_error(request: Request, exc: DBAPIError):
+        sqlstate = getattr(getattr(exc, "orig", None), "sqlstate", None)
+        if sqlstate in RETRYABLE_SQLSTATES:
+            log.warning("db_timeout", extra={"request_id": _rid(request), "sqlstate": sqlstate})
+            return _unavailable(request)
+        log.error("db_error", extra={"request_id": _rid(request), "sqlstate": sqlstate, "error": mask(str(exc))[:300]})
+        return _internal(request)
+
+    @app.exception_handler(Exception)
+    async def _unhandled(request: Request, exc: Exception):
+        # 맨 바깥(ServerErrorMiddleware)에서 처리돼 보안 헤더 미들웨어를 거치지 않는다. 그래서 응답 형식만 맞춘다
+        log.error("unhandled", extra={"request_id": _rid(request), "exc_type": type(exc).__name__, "error": mask(str(exc))[:300]})
+        return _internal(request)
