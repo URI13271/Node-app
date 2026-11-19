@@ -14,20 +14,11 @@ NAME_COLLATION = "C"
 
 
 def _like_escape(q: str) -> str:
-    return q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    raise NotImplementedError("BE-11a 연습: _like_escape")
 
 
 def search_places(conn: Connection, q: str | None, limit: int, offset: int) -> tuple[int, list[dict]]:
-    cond = []
-    if q:
-        cond.append(place.c.name.ilike(f"%{_like_escape(q)}%", escape="\\"))
-    total = conn.execute(select(func.count()).select_from(place).where(*cond)).scalar_one()
-    rows = conn.execute(
-        select(place.c.id, place.c.name, place.c.category, place.c.cover_image_url,
-               as_geojson(place.c.location, "location"))
-        .where(*cond).order_by(place.c.name.collate(NAME_COLLATION), place.c.id).limit(limit).offset(offset)
-    ).mappings().all()
-    return total, [{**r, "location": parse(r["location"])} for r in rows]
+    raise NotImplementedError("BE-11a 연습: search_places")
 
 
 def get_place(conn: Connection, place_id: int) -> dict | None:

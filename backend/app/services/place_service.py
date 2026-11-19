@@ -21,9 +21,7 @@ def _candidates(lots: list[dict]) -> list[ParkingCandidate]:
 
 class PlaceService:
     def search(self, q: str | None, limit: int, offset: int) -> PlaceListOut:
-        with read_tx() as conn:
-            total, items = place_repo.search_places(conn, q or None, limit, offset)
-        return PlaceListOut(total=total, limit=limit, offset=offset, items=items)
+        raise NotImplementedError("BE-11a 연습: PlaceService.search")
 
     def detail(self, place_id: int) -> PlaceDetail:
         with read_tx() as conn:

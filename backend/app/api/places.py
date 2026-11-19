@@ -20,8 +20,7 @@ def list_places(
     offset: int = Query(default=0, ge=0),
 ):
     """장소 검색 (Cache-Control: public, max-age=60). 검색어 앞뒤 공백은 지우고, 비면 전체."""
-    response.headers["Cache-Control"] = "public, max-age=60"
-    return service.search(q.strip() if q else None, limit, offset)
+    raise NotImplementedError("BE-11a 연습: list_places")
 
 
 @router.get("/{id}", response_model=PlaceDetail)
