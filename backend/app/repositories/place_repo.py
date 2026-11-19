@@ -46,7 +46,7 @@ def get_place(conn: Connection, place_id: int) -> dict | None:
 
 
 def place_exists(conn: Connection, place_id: int) -> bool:
-    return conn.execute(select(place.c.id).where(place.c.id == place_id)).first() is not None
+    raise NotImplementedError("BE-11b 연습: place_exists")
 
 
 def list_entrances(conn: Connection, place_id: int) -> list[dict]:

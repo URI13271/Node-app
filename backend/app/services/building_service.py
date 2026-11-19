@@ -13,14 +13,4 @@ from app.schemas.building import BuildingCollection
 
 class BuildingService:
     def list_for_place(self, place_id: int) -> BuildingCollection:
-        with read_tx() as conn:
-            if not place_repo.place_exists(conn, place_id):
-                raise not_found("장소")
-            rows = building_repo.list_buildings(conn, place_id)
-        features = [{
-            "id": r["id"], "geometry": r["footprint"],
-            "properties": {"name": r["name"], "floor_count": r["floor_count"],
-                           "render_height_m": render_height(r["height_m"], r["floor_count"]),
-                           "is_target": r["is_target"]},
-        } for r in rows]
-        return BuildingCollection(features=features, attributions=attributions([r["source"] for r in rows]))
+        raise NotImplementedError("BE-11b 연습: BuildingService.list_for_place")
