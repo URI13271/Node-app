@@ -1,4 +1,4 @@
-"""관리자 키 비교, 실패 잠금(BE-13)과 require_admin(BE-10). DB 없이 실행된다.
+"""관리자 키 비교, 실패 잠금(BE-13), 분당 요청 수 제한기(BE-17), require_admin(BE-10). DB 없이 실행된다.
 
 키 검사를 통과하면 핸들러까지 간다는 것을 GET /admin/me 의 200 으로 확인한다 (DB 를 쓰지 않는 관리자 API).
 요청 ID, 보안 헤더까지 함께 보는 전체 검사는 tests/unit/test_http_layer.py (미들웨어 BE-17 뒤에 켬).
@@ -8,7 +8,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.config import get_settings
-from app.core.security import FailureLimiter, key_matches
+from app.core.security import FailureLimiter, SlidingWindowLimiter, key_matches
 from app.main import create_app
 
 KEY = "unit-test-admin-key-0123456789abcdef"
@@ -84,6 +84,32 @@ def test_failure_limiter_reset_clears_locks():
     lim.fail("ip")
     lim.reset()
     assert lim.retry_after("ip") == 0
+
+
+# ---------- SlidingWindowLimiter ----------
+
+
+def test_sliding_window_allows_per_min_then_waits():
+    clock = FakeClock()
+    lim = SlidingWindowLimiter(2, clock)
+    assert [lim.hit("ip"), lim.hit("ip")] == [0, 0]
+    assert lim.hit("ip") == 61 and lim.hit("other") == 0  # IP 별로 따로
+    clock.t = 30
+    assert lim.hit("ip") == 31  # 첫 요청이 60초 창에서 빠질 때까지
+    clock.t = 60
+    assert lim.hit("ip") == 0  # 창이 지나면 다시 허용
+
+
+def test_sliding_window_blocked_hits_are_not_counted():
+    clock = FakeClock()
+    lim = SlidingWindowLimiter(1, clock)
+    lim.hit("ip")
+    for _ in range(10):
+        lim.hit("ip")  # 막힌 요청은 세지 않는다
+    clock.t = 60
+    assert lim.hit("ip") == 0
+    lim.reset()
+    assert lim.hit("ip") == 0
 
 
 # ---------- require_admin (AdminRoute 를 거쳐) ----------

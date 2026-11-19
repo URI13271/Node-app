@@ -1,12 +1,13 @@
 """관리자 키 비교, 실패 제한기, 요청 횟수 제한기 (설계서 2.7.1, 2.6.6).
 
 서버 1대 기준의 메모리 계수기다. 서버를 여러 대 띄우면 서버별로 따로 센다(설계서 2.6.6에서 수용).
-key_matches, FailureLimiter 는 BE-13, SlidingWindowLimiter(분당 요청 수)는 BE-17 에서 구현한다.
+key_matches, FailureLimiter 는 BE-13, SlidingWindowLimiter(분당 요청 수)는 BE-17.
 """
 
 import hmac
 import threading
 import time
+from collections import deque
 
 
 def key_matches(given: str | None, expected: str) -> bool:
@@ -56,14 +57,25 @@ class FailureLimiter:
 
 
 class SlidingWindowLimiter:
-    """IP별 분당 요청 수 제한."""
+    """IP별 분당 요청 수 제한. 최근 60초 안의 요청 시각을 IP마다 큐에 담아 센다."""
 
     def __init__(self, per_min: int, clock=time.monotonic):
-        raise NotImplementedError("TODO: app.core.security.SlidingWindowLimiter.__init__")
+        self.per_min, self.clock = per_min, clock
+        self._hits: dict[str, deque] = {}
+        self._lock = threading.Lock()
 
     def hit(self, ip: str) -> int:
-        """허용이면 0, 초과면 다시 시도할 초."""
-        raise NotImplementedError("TODO: app.core.security.SlidingWindowLimiter.hit")
+        """허용이면 0, 초과면 다시 시도할 초. 초과한 요청은 세지 않는다 (막힌 요청이 창을 늘리지 않게)."""
+        now = self.clock()
+        with self._lock:
+            q = self._hits.setdefault(ip, deque())
+            while q and now - q[0] >= 60:
+                q.popleft()
+            if len(q) >= self.per_min:
+                return int(60 - (now - q[0])) + 1
+            q.append(now)
+            return 0
 
     def reset(self) -> None:
-        raise NotImplementedError("TODO: app.core.security.SlidingWindowLimiter.reset")
+        with self._lock:
+            self._hits.clear()
