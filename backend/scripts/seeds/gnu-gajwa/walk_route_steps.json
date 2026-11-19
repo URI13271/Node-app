@@ -6,7 +6,7 @@
    "entrance_name": "북쪽 출입구"
   },
   "step_order": 1,
-  "instruction": "주차장 남쪽으로 나와 인도까지 내려간 뒤 왼쪽(동쪽)으로 걷기",
+  "instruction": "주차장에서 나와 경영대학을 왼쪽에 두고 남쪽으로 약 20m 걷기",
   "landmark_key": null,
   "location": {
    "type": "Point",
@@ -24,13 +24,13 @@
    "entrance_name": "북쪽 출입구"
   },
   "step_order": 2,
-  "instruction": "짧은 계단을 지나 큰길 쪽 인도로 나가기",
+  "instruction": "살짝 왼쪽(남동쪽)으로 틀어 약 50m 걷기",
   "landmark_key": null,
   "location": {
    "type": "Point",
    "coordinates": [
-    128.099793,
-    35.153652
+    128.099305,
+    35.153864
    ]
   },
   "camera": null
@@ -42,13 +42,13 @@
    "entrance_name": "북쪽 출입구"
   },
   "step_order": 3,
-  "instruction": "도서관 동쪽 끝 너머 횡단보도로 큰길 건너기",
+  "instruction": "계단을 지나 동쪽으로 약 40m 걷기",
   "landmark_key": null,
   "location": {
    "type": "Point",
    "coordinates": [
-    128.100239,
-    35.153498
+    128.099822,
+    35.153769
    ]
   },
   "camera": null
@@ -60,13 +60,13 @@
    "entrance_name": "북쪽 출입구"
   },
   "step_order": 4,
-  "instruction": "건너서 오른쪽(서쪽)으로 꺾어 도서관 북쪽 인도를 따라 걷기",
+  "instruction": "횡단보도로 남쪽 건너편으로 건넌 뒤 오른쪽(서쪽)으로 꺾어 중앙도서관을 왼쪽에 두고 약 70m 걷기",
   "landmark_key": null,
   "location": {
    "type": "Point",
    "coordinates": [
-    128.10019,
-    35.153409
+    128.10025,
+    35.153549
    ]
   },
   "camera": null
@@ -78,13 +78,13 @@
    "entrance_name": "북쪽 출입구"
   },
   "step_order": 5,
-  "instruction": "도서관 북쪽 벽 가운데 출입구로 들어가기",
+  "instruction": "왼쪽(남쪽)으로 꺾어 중앙도서관 북쪽 출입구로 들어가기",
   "landmark_key": null,
   "location": {
    "type": "Point",
    "coordinates": [
-    128.099499,
-    35.153467
+    128.099509,
+    35.153511
    ]
   },
   "camera": null
@@ -96,7 +96,7 @@
    "entrance_name": "서쪽 출입구"
   },
   "step_order": 1,
-  "instruction": "주차장 서쪽 출구에서 남쪽으로 내려가 짧은 계단을 지나 큰길 인도까지 걷기",
+  "instruction": "주차장에서 나와 남쪽으로 약 30m 걷기",
   "landmark_key": null,
   "location": {
    "type": "Point",
@@ -114,13 +114,13 @@
    "entrance_name": "서쪽 출입구"
   },
   "step_order": 2,
-  "instruction": "왼쪽 횡단보도로 옆 도로를 건넌 뒤 큰길 인도를 따라 동쪽으로 걷기",
+  "instruction": "계단을 지나 남쪽으로 약 20m 걷기",
   "landmark_key": null,
   "location": {
    "type": "Point",
    "coordinates": [
-    128.099097,
-    35.153733
+    128.099031,
+    35.153945
    ]
   },
   "camera": null
@@ -132,13 +132,13 @@
    "entrance_name": "서쪽 출입구"
   },
   "step_order": 3,
-  "instruction": "도서관 동쪽 끝 너머 횡단보도로 큰길 건너기",
+  "instruction": "횡단보도로 동쪽 건너편으로 건넌 뒤 그대로 약 100m 걷기",
   "landmark_key": null,
   "location": {
    "type": "Point",
    "coordinates": [
-    128.100234,
-    35.153477
+    128.098988,
+    35.15375
    ]
   },
   "camera": null
@@ -150,13 +150,13 @@
    "entrance_name": "서쪽 출입구"
   },
   "step_order": 4,
-  "instruction": "건너서 오른쪽(서쪽)으로 꺾어 도서관 북쪽 인도를 끝까지 걷기",
+  "instruction": "횡단보도로 남쪽 건너편으로 건넌 뒤 오른쪽(서쪽)으로 꺾어 도서관 앞 분수대를 왼쪽에 두고 약 110m 걷기",
   "landmark_key": null,
   "location": {
    "type": "Point",
    "coordinates": [
-    128.100175,
-    35.153411
+    128.10025,
+    35.153549
    ]
   },
   "camera": null
@@ -168,13 +168,13 @@
    "entrance_name": "서쪽 출입구"
   },
   "step_order": 5,
-  "instruction": "도서관 서쪽 모퉁이에서 왼쪽(남쪽)으로 꺾기",
-  "landmark_key": null,
+  "instruction": "왼쪽(남쪽)으로 꺾어 약 30m 걷기",
+  "landmark_key": "fountain-w",
   "location": {
    "type": "Point",
    "coordinates": [
-    128.098978,
-    35.153564
+    128.098984,
+    35.153589
    ]
   },
   "camera": null
@@ -186,13 +186,13 @@
    "entrance_name": "서쪽 출입구"
   },
   "step_order": 6,
-  "instruction": "분수대를 오른쪽에 두고 서쪽 벽 출입구로 들어가기",
+  "instruction": "왼쪽(동쪽)으로 꺾어 도서관 앞 분수대를 오른쪽에 두고 걷다가 왼쪽에 보이는 중앙도서관 서쪽 출입구로 들어가기",
   "landmark_key": "fountain-w",
   "location": {
    "type": "Point",
    "coordinates": [
-    128.098939,
-    35.153386
+    128.098933,
+    35.15336
    ]
   },
   "camera": null
@@ -204,7 +204,7 @@
    "entrance_name": "서쪽 출입구"
   },
   "step_order": 1,
-  "instruction": "주차장 북동쪽 끝으로 나와 큰길 쪽 인도로 올라가기",
+  "instruction": "주차장에서 나와 약학대학을 오른쪽에 두고 북동쪽으로 약 30m 걷기",
   "landmark_key": null,
   "location": {
    "type": "Point",
@@ -222,13 +222,13 @@
    "entrance_name": "서쪽 출입구"
   },
   "step_order": 2,
-  "instruction": "인도를 따라 동쪽으로 약 150m 직진. 중간의 골목은 횡단보도로 건너기",
+  "instruction": "살짝 오른쪽(동쪽)으로 틀어 학술정보관을 오른쪽에 두고 약 150m 걷기",
   "landmark_key": null,
   "location": {
    "type": "Point",
    "coordinates": [
-    128.09515,
-    35.154166
+    128.095113,
+    35.154172
    ]
   },
   "camera": null
@@ -240,13 +240,13 @@
    "entrance_name": "서쪽 출입구"
   },
   "step_order": 3,
-  "instruction": "사거리에서 횡단보도로 남북 방향 도로를 건너기",
+  "instruction": "횡단보도로 남동쪽 건너편으로 건넌 뒤 그대로 약 40m 걷기",
   "landmark_key": null,
   "location": {
    "type": "Point",
    "coordinates": [
-    128.096759,
-    35.153921
+    128.096719,
+    35.153928
    ]
   },
   "camera": null
@@ -258,13 +258,13 @@
    "entrance_name": "서쪽 출입구"
   },
   "step_order": 4,
-  "instruction": "오른쪽 앞에 보이는 학생회관 서쪽 벽 출입구로 들어가기",
+  "instruction": "학생회관 서쪽 출입구로 들어가기",
   "landmark_key": null,
   "location": {
    "type": "Point",
    "coordinates": [
-    128.097073,
-    35.153656
+    128.097097,
+    35.153636
    ]
   },
   "camera": null
@@ -276,7 +276,7 @@
    "entrance_name": "북동쪽 출입구"
   },
   "step_order": 1,
-  "instruction": "주차장 남쪽 출구로 나와 짧은 계단을 지나 큰길 인도까지 걷기",
+  "instruction": "주차장에서 나와 동쪽으로 약 30m 걷기",
   "landmark_key": null,
   "location": {
    "type": "Point",
@@ -294,13 +294,13 @@
    "entrance_name": "북동쪽 출입구"
   },
   "step_order": 2,
-  "instruction": "횡단보도로 옆 도로를 건넌 뒤 큰길 인도를 따라 동쪽으로 걷기",
+  "instruction": "오른쪽(남쪽)으로 꺾어 약 30m 걷기",
   "landmark_key": null,
   "location": {
    "type": "Point",
    "coordinates": [
-    128.099108,
-    35.15373
+    128.099082,
+    35.154176
    ]
   },
   "camera": null
@@ -312,13 +312,13 @@
    "entrance_name": "북동쪽 출입구"
   },
   "step_order": 3,
-  "instruction": "도서관 동쪽 끝 너머 횡단보도로 큰길 건너기",
+  "instruction": "계단을 지나 오른쪽(서쪽)으로 꺾어 약 30m 걷기 (인도가 없는 구내 도로라 차 주의)",
   "landmark_key": null,
   "location": {
    "type": "Point",
    "coordinates": [
-    128.100234,
-    35.153476
+    128.099026,
+    35.153946
    ]
   },
   "camera": null
@@ -330,13 +330,13 @@
    "entrance_name": "북동쪽 출입구"
   },
   "step_order": 4,
-  "instruction": "건너서 오른쪽(서쪽)으로 꺾어 도서관을 왼쪽에 두고 인도를 따라 직진",
-  "landmark_key": "library",
+  "instruction": "왼쪽(남동쪽)으로 꺾어 약 20m 걷기",
+  "landmark_key": null,
   "location": {
    "type": "Point",
    "coordinates": [
-    128.100132,
-    35.153418
+    128.098648,
+    35.153976
    ]
   },
   "camera": null
@@ -348,13 +348,13 @@
    "entrance_name": "북동쪽 출입구"
   },
   "step_order": 5,
-  "instruction": "분수대를 지나 학생회관이 보일 때까지 서쪽으로 계속 직진",
-  "landmark_key": "fountain-w",
+  "instruction": "왼쪽(동쪽)으로 꺾어 중앙도서관 건물을 오른쪽에 두고 약 20m 걷기",
+  "landmark_key": null,
   "location": {
    "type": "Point",
    "coordinates": [
-    128.098932,
-    35.153597
+    128.098777,
+    35.153782
    ]
   },
   "camera": null
@@ -366,13 +366,49 @@
    "entrance_name": "북동쪽 출입구"
   },
   "step_order": 6,
-  "instruction": "학생회관 북쪽 벽 동쪽 끝 출입구로 들어가기",
+  "instruction": "횡단보도로 동쪽 건너편으로 건넌 뒤 그대로 약 100m 걷기",
+  "landmark_key": "library",
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.099043,
+    35.15374
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-student-union",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "북동쪽 출입구"
+  },
+  "step_order": 7,
+  "instruction": "횡단보도로 남쪽 건너편으로 건넌 뒤 오른쪽(서쪽)으로 꺾어 중앙도서관 건물을 왼쪽에 두고 약 240m 걷기",
   "landmark_key": null,
   "location": {
    "type": "Point",
    "coordinates": [
-    128.097699,
-    35.153781
+    128.10025,
+    35.153549
+   ]
+  },
+  "camera": null
+ },
+ {
+  "walk_route": {
+   "place_key": "gnu-student-union",
+   "parking_lot_name": "중앙도서관 북쪽 주차장",
+   "entrance_name": "북동쪽 출입구"
+  },
+  "step_order": 8,
+  "instruction": "왼쪽(남쪽)으로 꺾어 왼쪽에 보이는 학생회관 북동쪽 출입구로 들어가기",
+  "landmark_key": null,
+  "location": {
+   "type": "Point",
+   "coordinates": [
+    128.097654,
+    35.153788
    ]
   },
   "camera": null
@@ -384,7 +420,7 @@
    "entrance_name": "동쪽 출입구"
   },
   "step_order": 1,
-  "instruction": "주차장 북쪽 끝으로 나와 횡단보도 쪽으로 걷기",
+  "instruction": "주차장에서 나와 북동쪽으로 약 30m 걷기",
   "landmark_key": null,
   "location": {
    "type": "Point",
@@ -402,13 +438,13 @@
    "entrance_name": "동쪽 출입구"
   },
   "step_order": 2,
-  "instruction": "횡단보도로 차도 건너기",
+  "instruction": "횡단보도로 북쪽 건너편으로 건넌 뒤 왼쪽(서쪽)으로 꺾어 교양학관을 오른쪽에 두고 약 110m 걷기",
   "landmark_key": null,
   "location": {
    "type": "Point",
    "coordinates": [
-    128.101036,
-    35.152397
+    128.101015,
+    35.152365
    ]
   },
   "camera": null
@@ -420,31 +456,13 @@
    "entrance_name": "동쪽 출입구"
   },
   "step_order": 3,
-  "instruction": "건너서 왼쪽(서쪽) 보행로를 따라 교양학관 쪽으로 걷기",
+  "instruction": "오른쪽에 보이는 교양학관 동쪽 출입구로 들어가기",
   "landmark_key": null,
   "location": {
    "type": "Point",
    "coordinates": [
-    128.100952,
-    35.152428
-   ]
-  },
-  "camera": null
- },
- {
-  "walk_route": {
-   "place_key": "gnu-liberal-arts",
-   "parking_lot_name": "교양학관 동쪽 주차장",
-   "entrance_name": "동쪽 출입구"
-  },
-  "step_order": 4,
-  "instruction": "교양학관 동쪽 벽 출입구로 들어가기",
-  "landmark_key": null,
-  "location": {
-   "type": "Point",
-   "coordinates": [
-    128.09991,
-    35.152134
+    128.099873,
+    35.152113
    ]
   },
   "camera": null
@@ -456,7 +474,7 @@
    "entrance_name": "북쪽 출입구"
   },
   "step_order": 1,
-  "instruction": "주차장 서쪽 출구에서 남쪽으로 내려가 짧은 계단을 지나 큰길 인도까지 걷기",
+  "instruction": "주차장에서 나와 남쪽으로 약 30m 걷기",
   "landmark_key": null,
   "location": {
    "type": "Point",
@@ -474,13 +492,13 @@
    "entrance_name": "북쪽 출입구"
   },
   "step_order": 2,
-  "instruction": "왼쪽 횡단보도로 옆 도로를 건넌 뒤 길 건너 도서관을 오른쪽에 두고 동쪽으로 걷기",
-  "landmark_key": "library",
+  "instruction": "계단을 지나 남쪽으로 약 20m 걷기",
+  "landmark_key": null,
   "location": {
    "type": "Point",
    "coordinates": [
-    128.099097,
-    35.153733
+    128.099031,
+    35.153945
    ]
   },
   "camera": null
@@ -492,13 +510,13 @@
    "entrance_name": "북쪽 출입구"
   },
   "step_order": 3,
-  "instruction": "도서관 동쪽 끝 너머 횡단보도로 큰길 건너기",
-  "landmark_key": null,
+  "instruction": "횡단보도로 동쪽 건너편으로 건넌 뒤 중앙도서관 건물을 오른쪽에 두고 그대로 약 100m 걷기",
+  "landmark_key": "library",
   "location": {
    "type": "Point",
    "coordinates": [
-    128.100234,
-    35.153477
+    128.098988,
+    35.15375
    ]
   },
   "camera": null
@@ -510,13 +528,13 @@
    "entrance_name": "북쪽 출입구"
   },
   "step_order": 4,
-  "instruction": "건너자마자 오른쪽 광장 길로 들어가 동쪽 분수대를 왼쪽에 두고 남쪽으로 걷기",
-  "landmark_key": "fountain-e",
+  "instruction": "횡단보도로 남쪽 건너편으로 건넌 뒤 광장으로 들어가 그대로 약 70m 걷기",
+  "landmark_key": null,
   "location": {
    "type": "Point",
    "coordinates": [
-    128.100084,
-    35.153405
+    128.10025,
+    35.153549
    ]
   },
   "camera": null
@@ -528,13 +546,13 @@
    "entrance_name": "북쪽 출입구"
   },
   "step_order": 5,
-  "instruction": "광장 끝에서 길 건너기. 횡단보도 표시가 없는 곳이라 좌우를 살핀 뒤 건너기",
-  "landmark_key": null,
+  "instruction": "횡단보도 표시가 없는 곳이라 좌우를 살피고 남쪽 건너편으로 건넌 뒤 살짝 오른쪽(남서쪽)으로 틀어 중앙도서관 건물을 오른쪽에 두고 약 40m 걷기",
+  "landmark_key": "library",
   "location": {
    "type": "Point",
    "coordinates": [
-    128.099881,
-    35.152795
+    128.099888,
+    35.152831
    ]
   },
   "camera": null
@@ -546,13 +564,13 @@
    "entrance_name": "북쪽 출입구"
   },
   "step_order": 6,
-  "instruction": "건너편 인도에서 오른쪽 앞 교양학관 북쪽 출입구로 들어가기",
+  "instruction": "왼쪽에 보이는 교양학관 북쪽 출입구로 들어가기",
   "landmark_key": null,
   "location": {
    "type": "Point",
    "coordinates": [
-    128.099817,
-    35.152671
+    128.099549,
+    35.152567
    ]
   },
   "camera": null

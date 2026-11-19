@@ -87,3 +87,7 @@ def test_clean_instruction_removes_control_chars():
 def test_attributions_unique_ordered_default():
     assert attributions(["manual", "osm", "manual"]) == ["© OpenStreetMap contributors", "직접 조사"]
     assert attributions([]) == ["직접 조사"]
+
+
+def test_attributions_split_combined_source():
+    assert attributions(["osm+public_data", "osm"]) == ["© OpenStreetMap contributors", "공공 건물 데이터"]

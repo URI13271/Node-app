@@ -53,11 +53,11 @@
    "properties": {
     "place_key": "gnu-central-library",
     "name": "학생회관",
-    "floor_count": null,
-    "height_m": null,
+    "floor_count": 6,
+    "height_m": 25.5,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM way 115469129. 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM way 115469129. 층수: 건축물대장 표제부 학생회관 (2026-11-20 조회)"
    }
   },
   {
@@ -92,11 +92,11 @@
    "properties": {
     "place_key": "gnu-central-library",
     "name": "중앙도서관",
-    "floor_count": null,
-    "height_m": null,
+    "floor_count": 7,
+    "height_m": 30.0,
     "is_target": true,
-    "source": "osm",
-    "description": "OSM way 115469226. 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM way 115469226. 층수: 건축물대장 표제부 중앙도서관 중앙도서관 (2026-11-20 조회)"
    }
   },
   {
@@ -271,11 +271,11 @@
    "properties": {
     "place_key": "gnu-central-library",
     "name": "교양학관",
-    "floor_count": null,
-    "height_m": null,
+    "floor_count": 3,
+    "height_m": 10.1,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM way 115699812. 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM way 115699812. 층수: 건축물대장 표제부 교양학관 (2026-11-20 조회)"
    }
   },
   {
@@ -330,11 +330,11 @@
    "properties": {
     "place_key": "gnu-student-union",
     "name": "학생회관",
-    "floor_count": null,
-    "height_m": null,
+    "floor_count": 6,
+    "height_m": 25.5,
     "is_target": true,
-    "source": "osm",
-    "description": "OSM way 115469129. 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM way 115469129. 층수: 건축물대장 표제부 학생회관 (2026-11-20 조회)"
    }
   },
   {
@@ -369,11 +369,11 @@
    "properties": {
     "place_key": "gnu-student-union",
     "name": "중앙도서관",
-    "floor_count": null,
-    "height_m": null,
+    "floor_count": 7,
+    "height_m": 30.0,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM way 115469226. 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM way 115469226. 층수: 건축물대장 표제부 중앙도서관 중앙도서관 (2026-11-20 조회)"
    }
   },
   {
@@ -548,11 +548,11 @@
    "properties": {
     "place_key": "gnu-student-union",
     "name": "교양학관",
-    "floor_count": null,
-    "height_m": null,
+    "floor_count": 3,
+    "height_m": 10.1,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM way 115699812. 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM way 115699812. 층수: 건축물대장 표제부 교양학관 (2026-11-20 조회)"
    }
   },
   {
@@ -607,11 +607,11 @@
    "properties": {
     "place_key": "gnu-liberal-arts",
     "name": "학생회관",
-    "floor_count": null,
-    "height_m": null,
+    "floor_count": 6,
+    "height_m": 25.5,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM way 115469129. 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM way 115469129. 층수: 건축물대장 표제부 학생회관 (2026-11-20 조회)"
    }
   },
   {
@@ -646,11 +646,11 @@
    "properties": {
     "place_key": "gnu-liberal-arts",
     "name": "중앙도서관",
-    "floor_count": null,
-    "height_m": null,
+    "floor_count": 7,
+    "height_m": 30.0,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM way 115469226. 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM way 115469226. 층수: 건축물대장 표제부 중앙도서관 중앙도서관 (2026-11-20 조회)"
    }
   },
   {
@@ -825,11 +825,11 @@
    "properties": {
     "place_key": "gnu-liberal-arts",
     "name": "교양학관",
-    "floor_count": null,
-    "height_m": null,
+    "floor_count": 3,
+    "height_m": 10.1,
     "is_target": true,
-    "source": "osm",
-    "description": "OSM way 115699812. 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM way 115699812. 층수: 건축물대장 표제부 교양학관 (2026-11-20 조회)"
    }
   },
   {
@@ -1457,11 +1457,11 @@
    "properties": {
     "place_key": "gnu-central-library",
     "name": "학술정보관",
-    "floor_count": null,
-    "height_m": null,
+    "floor_count": 3,
+    "height_m": 19.35,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 학술정보관 (2026-11-20 조회)"
    }
   },
   {
@@ -1512,11 +1512,11 @@
    "properties": {
     "place_key": "gnu-central-library",
     "name": "컴퓨터과학관",
-    "floor_count": null,
+    "floor_count": 4,
     "height_m": null,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 컴퓨터과학관 (2026-11-20 조회)"
    }
   },
   {
@@ -1551,11 +1551,11 @@
    "properties": {
     "place_key": "gnu-central-library",
     "name": "경상대학교 창업보육센터",
-    "floor_count": null,
-    "height_m": null,
+    "floor_count": 2,
+    "height_m": 10.5,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 창업보육센터 (2026-11-20 조회)"
    }
   },
   {
@@ -1622,11 +1622,11 @@
    "properties": {
     "place_key": "gnu-central-library",
     "name": "대경학술관",
-    "floor_count": null,
-    "height_m": null,
+    "floor_count": 3,
+    "height_m": 20.97,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 대경학술관 (2026-11-20 조회)"
    }
   },
   {
@@ -2082,11 +2082,11 @@
    "properties": {
     "place_key": "gnu-central-library",
     "name": "농생6호관",
-    "floor_count": null,
+    "floor_count": 3,
     "height_m": null,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 농생6호관 (2026-11-20 조회)"
    }
   },
   {
@@ -3320,11 +3320,11 @@
    "properties": {
     "place_key": "gnu-central-library",
     "name": "농생5호관",
-    "floor_count": null,
+    "floor_count": 3,
     "height_m": null,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 농생5호관 (2026-11-20 조회)"
    }
   },
   {
@@ -3367,11 +3367,11 @@
    "properties": {
     "place_key": "gnu-central-library",
     "name": "농생5호관",
-    "floor_count": null,
+    "floor_count": 3,
     "height_m": null,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 농생5호관 (2026-11-20 조회)"
    }
   },
   {
@@ -3904,11 +3904,11 @@
    "properties": {
     "place_key": "gnu-student-union",
     "name": "학술정보관",
-    "floor_count": null,
-    "height_m": null,
+    "floor_count": 3,
+    "height_m": 19.35,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 학술정보관 (2026-11-20 조회)"
    }
   },
   {
@@ -3959,11 +3959,11 @@
    "properties": {
     "place_key": "gnu-student-union",
     "name": "컴퓨터과학관",
-    "floor_count": null,
+    "floor_count": 4,
     "height_m": null,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 컴퓨터과학관 (2026-11-20 조회)"
    }
   },
   {
@@ -4030,11 +4030,11 @@
    "properties": {
     "place_key": "gnu-student-union",
     "name": "대경학술관",
-    "floor_count": null,
-    "height_m": null,
+    "floor_count": 3,
+    "height_m": 20.97,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 대경학술관 (2026-11-20 조회)"
    }
   },
   {
@@ -4616,11 +4616,11 @@
    "properties": {
     "place_key": "gnu-student-union",
     "name": "농생6호관",
-    "floor_count": null,
+    "floor_count": 3,
     "height_m": null,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 농생6호관 (2026-11-20 조회)"
    }
   },
   {
@@ -5864,11 +5864,11 @@
    "properties": {
     "place_key": "gnu-student-union",
     "name": "농생5호관",
-    "floor_count": null,
+    "floor_count": 3,
     "height_m": null,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 농생5호관 (2026-11-20 조회)"
    }
   },
   {
@@ -5903,11 +5903,11 @@
    "properties": {
     "place_key": "gnu-student-union",
     "name": "농생5호관",
-    "floor_count": null,
+    "floor_count": 3,
     "height_m": null,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 농생5호관 (2026-11-20 조회)"
    }
   },
   {
@@ -5950,11 +5950,11 @@
    "properties": {
     "place_key": "gnu-student-union",
     "name": "농생5호관",
-    "floor_count": null,
+    "floor_count": 3,
     "height_m": null,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 농생5호관 (2026-11-20 조회)"
    }
   },
   {
@@ -6299,11 +6299,11 @@
    "properties": {
     "place_key": "gnu-liberal-arts",
     "name": "학술정보관",
-    "floor_count": null,
-    "height_m": null,
+    "floor_count": 3,
+    "height_m": 19.35,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 학술정보관 (2026-11-20 조회)"
    }
   },
   {
@@ -6354,11 +6354,11 @@
    "properties": {
     "place_key": "gnu-liberal-arts",
     "name": "컴퓨터과학관",
-    "floor_count": null,
+    "floor_count": 4,
     "height_m": null,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 컴퓨터과학관 (2026-11-20 조회)"
    }
   },
   {
@@ -6393,11 +6393,11 @@
    "properties": {
     "place_key": "gnu-liberal-arts",
     "name": "경상대학교 창업보육센터",
-    "floor_count": null,
-    "height_m": null,
+    "floor_count": 2,
+    "height_m": 10.5,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 창업보육센터 (2026-11-20 조회)"
    }
   },
   {
@@ -6464,11 +6464,11 @@
    "properties": {
     "place_key": "gnu-liberal-arts",
     "name": "대경학술관",
-    "floor_count": null,
-    "height_m": null,
+    "floor_count": 3,
+    "height_m": 20.97,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 대경학술관 (2026-11-20 조회)"
    }
   },
   {
@@ -6995,11 +6995,11 @@
    "properties": {
     "place_key": "gnu-liberal-arts",
     "name": "농생6호관",
-    "floor_count": null,
+    "floor_count": 3,
     "height_m": null,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 농생6호관 (2026-11-20 조회)"
    }
   },
   {
@@ -7930,11 +7930,11 @@
    "properties": {
     "place_key": "gnu-liberal-arts",
     "name": "농생5호관",
-    "floor_count": null,
+    "floor_count": 3,
     "height_m": null,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 농생5호관 (2026-11-20 조회)"
    }
   },
   {
@@ -7969,11 +7969,11 @@
    "properties": {
     "place_key": "gnu-liberal-arts",
     "name": "농생5호관",
-    "floor_count": null,
+    "floor_count": 3,
     "height_m": null,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 농생5호관 (2026-11-20 조회)"
    }
   },
   {
@@ -8016,11 +8016,11 @@
    "properties": {
     "place_key": "gnu-liberal-arts",
     "name": "농생5호관",
-    "floor_count": null,
+    "floor_count": 3,
     "height_m": null,
     "is_target": false,
-    "source": "osm",
-    "description": "OSM 주변 건물 (2026-11-11 조회). 층수는 현장 확인 후 입력"
+    "source": "osm+public_data",
+    "description": "OSM 주변 건물 (2026-11-11 조회). 층수: 건축물대장 표제부 농생5호관 (2026-11-20 조회)"
    }
   }
  ]

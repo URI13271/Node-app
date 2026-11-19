@@ -23,6 +23,7 @@ import sys
 from pathlib import Path
 
 from sqlalchemy import create_engine, text
+from sqlalchemy.exc import OperationalError
 
 from app.config import get_settings
 
@@ -139,10 +140,31 @@ def unmarked_crossings(c, ids: list[int], area_key: str) -> list[str]:
         {"ids": ids, "area": area_key, "near": CROSSING_NEAR_M}).scalars())
 
 
+CONNECT_TIMEOUT_S = 5       # DB 가 꺼져 있거나 포트가 막혔을 때 무한 대기하지 않도록
+LOCK_TIMEOUT = "10s"        # 다른 세션(멈춘 이전 적재, DB 도구의 열린 트랜잭션)이 표를 잡고 있으면 기다리지 않고 멈춘다
+
+
 def load(seed_dir: Path) -> int:
-    eng = create_engine(get_settings().MIGRATION_DATABASE_URL)
+    url = get_settings().MIGRATION_DATABASE_URL
+    eng = create_engine(url, connect_args={"connect_timeout": CONNECT_TIMEOUT_S,
+                                           "options": f"-c timezone=UTC -c lock_timeout={LOCK_TIMEOUT}"})
+    host = url.split("@")[-1]
+    print(f"[연결] {host} ...", flush=True)
     try:
+        with eng.connect() as c:
+            c.execute(text("SELECT 1"))
+        print("[연결] 성공", flush=True)
         return _load(eng, seed_dir)
+    except OperationalError as e:
+        msg = str(e.orig) if e.orig else str(e)
+        if "lock timeout" in msg:
+            print(f"[중단] 다른 DB 세션이 표를 잡고 있어 {LOCK_TIMEOUT} 안에 적재하지 못했습니다.\n"
+                  "  멈춘 이전 load_seed 창, DB 도구(pgAdmin, DBeaver)의 커밋 안 한 트랜잭션을 닫고 다시 실행하세요.")
+        else:
+            print(f"[중단] DB 에 연결하지 못했습니다 ({host}).\n"
+                  "  docker compose ps 로 majunggil-db 가 healthy 인지 확인하세요.\n"
+                  f"  원인: {msg.strip().splitlines()[0] if msg.strip() else e}")
+        return 1
     finally:
         eng.dispose()
 
