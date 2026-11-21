@@ -13,4 +13,10 @@ service = BuildingService()
 @router.get("/{id}/buildings", response_model=BuildingCollection, responses={200: {"content": {"application/geo+json": {}}}})
 def list_buildings(id: int = Path(ge=1)):
     """건물 GeoJSON (application/geo+json, Cache-Control: public, max-age=300)."""
-    raise NotImplementedError("BE-11b 연습: list_buildings")
+    body = service.list_for_place(id).model_dump()
+
+    return JSONResponse(
+        content=body,
+        media_type="application/geo+json",
+        headers={"Cache-Control": "public, max-age=300"},
+    )
