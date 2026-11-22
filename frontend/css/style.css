@@ -79,6 +79,26 @@ h2 { font-size: 15px; margin: 0 0 8px; }
 .notice { padding: 12px 14px; border-radius: 12px; background: var(--surface-2); border-left: 4px solid var(--muted); font-size: 14px; }
 .empty { color: var(--muted); font-size: 14px; padding: 8px 2px; }
 .place-item { display: flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: none; border: 1px solid var(--line); min-height: 44px; }
+.place-summary { margin: 12px 0; }
+.place-heading, .parking-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.place-heading h1 { margin: 0; }
+.place-address, .place-description, .parking-detail, .map-attribution-note { margin: 8px 0 0; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+.place-meta { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 12px; color: var(--muted); font-size: 12px; }
+.parking-card { border: 1px solid var(--line); box-shadow: none; }
+.parking-route { margin-top: 10px; }
+.parking-route-empty { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+.actions .parking-route { display: inline-flex; }
+.navi-options { margin: 14px 0; }
+.navi-option { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-decoration: none; }
+.navi-option span { max-width: 100%; overflow-wrap: anywhere; color: var(--muted); font: 11px var(--mono); }
+.sheet-panel { width: min(100%, 480px); max-height: min(85vh, 760px); overflow: auto; margin: 0 auto; padding: 24px 18px calc(24px + env(safe-area-inset-bottom, 0px)); border-radius: 20px 20px 0 0; background: var(--surface); }
+.sheet-panel h2 { margin: 8px 0; font-size: 18px; }
+.sheet-panel li { margin: 4px 0; }
+.sheet-description, .sheet-footnote { color: var(--muted); font-size: 13px; line-height: 1.5; }
+.sheet-close { width: 100%; margin-top: 12px; }
+.route-notice { margin-top: 8px; }
+.notice-error { border-left-color: var(--danger); }
+.notice-success { border-left-color: var(--entrance); }
 /* 글자 수 표시 (관리자 문장 n/200) */
 .counter { font: 500 12px var(--mono); color: var(--muted); }
 .counter.over, .counter.empty-text { color: var(--danger); }
@@ -91,6 +111,7 @@ h2 { font-size: 15px; margin: 0 0 8px; }
 
 /* ---- 지도 ---- */
 .map { background: var(--map-ground); border-radius: 16px; overflow: hidden; }
+.map-notice { position: absolute; z-index: 5; left: 10px; bottom: 10px; max-width: calc(100% - 20px); padding: 6px 10px; border-radius: 8px; background: var(--surface); color: var(--muted); font-size: 12px; box-shadow: var(--shadow); }
 .map-preview { height: 240px; margin: 12px 0; }
 .map-full { position: absolute; inset: 0; border-radius: 0; display: grid; place-items: center; }
 .guide-card { position: absolute; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 10; }
@@ -121,7 +142,57 @@ h2 { font-size: 15px; margin: 0 0 8px; }
    3D 안내 화면은 아래 안내 카드가 오른쪽 아래를 덮으므로 오른쪽 위, 뒤로 버튼 줄 아래에 둔다 */
 .map-full .maplibregl-ctrl-top-right { top: calc(64px + env(safe-area-inset-top, 0px)); }
 .maplibregl-ctrl-attrib a { color: inherit; }
-/* TODO: 나침반 위치 */
+.maplibregl-ctrl-top-left { top: 54px; }
+.map-full .maplibregl-ctrl-top-left { top: calc(64px + env(safe-area-inset-top, 0px)); }
+
+/* ---- 상세·3D 안내 ---- */
+.guide-summary { position: absolute; z-index: 8; top: calc(66px + env(safe-area-inset-top, 0px)); left: 12px; right: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; font-size: 12px; }
+.guide-summary b { font-size: 14px; }
+.route-switcher { position: absolute; z-index: 8; top: calc(130px + env(safe-area-inset-top, 0px)); left: 12px; right: 12px; display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+.route-chip { flex: 0 0 auto; min-height: 36px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--fg); font: 500 12px var(--font); }
+.route-chip.selected { border-color: var(--accent); color: var(--accent); }
+.guide-card { max-height: 52vh; overflow-y: auto; }
+.guide-card .legend { margin-bottom: 0; }
+.guide-card .map-attribution-note { margin-top: 5px; }
+.mk-step { display: grid; place-items: center; width: 28px; height: 28px; border: 2px solid #fff; border-radius: 50%; background: var(--accent); color: #fff; font: 700 13px var(--mono); box-shadow: 0 1px 5px rgba(0, 0, 0, .35); }
+.mk-step.selected { width: 34px; height: 34px; outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent); }
+
+/* ---- 관리자 편집 ---- */
+.admin-app { padding-bottom: 32px; }
+.admin-app > .topbar { margin-bottom: 18px; }
+.admin-app > .topbar b { flex: 1; }
+.key-form { padding: 16px; border: 1px solid var(--line); border-radius: 14px; }
+.key-form .notice { margin: 4px 0 0; }
+.admin-editor { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.admin-editor > .label:not(:first-child) { margin-top: 6px; }
+.route-meta { margin: 2px 0 4px; color: var(--muted); font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
+.admin-editor .map-preview { margin: 4px 0; }
+.admin-actions { position: sticky; bottom: 8px; z-index: 10; padding: 8px; border: 1px solid var(--line); border-radius: 14px; background: color-mix(in srgb, var(--surface) 92%, transparent); box-shadow: var(--shadow); }
+.preview-link { width: 100%; }
+.step-list { gap: 12px; }
+.step-card { display: flex; flex-direction: column; gap: 8px; padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.step-card-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.step-card-heading h2 { margin: 0; font-size: 16px; }
+.step-order-actions { display: flex; gap: 4px; }
+.step-order-actions .btn-sm { min-width: 36px; min-height: 36px; padding: 4px 8px; }
+.step-instruction { resize: vertical; line-height: 1.5; }
+.position-slider { width: 100%; accent-color: var(--accent); }
+.position-value { float: right; font: 500 12px var(--mono); }
+.coordinate-note { margin: -6px 0 0; color: var(--muted); font: 11px var(--mono); }
+.camera-auto { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.camera-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.camera-fields[hidden] { display: none; }
+.camera-fields .label { display: flex; flex-direction: column; gap: 4px; }
+.camera-fields .input { padding: 8px; font-size: 13px; }
+.patch-step { align-self: flex-end; min-height: 36px; }
+#draft-recovery p { margin: 6px 0; font-size: 12px; }
+#draft-recovery .actions { margin-top: 6px; }
+.conflict-list { display: flex; flex-direction: column; gap: 8px; max-height: 46vh; overflow: auto; }
+.cmp-row { padding: 8px; border: 1px solid var(--line); border-radius: 10px; font-size: 12px; }
+.cmp-row > span { display: block; margin-bottom: 6px; color: var(--muted); font-weight: 600; }
+.cmp-row .cmp > div { min-height: 62px; }
+.cmp-row.diff { border-color: var(--target); background: color-mix(in srgb, var(--target) 10%, var(--surface)); }
+.admin-editor > .notice { overflow-wrap: anywhere; }
 
 /* ---- 정보 페이지(about.html), 화면 아래 링크 ---- */
 .about-section p, .about-list p { margin: 4px 0 0; font-size: 14px; line-height: 1.55; }
@@ -132,10 +203,3 @@ h2 { font-size: 15px; margin: 0 0 8px; }
 /* ---- 가짜 응답(mock) 표시. mock 을 지울 때 같이 지운다 ---- */
 .mock-badge { position: fixed; top: 8px; right: 8px; z-index: 60; padding: 2px 8px; border-radius: 6px;
   background: var(--target); color: #2a2108; font: 700 11px var(--mono); pointer-events: none; }
-
-/* ---- 뼈대 전용 (구현 후 지운다) ---- */
-.skeleton { position: relative; z-index: 20; background: var(--surface); margin: 24px 0 16px; padding: 12px; border: 1px dashed var(--line); border-radius: 12px; font-size: 13.5px; }
-.skeleton ul { margin: 0; padding-left: 18px; }
-.skeleton-nav { display: flex; flex-wrap: wrap; gap: 8px; position: relative; z-index: 20; }
-.todo-box { padding: 12px; border: 1px dashed var(--line); border-radius: 12px; color: var(--muted); font-size: 13px; }
-.app:has(.map-full) .skeleton { margin-top: 56px; } /* 3D 안내 화면: 지도 위에 띄움 */
