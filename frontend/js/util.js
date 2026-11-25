@@ -1,10 +1,5 @@
 // 여러 화면이 같이 쓰는 작은 도구.
 
-/** 뼈대 전용. 아직 만들지 않은 함수가 부르면 바로 알 수 있게 오류를 던진다. 구현이 끝나면 지운다. */
-export function todo(name) {
-  throw new Error(`TODO: ${name}`)
-}
-
 /** CSS 선택자로 요소 하나 찾기. 예: $('#q') */
 export const $ = (selector, root = document) => root.querySelector(selector)
 
@@ -68,11 +63,10 @@ export function bindCharCounter(textarea, counterEl, max = 200) {
 
 // ---- 화면 오류 처리 ----
 // 잡지 못한 오류가 나도 흰 화면 대신 알림을 띄운다. 모든 화면이 util.js 를 불러오므로 여기서 한 번만 등록한다.
-// 뼈대의 todo() 오류도 여기서 알림으로 보인다.
 function showError(err) {
   console.error('화면 오류', err)
   const msg = err && err.message ? err.message : String(err)
-  toast(msg.startsWith('TODO:') ? `아직 만들지 않은 기능: ${msg.slice(5).trim()}` : '문제가 생겼습니다. 새로고침해 보세요.', 4000)
+  toast('문제가 생겼습니다. 새로고침해 보세요.', 4000)
 }
 if (typeof window !== 'undefined') { // 브라우저에서만 (npm test 는 Node 에서 돌아 window 가 없다)
   window.addEventListener('error', (e) => showError(e.error || e.message))

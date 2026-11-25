@@ -205,3 +205,47 @@ test('flyTo: 동작 줄이기를 켜면 jumpTo, 아니면 flyTo. 빈 칸은 넘�
 
   assert.deepEqual(calls, [['fly', view], ['fly', { zoom: 18 }], ['jump', view]])
 })
+
+test('drawRoute, drawBuildings: 스타일 준비 전에는 기록만 하고 style.load 에서 그린다. 그 뒤에는 바로 갱신한다', async () => {
+  const { mock } = await import('node:test')
+  const { createMap, drawBuildings, drawRoute } = await import('../js/map.js')
+  mock.timers.enable({ apis: ['setTimeout'] }) // 배경 지도 8초 감시가 테스트를 붙잡지 않게
+  const saved = { maplibregl: globalThis.maplibregl, document: globalThis.document, getComputedStyle: globalThis.getComputedStyle }
+  const calls = []
+  class FakeMap {
+    constructor() { this.handlers = {}; this.sources = {}; this.layers = [] }
+    on(event, fn) { (this.handlers[event] ||= []).push(fn) }
+    once(event, fn) { this.on(event, fn) }
+    emit(event) { for (const fn of this.handlers[event] || []) fn({}) }
+    addControl() {}
+    isStyleLoaded() { return false } // 타일을 받는 중에는 false 다. 이 값에 기대지 않아야 한다
+    getSource(id) { return this.sources[id] }
+    addSource(id, spec) { this.sources[id] = { data: spec.data, setData(d) { this.data = d; calls.push(['setData', id]) } } }
+    getLayer(id) { return this.layers.find((l) => l.id === id) }
+    addLayer(layer, beforeId) { calls.push(['addLayer', layer.id, beforeId]); const i = beforeId ? this.layers.findIndex((l) => l.id === beforeId) : -1; i < 0 ? this.layers.push(layer) : this.layers.splice(i, 0, layer) }
+  }
+  globalThis.maplibregl = { Map: FakeMap, NavigationControl: class {}, AttributionControl: class {} }
+  globalThis.document = { documentElement: {} }
+  globalThis.getComputedStyle = () => ({ getPropertyValue: () => '#000' })
+  try {
+    const map = createMap({ classList: { contains: () => false } })
+    const route = { path: { type: 'LineString', coordinates: [[128.1, 35.15], [128.101, 35.15], [128.102, 35.15]] } }
+
+    drawRoute(map, route, 0.5)
+    assert.equal(calls.length, 0, '스타일 준비 전에는 레이어를 더하지 않는다')
+
+    map.emit('style.load')
+    assert.deepEqual(map.layers.map((l) => l.id), ['lm-route', 'lm-route-done'])
+    assert.equal(map.sources['lm-route-done'].data.features[0].geometry.coordinates.length, 2, '절반 지점까지 자른 선')
+
+    calls.length = 0
+    drawRoute(map, route, 1)
+    assert.deepEqual(calls, [['setData', 'lm-route'], ['setData', 'lm-route-done']], 'isStyleLoaded 가 false 여도 바로 갱신')
+
+    drawBuildings(map, { type: 'FeatureCollection', features: [] })
+    assert.deepEqual(map.layers.map((l) => l.id), ['lm-buildings', 'lm-route', 'lm-route-done'], '건물은 경로 선 아래')
+  } finally {
+    Object.assign(globalThis, saved)
+    mock.timers.reset()
+  }
+})

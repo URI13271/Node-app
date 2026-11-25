@@ -1,7 +1,8 @@
 // 3D 지도 (MapLibre). 화면 HTML 에서 maplibre-gl.js 를 먼저 불러야 전역 maplibregl 이 생긴다.
 // 배경 지도: OpenFreeMap "liberty" (키, 가입 없음, SLA 없음) [검증 필요: 이용 조건 변경 여부]
 // 배경 지도 주소를 바꾸면 backend/app/frontend.py 의 CSP 허용 주소도 같이 바꾼다.
-import { todo, toast } from './util.js'
+import { pathUntil } from './geo.js'
+import { toast } from './util.js'
 
 export const DEFAULT_BASEMAP_URL = 'https://tiles.openfreemap.org/styles/liberty'
 export const BASEMAP_TIMEOUT_MS = 8000 // 이 시간 안에 배경 지도가 안 오면 저장해 둔 캠퍼스 지도로 바꾼다
@@ -206,11 +207,17 @@ function cameraOf(view = {}) {
 }
 
 /**
- * 대체 지도로 바꾼 뒤 우리 레이어(lm-*)를 다시 그리기 위한 기록. setStyle 은 레이어를 모두 지운다.
- * 4단계 drawBuildings, drawRoute 가 마지막 데이터로 다시 그리는 함수를 넣는다: lastDraw.get(map).route = () => ...
+ * 우리 레이어(lm-*)를 다시 그리기 위한 기록. 지도마다 {이름: 다시 그리는 함수}.
+ * 스타일이 준비될 때(style.load: 처음 배경 지도, 대체 지도로 바꾼 뒤) 모두 다시 부른다. setStyle 은 레이어를 모두 지운다.
  * (마커는 DOM 이라 스타일을 바꿔도 남는다)
  */
 const lastDraw = new WeakMap()
+
+/**
+ * 레이어를 더할 수 있는 지도. style.load 에서 넣고, 대체 지도로 바꾸기 직전에 뺀다.
+ * map.isStyleLoaded() 는 지도가 뜬 뒤에도 타일을 받는 동안 false 라서, 그 값으로 판단하면 단계 전환 때 경로 선이 안 바뀐다
+ */
+const styleReady = new WeakSet()
 
 /** 지도 자리에 안내 문구 (지도를 만들 수 없을 때) */
 function showMapNotice(container, text) {
@@ -240,7 +247,7 @@ async function switchToCampusContext(map, reason, watch) {
     return
   }
   if (reason === 'timeout' && watch.basemapLoaded) { watch.resume(); return } // 기다리는 사이 배경 지도가 떴다
-  map.once('style.load', () => { for (const redraw of Object.values(lastDraw.get(map) || {})) redraw() })
+  styleReady.delete(map) // 새 스타일이 준비될 때까지 레이어를 더하지 않는다 (style.load 에서 다시 그림)
   map.setStyle(campusContextStyle(ctx, cssVar), { diff: false })
   toast(reason === 'timeout'
     ? '배경 지도가 늦어 저장해 둔 캠퍼스 지도로 보여 드려요.'
@@ -275,6 +282,10 @@ export function createMap(container, view = {}) {
     return null
   }
   lastDraw.set(map, {})
+  map.on('style.load', () => {
+    styleReady.add(map)
+    for (const redraw of Object.values(lastDraw.get(map) || {})) redraw()
+  })
   // 나침반: 지도를 돌리면 북쪽을 가리키고, 누르면 북쪽으로 되돌린다. 확대 버튼은 손가락 확대가 있어 뺀다
   map.addControl(new maplibregl.NavigationControl({ showZoom: false, visualizePitch: true }), 'top-right')
   map.addControl(new maplibregl.AttributionControl(ATTRIBUTION_OPTIONS), attributionPosition(container))
@@ -288,16 +299,114 @@ export function createMap(container, view = {}) {
   return map
 }
 
-/** 건물(2.5D), 목적 건물 강조, 주차장 레이어 그리기 (F-02, F-03) */
-export function drawBuildings(map, buildings) { todo('drawBuildings') }
-/** 도보 경로 선, 지나온 구간 (F-04) */
-export function drawRoute(map, route, doneFraction = 0) { todo('drawRoute') }
+// ---- 우리 레이어와 마커 (F-02 ~ F-05) ----
+
+const emptyCollection = () => ({ type: 'FeatureCollection', features: [] })
+const lineCollection = (coordinates) => (Array.isArray(coordinates) && coordinates.length >= 2
+  ? { type: 'FeatureCollection', features: [{ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates } }] }
+  : emptyCollection())
+
+/** 지도마다 마지막으로 그린 데이터. 스타일이 바뀌면 이 값으로 다시 그린다 */
+const drawData = new WeakMap()
+function dataOf(map) {
+  if (!drawData.has(map)) drawData.set(map, { buildings: null, route: null, doneFraction: 0, markers: [], stepMarkers: [] })
+  return drawData.get(map)
+}
+
+function setSource(map, id, data) {
+  const source = map.getSource(id)
+  if (source) source.setData(data)
+  else map.addSource(id, { type: 'geojson', data })
+}
+
+/** 레이어를 다시 그리는 함수를 기록하고, 스타일이 준비돼 있으면 바로 그린다 */
+function keepDrawing(map, name, draw) {
+  if (!lastDraw.has(map)) lastDraw.set(map, {})
+  lastDraw.get(map)[name] = draw
+  if (styleReady.has(map)) draw()
+}
+
+/** 건물(2.5D), 목적 건물 강조 (F-02, F-03). buildings: GET /places/{id}/buildings 응답 (GeoJSON) */
+export function drawBuildings(map, buildings) {
+  if (!map) return
+  dataOf(map).buildings = buildings || emptyCollection()
+  keepDrawing(map, 'buildings', () => {
+    setSource(map, 'lm-buildings', dataOf(map).buildings)
+    if (map.getLayer('lm-buildings')) return
+    map.addLayer({
+      id: 'lm-buildings', type: 'fill-extrusion', source: 'lm-buildings',
+      paint: {
+        'fill-extrusion-color': ['case', ['boolean', ['get', 'is_target'], false], cssVar('--target'), cssVar('--map-bldg')],
+        'fill-extrusion-height': ['max', ['get', 'render_height_m'], 1],
+        'fill-extrusion-base': 0,
+        'fill-extrusion-opacity': 0.92,
+      },
+    }, map.getLayer('lm-route') ? 'lm-route' : undefined) // 경로 선이 먼저 그려졌으면 그 아래에 둔다
+  })
+}
+
+/** 도보 경로 선과 지나온 구간 (F-04). doneFraction 은 0~1 */
+export function drawRoute(map, route, doneFraction = 0) {
+  if (!map) return
+  const data = dataOf(map)
+  data.route = route || null
+  data.doneFraction = Number.isFinite(doneFraction) ? Math.min(1, Math.max(0, doneFraction)) : 0
+  keepDrawing(map, 'route', () => {
+    const path = data.route?.path?.coordinates
+    const done = Array.isArray(path) && path.length >= 2 && data.doneFraction > 0 ? pathUntil(path, data.doneFraction) : []
+    setSource(map, 'lm-route', lineCollection(path))
+    setSource(map, 'lm-route-done', lineCollection(done))
+    if (!map.getLayer('lm-route')) {
+      map.addLayer({ id: 'lm-route', type: 'line', source: 'lm-route', layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': cssVar('--accent'), 'line-width': 5, 'line-opacity': 0.9 } })
+    }
+    if (!map.getLayer('lm-route-done')) {
+      map.addLayer({ id: 'lm-route-done', type: 'line', source: 'lm-route-done', layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': cssVar('--muted'), 'line-width': 6, 'line-opacity': 0.72 } })
+    }
+  })
+}
+
 /**
- * 입구, 주차장, 랜드마크 마커. TODO: place.entrances, parking_lots, landmarks 마다
- *   new maplibregl.Marker({ element: markerElement('entrance', e.name), anchor: 'bottom' }).setLngLat(e.location.coordinates).addTo(map)
- *   options.activeEntranceId 가 있으면 다른 입구는 흐리게 (el.style.opacity = .45)
+ * 주차장, 입구, 랜드마크 마커 (F-03). 마커는 DOM 이라 스타일을 바꿔도 남고, 지도가 뜨기 전에 더해도 된다.
+ * options.activeEntranceId 가 있으면 다른 입구는 흐리게 표시한다
  */
-export function drawMarkers(map, place, options = {}) { todo('drawMarkers') }
+export function drawMarkers(map, place, options = {}) {
+  if (!map) return
+  const data = dataOf(map)
+  for (const marker of data.markers) marker.remove()
+  data.markers = []
+  if (!place) return
+  const points = [
+    ...(place.parking_lots || []).map((item) => ({ kind: 'parking', item })),
+    ...(place.entrances || []).map((item) => ({ kind: 'entrance', item })),
+    ...(place.landmarks || []).map((item) => ({ kind: 'landmark', item })),
+  ]
+  for (const { kind, item } of points) {
+    const coordinates = item.location?.coordinates
+    if (!Array.isArray(coordinates)) continue
+    const el = markerElement(kind, item.name)
+    if (kind === 'entrance' && options.activeEntranceId != null && item.id !== options.activeEntranceId) el.style.opacity = '0.45'
+    data.markers.push(new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat(coordinates).addTo(map))
+  }
+}
+
+/** 관리자 지도에 초안 단계를 번호로 표시한다. activeStepIndex 단계는 크게 */
+export function drawDraftSteps(map, steps, activeStepIndex = 0) {
+  if (!map) return
+  const data = dataOf(map)
+  for (const marker of data.stepMarkers) marker.remove()
+  data.stepMarkers = []
+  for (const [index, step] of (Array.isArray(steps) ? steps : []).entries()) {
+    const coordinates = step.location?.coordinates
+    if (!Array.isArray(coordinates) || coordinates.length !== 2) continue
+    const el = document.createElement('div')
+    el.className = `mk-step${index === activeStepIndex ? ' selected' : ''}`
+    el.textContent = String(index + 1)
+    el.setAttribute('aria-label', `${index + 1}단계`)
+    data.stepMarkers.push(new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(coordinates).addTo(map))
+  }
+}
 
 // ---- 마커와 범례 모양 (색 + 모양을 함께 써서 색만으로 구분하지 않는다) ----
 // 색은 css/style.css 의 .mk-icon 규칙이 토큰(--parking, --entrance ...)으로 칠한다

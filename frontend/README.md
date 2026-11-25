@@ -1,12 +1,10 @@
-# 프론트엔드 (HTML, CSS, JavaScript)
+# Frontend
 
-> 처음 프로젝트를 보는 분은 [`프로토타입_따라하기_가이드.md`](프로토타입_따라하기_가이드.md)를 먼저 읽어 주세요. 코드를 한 줄씩 따라 하며 `상태(S) → render()` 구조를 익힐 수 있습니다. 더 깊은 설명과 실제 저장소 매핑은 [`프로토타입_해설_가이드.md`](프로토타입_해설_가이드.md)에 있습니다.
-
-빌드 도구 없이 HTML 파일을 그대로 쓴다. 설치할 것이 없다. 지도 라이브러리(MapLibre)도 `vendor/` 에 받아 두어서 인터넷 CDN 이 막혀도 지도 화면이 뜬다.
+정적 HTML, CSS, ES modules로 구현한 검색, 장소 상세, 3D 경로 안내, 관리자 편집 화면이다. 빌드 단계나 프론트엔드 패키지 설치가 필요 없다. MapLibre GL JS는 `vendor/`에서 제공한다.
 
 ## 실행
 
-백엔드를 켜면 이 폴더도 같은 주소로 열린다. 그래서 API를 부를 때 CORS 설정이 필요 없다.
+백엔드와 프론트엔드를 함께 실행하면 API 호출에 CORS 설정이 필요 없다.
 
 ```bash
 cd ../backend
@@ -17,11 +15,16 @@ uvicorn app.main:app --reload --port 8000
 
 HTML 파일을 더블클릭해서(`file://`) 열면 안 된다. `<script type="module">` 과 API 호출이 막힌다.
 
-## 백엔드 없이 화면 만들기 (mock)
+## 백엔드 없이 실행하기
 
-백엔드 API 가 아직 501 을 주는 동안에도 `http://localhost:8000/?mock=1` 로 열면 가짜 응답으로 화면이 동작한다.
-같은 탭에서는 다른 화면으로 가도 유지되고, `?mock=0` 으로 끈다. 켜져 있으면 오른쪽 위에 노란 MOCK 표시가 뜬다.
-데이터와 오류 시험 방법은 `mock/README.md`. 화면 코드는 mock 이든 실제 서버든 똑같이 `js/api.js` 함수만 부른다.
+백엔드 대신 프론트엔드 폴더를 정적 서버로 제공하고 `?mock=1`로 연다.
+
+```bash
+cd frontend
+python -m http.server 8000
+```
+
+`http://localhost:8000/?mock=1`에서 전체 화면을 확인할 수 있다. 관리자 키는 임의 값으로 통과하며 `wrong`, `locked`로 각각 401, 429 응답을 확인한다. 관리자 저장과 충돌 재현 방법은 [`mock/README.md`](mock/README.md)에 있다. mock 사용 상태는 현재 탭에 유지되고, `?mock=0`으로 끈다.
 
 ## 파일
 
@@ -40,7 +43,7 @@ HTML 파일을 더블클릭해서(`file://`) 열면 안 된다. `<script type="m
 | `js/geo.js` | 거리, 경로 계산 |
 | `js/navi.js` | 내비 앱 링크, 도착 판정 |
 | `js/admin-store.js`, `js/draft-checks.js` | 관리자 키, 초안 보관과 검사 |
-| `js/util.js` | `$`, `param`, `toast`, `debounce`, `escapeHtml`, `todo`, 화면 오류 알림 |
+| `js/util.js` | `$`, `param`, `toast`, `debounce`, `escapeHtml`, 화면 오류 알림 |
 | `vendor/maplibre-gl-4.7.1/` | MapLibre GL JS 원본 파일 (BSD-3 라이선스 동봉). 고치지 않는다 |
 | `data/osm_context_gnu.json` | 저장해 둔 캠퍼스 지도 (형식은 `data/README.md`) |
 | `tests/` | DOM 없이 도는 함수의 단위 테스트 |
@@ -48,7 +51,7 @@ HTML 파일을 더블클릭해서(`file://`) 열면 안 된다. `<script type="m
 
 ## 테스트
 
-Node.js 20 이상이 있으면 `frontend` 폴더에서 `npm test` (설치 없이 `node --test` 를 돌린다). `js/geo.js`, `js/draft-checks.js`, `js/map.js` 의 계산 함수가 대상이다. 함수를 만들면 `tests/*.test.js` 의 `test.todo` 를 실제 테스트로 바꾼다.
+Node.js 20 이상이 있으면 `frontend` 폴더에서 `npm test`를 실행한다. 설치 없이 `node --test`로 지오메트리, 지도 데이터 처리, 관리자 초안 검사·저장, 내비게이션 함수를 검증한다.
 
 ## 정해 둔 것
 
@@ -101,5 +104,5 @@ Node.js 20 이상이 있으면 `frontend` 폴더에서 `npm test` (설치 없이
 - 화면마다 HTML 1개 + JS 1개. 공용 기능은 `js/` 바로 아래 파일에 만들고 `import` 해서 쓴다.
 - 서버에서 받은 글자를 `innerHTML` 에 넣을 때는 `escapeHtml()` 을 거친다. 글자만 넣을 때는 `textContent` 를 쓴다.
 - 숨기고 보이기는 `hidden` 속성으로 한다 (`el.hidden = true`).
-- `todo('이름')` 이 남은 곳이 할 일이다. `grep -rn "TODO" .` 로 찾는다.
-- 뼈대 전용 (구현 후 삭제): 각 HTML 의 `<section class="skeleton">`, `<nav class="skeleton-nav">`, `style.css` 맨 아래 뼈대 전용 블록, `util.js` 의 `todo`.
+- 서버가 보낸 값을 HTML 문자열에 넣을 때는 `escapeHtml()`을 적용한다. 텍스트만 넣을 때는 `textContent`를 쓴다.
+- 관리자 키와 저장하지 않은 수정 내용은 `sessionStorage`에만 둔다. 경로 버전 값은 서버 문자열을 그대로 사용해 충돌을 검사한다.
