@@ -84,11 +84,12 @@ export function loadCampusContext() {
 /**
  * 대체 지도 스타일 (MapLibre style spec). 글자 레이어가 없어 glyphs 주소가 필요 없다 (CSP 추가 없음).
  * 소스, 레이어 id 는 lm-ctx-* (우리 레이어 접두 lm-). 출처 표기는 소스 attribution 으로 모서리에 뜬다.
+ * 레이어 id 는 소스 id 와 같게, 같은 소스의 보조 레이어는 꼬리를 붙인다 (lm-ctx-roads, lm-ctx-roads-edge)
  * @param ctx   decodeCampusContext 결과
  * @param color 토큰 이름 → 색 값 함수. 화면에서는 cssVar
  *              (전환하는 순간의 테마 색을 읽는다. 전환 뒤 다크 모드를 바꿔도 지도 색은 그대로)
  */
-export function campusStyle(ctx, color) {
+export function campusContextStyle(ctx, color) {
   const src = (data) => ({ type: 'geojson', data, attribution: CONTEXT_ATTRIBUTION })
   const round = { 'line-cap': 'round', 'line-join': 'round' }
   return {
@@ -101,11 +102,11 @@ export function campusStyle(ctx, color) {
       { id: 'lm-ctx-bg', type: 'background', paint: { 'background-color': color('--map-ground') } },
       { id: 'lm-ctx-green', type: 'fill', source: 'lm-ctx-green', paint: { 'fill-color': color('--map-grass') } },
       { id: 'lm-ctx-water', type: 'fill', source: 'lm-ctx-water', paint: { 'fill-color': color('--map-water') } },
-      { id: 'lm-ctx-road-edge', type: 'line', source: 'lm-ctx-roads', layout: round,
+      { id: 'lm-ctx-roads-edge', type: 'line', source: 'lm-ctx-roads', layout: round,
         paint: { 'line-color': color('--map-road-edge'), 'line-width': ['match', ['get', 'grade'], 2, 9, 1, 6, 4] } },
-      { id: 'lm-ctx-road', type: 'line', source: 'lm-ctx-roads', layout: round,
+      { id: 'lm-ctx-roads', type: 'line', source: 'lm-ctx-roads', layout: round,
         paint: { 'line-color': color('--map-road'), 'line-width': ['match', ['get', 'grade'], 2, 7, 1, 4.5, 2.5] } },
-      { id: 'lm-ctx-path', type: 'line', source: 'lm-ctx-paths',
+      { id: 'lm-ctx-paths', type: 'line', source: 'lm-ctx-paths',
         paint: { 'line-color': color('--map-path'), 'line-width': 1.2, 'line-dasharray': [2, 2] } },
       { id: 'lm-ctx-buildings', type: 'fill', source: 'lm-ctx-buildings', paint: { 'fill-color': color('--map-ctx-bldg') } },
     ],
@@ -120,59 +121,59 @@ export function campusStyle(ctx, color) {
  * - 그 밖의 sourceId (배경 지도 타일, 소스): 그렇다
  * - sourceId 없음: 스타일을 아직 못 받았으면(스타일 주소 실패) 그렇다. 받은 뒤라면 우리 코드 오류로 본다
  */
-export function isBasemapError(event, styleLoaded) {
+export function isBasemapError(event, basemapLoaded) {
   const id = event?.sourceId
   if (typeof id === 'string' && id.startsWith('lm-')) return false
   if (id) return true
-  return !styleLoaded
+  return !basemapLoaded
 }
 
 /**
  * 배경 지도 감시. onFallback(이유) 를 한 번만 부른다.
- * - load 전: timeoutMs 안에 loaded() 가 안 오면 'timeout', 배경 지도 오류가 나면 바로 'error'
- * - load 뒤: 배경 지도 타일 오류가 windowMs 안에 limit 번 쌓이거나, 오프라인이면 'error'
+ * - load 전: timeoutMs 안에 onLoad() 가 안 오면 'timeout', 배경 지도 오류가 나면 바로 'error'
+ * - load 뒤: 배경 지도 타일 오류가 tileErrorWindowMs 안에 tileErrorLimit 번 쌓이거나, 오프라인이면 'error'
  * @param {(reason: 'timeout' | 'error') => void} onFallback
  * @param {object} [opt]
  * @param {number} [opt.timeoutMs]
- * @param {number} [opt.limit]     load 뒤 전환에 필요한 타일 오류 횟수
- * @param {number} [opt.windowMs]  그 횟수를 세는 시간 폭
+ * @param {number} [opt.tileErrorLimit]     load 뒤 전환에 필요한 타일 오류 횟수
+ * @param {number} [opt.tileErrorWindowMs]  그 횟수를 세는 시간 폭
  * @param {{setTimeout: Function, clearTimeout: Function}} [opt.timers]  테스트용 가짜 시계
  * @param {() => number} [opt.now]         현재 시각(ms). 테스트용
  * @param {() => boolean} [opt.isOffline]  오프라인인가. 테스트용
  */
 export function createBasemapWatch(onFallback, {
   timeoutMs = BASEMAP_TIMEOUT_MS,
-  limit = TILE_ERROR_LIMIT,
-  windowMs = TILE_ERROR_WINDOW_MS,
+  tileErrorLimit = TILE_ERROR_LIMIT,
+  tileErrorWindowMs = TILE_ERROR_WINDOW_MS,
   timers = globalThis,
   now = () => Date.now(),
   isOffline = () => globalThis.navigator?.onLine === false,
 } = {}) {
-  let styleLoaded = false
-  let fallen = false
+  let basemapLoaded = false
+  let usingFallback = false
   let timer = null
   let tileErrors = [] // load 뒤 배경 지도 타일 오류 시각
-  const fall = (reason) => {
-    if (fallen) return
-    fallen = true
+  const fallBack = (reason) => {
+    if (usingFallback) return
+    usingFallback = true
     timers.clearTimeout(timer)
     onFallback(reason)
   }
-  const arm = () => { timer = timers.setTimeout(() => { if (!styleLoaded) fall('timeout') }, timeoutMs) }
+  const arm = () => { timer = timers.setTimeout(() => { if (!basemapLoaded) fallBack('timeout') }, timeoutMs) }
   arm()
   return {
     /** 배경 지도 load 이벤트 */
-    loaded() { styleLoaded = true; timers.clearTimeout(timer) },
+    onLoad() { basemapLoaded = true; timers.clearTimeout(timer) },
     /** 지도 error 이벤트. 이번 오류로 대체 지도로 바꾸면 true */
-    error(event) {
-      if (fallen || !isBasemapError(event, styleLoaded)) return false
-      if (styleLoaded && !isOffline()) {
+    onError(event) {
+      if (usingFallback || !isBasemapError(event, basemapLoaded)) return false
+      if (basemapLoaded && !isOffline()) {
         const t = now()
-        tileErrors = tileErrors.filter((at) => t - at < windowMs)
+        tileErrors = tileErrors.filter((at) => t - at < tileErrorWindowMs)
         tileErrors.push(t)
-        if (tileErrors.length < limit) return false
+        if (tileErrors.length < tileErrorLimit) return false
       }
-      fall('error')
+      fallBack('error')
       return true
     },
     /**
@@ -180,13 +181,13 @@ export function createBasemapWatch(onFallback, {
      * 저장해 둔 캠퍼스 지도를 받지 못해 배경 지도를 그대로 둘 때 부른다
      */
     resume() {
-      fallen = false
+      usingFallback = false
       tileErrors = []
-      if (!styleLoaded) arm() // 아직 배경 지도가 안 떴으면 대기 시간을 다시 잰다
+      if (!basemapLoaded) arm() // 아직 배경 지도가 안 떴으면 대기 시간을 다시 잰다
     },
-    get fallen() { return fallen },
+    get usingFallback() { return usingFallback },
     /** 배경 지도 load 이벤트를 받았는가 */
-    get styleLoaded() { return styleLoaded },
+    get basemapLoaded() { return basemapLoaded },
   }
 }
 
@@ -220,27 +221,27 @@ function showMapNotice(container, text) {
   container.replaceChildren(p)
 }
 
-const CAMPUS_RETRY_MS = 10000 // 캠퍼스 지도를 못 받았을 때 다시 감시하기까지 (오류마다 재시도, 안내가 반복되지 않게)
+const CAMPUS_CONTEXT_RETRY_MS = 10000 // 캠퍼스 지도를 못 받았을 때 다시 감시하기까지 (오류마다 재시도, 안내가 반복되지 않게)
 
 /**
  * 저장해 둔 캠퍼스 지도로 바꾼다. 바꾼 뒤 lastDraw 에 기록된 우리 레이어를 다시 그린다.
  * 캠퍼스 지도를 받는 동안 배경 지도가 떴으면 바꾸지 않는다 (이미 뜬 배경 지도를 덮어쓰지 않게)
  */
-async function switchToCampusMap(map, reason, watch) {
+async function switchToCampusContext(map, reason, watch) {
   let ctx
   try {
     ctx = await loadCampusContext()
   } catch (e) {
     console.warn('저장해 둔 캠퍼스 지도를 불러오지 못했습니다', e)
-    setTimeout(() => watch.resume(), CAMPUS_RETRY_MS) // 배경 지도는 그대로 두고, 잠시 뒤 다시 감시한다 (다음 전환 때 캠퍼스 지도를 다시 받는다)
+    setTimeout(() => watch.resume(), CAMPUS_CONTEXT_RETRY_MS) // 배경 지도는 그대로 두고, 잠시 뒤 다시 감시한다 (다음 전환 때 캠퍼스 지도를 다시 받는다)
     toast(reason === 'timeout'
       ? '지도를 받는 데 시간이 걸리고 있습니다. 잠시 기다려 주세요.'
       : '지도를 불러오지 못했습니다. 인터넷 연결을 확인하세요.', 4000)
     return
   }
-  if (reason === 'timeout' && watch.styleLoaded) { watch.resume(); return } // 기다리는 사이 배경 지도가 떴다
+  if (reason === 'timeout' && watch.basemapLoaded) { watch.resume(); return } // 기다리는 사이 배경 지도가 떴다
   map.once('style.load', () => { for (const redraw of Object.values(lastDraw.get(map) || {})) redraw() })
-  map.setStyle(campusStyle(ctx, cssVar), { diff: false })
+  map.setStyle(campusContextStyle(ctx, cssVar), { diff: false })
   toast(reason === 'timeout'
     ? '배경 지도가 늦어 저장해 둔 캠퍼스 지도로 보여 드려요.'
     : '배경 지도를 받지 못해 저장해 둔 캠퍼스 지도로 보여 드려요.', 4000)
@@ -279,10 +280,10 @@ export function createMap(container, view = {}) {
   map.addControl(new maplibregl.AttributionControl(ATTRIBUTION_OPTIONS), attributionPosition(container))
 
   loadCampusContext().catch(() => {}) // 미리 받아 둔다 (약 18KB). 인터넷이 끊긴 뒤에도 바로 바꿀 수 있게
-  const watch = createBasemapWatch((reason) => switchToCampusMap(map, reason, watch))
-  map.once('load', () => watch.loaded())
-  map.on('error', (ev) => {
-    if (!watch.error(ev)) console.warn('지도 오류', ev.sourceId || '', ev.error) // 우리 레이어 오류, 전환 뒤 오류는 기록만
+  const watch = createBasemapWatch((reason) => switchToCampusContext(map, reason, watch))
+  map.once('load', () => watch.onLoad())
+  map.on('error', (event) => {
+    if (!watch.onError(event)) console.warn('지도 오류', event.sourceId || '', event.error) // 우리 레이어 오류, 전환 뒤 오류는 기록만
   })
   return map
 }
@@ -327,7 +328,11 @@ export function renderLegend(container, kinds = ['parking', 'entrance', 'target'
   const name = { parking: '주차장', entrance: '입구', landmark: '랜드마크', target: '목적 건물', route: '도보 경로' }
   container.innerHTML = kinds.map((k) => `<span>${MARKER_ICON[k]}${name[k]}</span>`).join('')
 }
-/** 카메라 이동 {center: [경도, 위도], bearing, pitch, zoom}. "동작 줄이기"를 켠 사용자에게는 jumpTo (움직임 없이 바로) */
+/**
+ * 카메라 이동 {center: [경도, 위도], bearing, pitch, zoom}. "동작 줄이기"를 켠 사용자에게는 jumpTo (움직임 없이 바로)
+ * 서버의 steps[].camera 에는 center 가 없다 (위치는 steps[].location). 넘길 때 합친다:
+ *   flyTo(map, { center: step.location.coordinates, ...step.camera })
+ */
 export function flyTo(map, view) {
   if (!map || !view) return
   const camera = cameraOf(view)

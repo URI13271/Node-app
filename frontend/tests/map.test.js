@@ -4,7 +4,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
   BASEMAP_TIMEOUT_MS, TILE_ERROR_LIMIT, TILE_ERROR_WINDOW_MS, ATTRIBUTION_OPTIONS, CONTEXT_ATTRIBUTION, attributionPosition,
-  createBasemapWatch, isBasemapError, decodeCampusContext, campusStyle, flyTo,
+  createBasemapWatch, isBasemapError, decodeCampusContext, campusContextStyle, flyTo,
 } from '../js/map.js'
 
 test('배경 지도 대기 시간은 8초', () => {
@@ -46,8 +46,8 @@ test('배경 지도 스타일이 8초 안에 안 오면 저장해 둔 캠퍼스 
   assert.deepEqual(calls, [])
   timers.tick(1)                      // 8초: 바꾼다
   assert.deepEqual(calls, ['timeout'])
-  assert.equal(watch.fallen, true)
-  assert.equal(watch.error({ sourceId: 'openmaptiles' }), false) // 이미 바꿨으면 다시 바꾸지 않는다
+  assert.equal(watch.usingFallback, true)
+  assert.equal(watch.onError({ sourceId: 'openmaptiles' }), false) // 이미 바꿨으면 다시 바꾸지 않는다
   assert.deepEqual(calls, ['timeout'])
 
   // 2) 8초 안에 load 가 오면 바꾸지 않는다
@@ -55,14 +55,14 @@ test('배경 지도 스타일이 8초 안에 안 오면 저장해 둔 캠퍼스 
   const calls2 = []
   const w2 = createBasemapWatch((r) => calls2.push(r), { timers: t2 })
   t2.tick(3000)
-  w2.loaded()
+  w2.onLoad()
   t2.tick(10000)
   assert.deepEqual(calls2, [])
-  assert.equal(w2.fallen, false)
+  assert.equal(w2.usingFallback, false)
 })
 
 test('배경 지도 타일 오류는 대체 지도로 바꾸고, 우리 레이어(lm-*) 오류는 바꾸지 않는다', () => {
-  // 판단 규칙 (styleLoaded = 배경 지도 load 이벤트를 받았는가)
+  // 판단 규칙 (basemapLoaded = 배경 지도 load 이벤트를 받았는가)
   assert.equal(isBasemapError({ sourceId: 'openmaptiles' }, true), true)   // 배경 지도 타일 오류 (load 뒤 인터넷 끊김)
   assert.equal(isBasemapError({ sourceId: 'lm-route' }, true), false)      // 우리 레이어
   assert.equal(isBasemapError({ sourceId: 'lm-buildings' }, false), false) // 우리 레이어는 load 전이라도 아니다
@@ -73,21 +73,21 @@ test('배경 지도 타일 오류는 대체 지도로 바꾸고, 우리 레이�
   const t0 = fakeTimers()
   const calls0 = []
   const w0 = createBasemapWatch((r) => calls0.push(r), { timers: t0, now: t0.now, isOffline: () => false })
-  assert.equal(w0.error({ sourceId: 'openmaptiles' }), true)
+  assert.equal(w0.onError({ sourceId: 'openmaptiles' }), true)
   assert.deepEqual(calls0, ['error'])
 
   // load 뒤: lm- 오류는 무시, 배경 타일 오류는 5초 안에 3번 쌓여야 바꾼다
   const timers = fakeTimers()
   const calls = []
   const watch = createBasemapWatch((r) => calls.push(r), { timers, now: timers.now, isOffline: () => false })
-  watch.loaded()
-  assert.equal(watch.error({ sourceId: 'lm-route' }), false)
+  watch.onLoad()
+  assert.equal(watch.onError({ sourceId: 'lm-route' }), false)
   for (let i = 1; i < TILE_ERROR_LIMIT; i++) {
-    assert.equal(watch.error({ sourceId: 'openmaptiles' }), false) // 1, 2번째: 타일 1장의 일시 오류일 수 있다
+    assert.equal(watch.onError({ sourceId: 'openmaptiles' }), false) // 1, 2번째: 타일 1장의 일시 오류일 수 있다
     timers.tick(1000)
   }
   assert.deepEqual(calls, [])
-  assert.equal(watch.error({ sourceId: 'openmaptiles' }), true)  // 3번째 (5초 안)
+  assert.equal(watch.onError({ sourceId: 'openmaptiles' }), true)  // 3번째 (5초 안)
   assert.deepEqual(calls, ['error'])
 })
 
@@ -96,9 +96,9 @@ test('load 뒤 타일 오류: 띄엄띄엄 나면 바꾸지 않고, 오프라인
   const timers = fakeTimers()
   const calls = []
   const watch = createBasemapWatch((r) => calls.push(r), { timers, now: timers.now, isOffline: () => false })
-  watch.loaded()
+  watch.onLoad()
   for (let i = 0; i < 10; i++) {
-    assert.equal(watch.error({ sourceId: 'openmaptiles' }), false)
+    assert.equal(watch.onError({ sourceId: 'openmaptiles' }), false)
     timers.tick(TILE_ERROR_WINDOW_MS / 2 + 1) // 2.5초 남짓마다 1번 → 5초 폭 안에는 늘 2번 이하
   }
   assert.deepEqual(calls, [])
@@ -108,10 +108,10 @@ test('load 뒤 타일 오류: 띄엄띄엄 나면 바꾸지 않고, 오프라인
   const t2 = fakeTimers()
   const calls2 = []
   const w2 = createBasemapWatch((r) => calls2.push(r), { timers: t2, now: t2.now, isOffline: () => offline })
-  w2.loaded()
-  assert.equal(w2.error({ sourceId: 'openmaptiles' }), false)
+  w2.onLoad()
+  assert.equal(w2.onError({ sourceId: 'openmaptiles' }), false)
   offline = true
-  assert.equal(w2.error({ sourceId: 'openmaptiles' }), true)
+  assert.equal(w2.onError({ sourceId: 'openmaptiles' }), true)
   assert.deepEqual(calls2, ['error'])
 })
 
@@ -123,7 +123,7 @@ test('resume: 전환을 취소하고 다시 감시한다', () => {
   timers.tick(BASEMAP_TIMEOUT_MS)
   assert.deepEqual(calls, ['timeout'])
   watch.resume()
-  assert.equal(watch.fallen, false)
+  assert.equal(watch.usingFallback, false)
   timers.tick(BASEMAP_TIMEOUT_MS - 1)
   assert.deepEqual(calls, ['timeout'])
   timers.tick(1)
@@ -134,17 +134,17 @@ test('resume: 전환을 취소하고 다시 감시한다', () => {
   const calls2 = []
   const w2 = createBasemapWatch((r) => calls2.push(r), { timers: t2, now: t2.now, isOffline: () => false })
   t2.tick(BASEMAP_TIMEOUT_MS)
-  w2.loaded()
-  assert.equal(w2.styleLoaded, true)
+  w2.onLoad()
+  assert.equal(w2.basemapLoaded, true)
   w2.resume()
   t2.tick(BASEMAP_TIMEOUT_MS * 2)
   assert.deepEqual(calls2, ['timeout'])
-  for (let i = 1; i < TILE_ERROR_LIMIT; i++) assert.equal(w2.error({ sourceId: 'openmaptiles' }), false)
-  assert.equal(w2.error({ sourceId: 'openmaptiles' }), true)
+  for (let i = 1; i < TILE_ERROR_LIMIT; i++) assert.equal(w2.onError({ sourceId: 'openmaptiles' }), false)
+  assert.equal(w2.onError({ sourceId: 'openmaptiles' }), true)
   assert.deepEqual(calls2, ['timeout', 'error'])
 })
 
-test('loadCampusContext: 원점 + 정수 x 단위 → [경도, 위도]', () => {
+test('decodeCampusContext: 원점 + 정수 x 단위 → [경도, 위도]', () => {
   // 검산: 원점 [128.09, 35.14], 단위 0.00001도
   //   x=10 → 128.09 + 10 x 0.00001 = 128.0901,  y=20 → 35.14 + 20 x 0.00001 = 35.1402
   //   x=3, y=7 → 128.09003, 35.14007 (소수 6자리 반올림이라 0.1+0.2 같은 부동소수 꼬리가 없다)
@@ -178,13 +178,16 @@ test('loadCampusContext: 원점 + 정수 x 단위 → [경도, 위도]', () => {
 
 test('대체 지도 스타일: 소스, 레이어 id 는 lm- 로 시작하고 출처 표기와 토큰 색을 쓴다', () => {
   const ctx = decodeCampusContext({ o: [128.09, 35.14], u: 0.00001, buildings: [], green: [], water: [], roads: [], paths: [] })
-  const style = campusStyle(ctx, (name) => `color(${name})`)
+  const style = campusContextStyle(ctx, (name) => `color(${name})`)
   assert.equal(style.version, 8)
   for (const id of Object.keys(style.sources)) {
     assert.ok(id.startsWith('lm-'), id)
     assert.equal(style.sources[id].attribution, CONTEXT_ATTRIBUTION)
   }
-  for (const l of style.layers) assert.ok(l.id.startsWith('lm-'), l.id)
+  for (const l of style.layers) {
+    assert.ok(l.id.startsWith('lm-'), l.id)
+    if (l.source) assert.ok(l.id === l.source || l.id.startsWith(`${l.source}-`), `${l.id} 는 소스 ${l.source} 이름을 따른다`)
+  }
   assert.equal(style.glyphs, undefined) // 글자 레이어 없음 → 외부 글꼴 주소 없음 (CSP)
   assert.equal(style.layers[0].paint['background-color'], 'color(--map-ground)')
 })
