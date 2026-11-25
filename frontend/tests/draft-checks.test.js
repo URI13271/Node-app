@@ -1,11 +1,11 @@
 // js/draft-checks.js 단위 테스트 (프론트 작성 가이드 7.5 규칙)
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { MIN_STEP_GAP_M, MAX_INSTRUCTION, checkDraft, cleanInstruction, emptyCameraFields, instructionIssues } from '../js/draft-checks.js'
+import { MIN_STEP_GAP_M, MAX_INSTRUCTION_CHARS, checkDraft, cleanInstruction, emptyCameraFields, instructionIssues } from '../js/draft-checks.js'
 
 test('최소 단계 간격은 3m, 문장은 200자까지', () => {
   assert.equal(MIN_STEP_GAP_M, 3)
-  assert.equal(MAX_INSTRUCTION, 200)
+  assert.equal(MAX_INSTRUCTION_CHARS, 200)
 })
 
 test('cleanInstruction: 제어 문자를 지우고 앞뒤 공백을 뺀다 (줄바꿈은 남김)', () => {

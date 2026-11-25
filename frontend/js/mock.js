@@ -10,8 +10,8 @@
 //                      majunggilMock.reset()      → 저장한 내용을 지우고 처음 데이터로
 import { ApiError } from './api.js'
 
-const FLAG = 'majunggil.mock'
-const EDITS = 'majunggil.mock.routes' // {routeId: route} 관리자가 저장한 경로
+const MOCK_STORAGE_KEY = 'majunggil.mock'
+const MOCK_EDITS_STORAGE_KEY = 'majunggil.mock.routes' // {routeId: route} 관리자가 저장한 경로
 
 function storage() {
   try { return window.sessionStorage } catch { return null }
@@ -23,9 +23,9 @@ export function isMockMode() {
   const s = storage()
   const q = new URLSearchParams(location.search).get('mock')
   try {
-    if (q === '1') s?.setItem(FLAG, '1')
-    if (q === '0') s?.removeItem(FLAG)
-    return s?.getItem(FLAG) === '1'
+    if (q === '1') s?.setItem(MOCK_STORAGE_KEY, '1')
+    if (q === '0') s?.removeItem(MOCK_STORAGE_KEY)
+    return s?.getItem(MOCK_STORAGE_KEY) === '1'
   } catch {
     return q === '1'
   }
@@ -63,12 +63,12 @@ function stamp() {
 }
 
 function edits() {
-  try { return JSON.parse(storage()?.getItem(EDITS) || '{}') } catch { return {} }
+  try { return JSON.parse(storage()?.getItem(MOCK_EDITS_STORAGE_KEY) || '{}') } catch { return {} }
 }
 function saveEdit(route) {
   const all = edits()
   all[route.id] = route
-  try { storage()?.setItem(EDITS, JSON.stringify(all)) } catch { /* 저장 못 해도 이번 응답은 돌려준다 */ }
+  try { storage()?.setItem(MOCK_EDITS_STORAGE_KEY, JSON.stringify(all)) } catch { /* 저장 못 해도 이번 응답은 돌려준다 */ }
 }
 
 /** 장소의 경로 목록 (관리자 저장 내용을 덮어씀) */
@@ -203,7 +203,7 @@ if (typeof window !== 'undefined') {
       return '경로 버전을 바꿨습니다. 지금 저장하면 409 가 납니다.'
     },
     reset() {
-      try { storage()?.removeItem(EDITS) } catch { /* 무시 */ }
+      try { storage()?.removeItem(MOCK_EDITS_STORAGE_KEY) } catch { /* 무시 */ }
       return '관리자 저장 내용을 지웠습니다.'
     },
   }

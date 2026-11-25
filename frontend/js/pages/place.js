@@ -175,7 +175,7 @@ async function checkArrivalNow() {
 
 // 5. 불러오기
 // 장소 상세가 실패하면 홈 링크만 보여 주고 멈춘다. 건물, 경로는 실패해도 상세는 그대로 보여 준다
-async function init() {
+async function load() {
   if (!Number.isInteger(placeId) || placeId < 1) {
     placeInfo.innerHTML = '<p class="notice" role="status">주소에 올바른 장소 번호가 없습니다.</p>'
     return
@@ -208,25 +208,28 @@ async function init() {
 }
 
 // 6. 이벤트
-$('#btn-navi').addEventListener('click', openNaviSheet)
-naviSheet.addEventListener('click', (event) => {
-  if (event.target === naviSheet || event.target.closest('[data-action="close-navi"]')) {
-    closeNaviSheet()
-    return
-  }
-  const link = event.target.closest('[data-navi]')
-  // 앱으로 떠나기 직전에 여행을 저장한다 (돌아오면 도착 판정)
-  if (link && state.place?.navigation_target) {
-    saveTrip({ placeId, parkingLotId: state.place.navigation_target.parking_lot_id })
-  }
-})
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape' && !naviSheet.hidden) closeNaviSheet()
-})
-arrivalBox.addEventListener('click', (event) => {
-  if (event.target.closest('[data-action="check-arrival"]')) checkArrivalNow()
-  if (event.target.closest('[data-action="arrived-manually"]')) finishTrip()
-})
+function bind() {
+  $('#btn-navi').addEventListener('click', openNaviSheet)
+  naviSheet.addEventListener('click', (event) => {
+    if (event.target === naviSheet || event.target.closest('[data-action="close-navi"]')) {
+      closeNaviSheet()
+      return
+    }
+    const link = event.target.closest('[data-navi]')
+    // 앱으로 떠나기 직전에 여행을 저장한다 (돌아오면 도착 판정)
+    if (link && state.place?.navigation_target) {
+      saveTrip({ placeId, parkingLotId: state.place.navigation_target.parking_lot_id })
+    }
+  })
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !naviSheet.hidden) closeNaviSheet()
+  })
+  arrivalBox.addEventListener('click', (event) => {
+    if (event.target.closest('[data-action="check-arrival"]')) checkArrivalNow()
+    if (event.target.closest('[data-action="arrived-manually"]')) finishTrip()
+  })
+}
 
 // 7. 시작
-init()
+bind()
+load()

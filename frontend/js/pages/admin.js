@@ -5,23 +5,23 @@ import { adminKey, drafts } from '../admin-store.js'
 import { checkDraft, cleanInstruction } from '../draft-checks.js'
 import { fractionOnPath, pointAlong } from '../geo.js'
 import { createMap, drawBuildings, drawDraftSteps, drawMarkers, drawRoute, flyTo, renderLegend } from '../map.js'
-import { $, escapeHtml, param, toast } from '../util.js'
+import { $, bindCharCounter, escapeHtml, param, toast } from '../util.js'
 
 // 1. 화면 요소, 상태
-const $keyForm = $('#key-form')
-const $key = $('#admin-key')
-const $keyStatus = $('#key-status')
-const $keyClear = $('#btn-key-clear')
-const $editor = $('#editor')
-const $placeSelect = $('#place-select')
-const $routeSelect = $('#route-select')
-const $routeMeta = $('#route-meta')
-const $stepList = $('#step-list')
-const $status = $('#editor-status')
-const $recovery = $('#draft-recovery')
-const $map = $('#map')
-const $warning = $('#warning-dialog')
-const $conflict = $('#conflict-dialog')
+const keyForm = $('#key-form')
+const keyInput = $('#admin-key')
+const keyStatus = $('#key-status')
+const keyClearButton = $('#btn-key-clear')
+const editor = $('#editor')
+const placeSelect = $('#place-select')
+const routeSelect = $('#route-select')
+const routeMeta = $('#route-meta')
+const stepList = $('#step-list')
+const editorStatus = $('#editor-status')
+const draftRecovery = $('#draft-recovery')
+const mapContainer = $('#map')
+const warningDialog = $('#warning-dialog')
+const conflictDialog = $('#conflict-dialog')
 
 // route.updated_at 은 서버가 준 문자열 그대로 둔다 (마이크로초까지 있어 Date 로 바꾸면 저장할 때 409)
 // placeLoadId: 장소를 빠르게 바꿀 때 늦게 온 옛 응답을 버리기 위한 번호
@@ -52,22 +52,22 @@ function showKeyError(error) {
 
 /** 키를 /admin/me 로 확인하고 편집기를 연다. 401 이면 저장해 둔 키를 지운다 */
 async function authenticate(key) {
-  setMessage($keyStatus, '관리자 키를 확인하고 있습니다.')
+  setMessage(keyStatus, '관리자 키를 확인하고 있습니다.')
   try {
     await checkAdminKey(key)
     state.key = key.trim()
     adminKey.set(state.key)
-    $key.value = ''
-    $keyForm.hidden = true
-    $editor.hidden = false
-    $keyClear.hidden = false
-    if (!state.map) state.map = createMap($map)
+    keyInput.value = ''
+    keyForm.hidden = true
+    editor.hidden = false
+    keyClearButton.hidden = false
+    if (!state.map) state.map = createMap(mapContainer)
     requestAnimationFrame(() => state.map?.resize())
     await loadPlaces()
     return true
   } catch (error) {
     if (error?.status === 401) adminKey.set(null)
-    setMessage($keyStatus, showKeyError(error), 'error')
+    setMessage(keyStatus, showKeyError(error), 'error')
     return false
   }
 }
@@ -76,13 +76,13 @@ async function authenticate(key) {
 
 /** 장소 목록. 주소 ?id= 또는 마지막 초안의 장소를 먼저 고른다 */
 async function loadPlaces() {
-  setMessage($status, '장소 목록을 불러오는 중입니다.')
+  setMessage(editorStatus, '장소 목록을 불러오는 중입니다.')
   try {
     const result = await getPlaces('', 100)
     state.places = result.items || []
-    $placeSelect.innerHTML = state.places.map((place) => `<option value="${place.id}">${escapeHtml(place.name)}</option>`).join('')
+    placeSelect.innerHTML = state.places.map((place) => `<option value="${place.id}">${escapeHtml(place.name)}</option>`).join('')
     if (!state.places.length) {
-      setMessage($status, '편집할 장소가 없습니다.', 'error')
+      setMessage(editorStatus, '편집할 장소가 없습니다.', 'error')
       return
     }
     const saved = drafts.last()
@@ -90,10 +90,10 @@ async function loadPlaces() {
     const preferred = state.places.find((item) => item.id === requestedId)
       || state.places.find((item) => item.id === saved?.placeId)
       || state.places[0]
-    $placeSelect.value = String(preferred.id)
+    placeSelect.value = String(preferred.id)
     await loadPlace(preferred.id, saved?.placeId === preferred.id ? saved.routeId : null)
   } catch (error) {
-    setMessage($status, `장소 목록을 불러오지 못했습니다. ${error.message || ''}`, 'error')
+    setMessage(editorStatus, `장소 목록을 불러오지 못했습니다. ${error.message || ''}`, 'error')
   }
 }
 
@@ -106,14 +106,14 @@ async function loadPlace(placeId, preferredRouteId = null) {
   state.route = null
   state.routes = []
   state.steps = []
-  $routeSelect.replaceChildren()
-  $stepList.replaceChildren()
-  $routeMeta.textContent = ''
+  routeSelect.replaceChildren()
+  stepList.replaceChildren()
+  routeMeta.textContent = ''
   $('#btn-add-step').disabled = true
   $('#btn-save').disabled = true
   $('#btn-preview').href = '#'
   $('#btn-preview').setAttribute('aria-disabled', 'true')
-  setMessage($status, '장소와 경로를 불러오는 중입니다.')
+  setMessage(editorStatus, '장소와 경로를 불러오는 중입니다.')
   try {
     const [detailResult, buildingResult, routesResult] = await Promise.allSettled([
       getPlace(place.id), getBuildings(place.id), getWalkRoutes(place.id, null, { fresh: true }),
@@ -126,23 +126,23 @@ async function loadPlace(placeId, preferredRouteId = null) {
     renderLegend($('#map-legend'), ['entrance', 'landmark', 'route'])
     if (routesResult.status === 'rejected') throw routesResult.reason
     state.routes = routesResult.value.items || []
-    $routeSelect.innerHTML = state.routes.map((route) => {
+    routeSelect.innerHTML = state.routes.map((route) => {
       const lot = state.place.parking_lots?.find((item) => item.id === route.parking_lot_id)
       const entrance = state.place.entrances?.find((item) => item.id === route.entrance_id)
       return `<option value="${route.id}">${escapeHtml(lot?.name || '주차장')} → ${escapeHtml(entrance?.name || '입구')} · ${Math.round(route.distance_m)}m</option>`
     }).join('')
     if (!state.routes.length) {
-      setMessage($status, '이 장소에는 등록된 도보 경로가 없습니다.')
+      setMessage(editorStatus, '이 장소에는 등록된 도보 경로가 없습니다.')
       drawRoute(state.map, null)
       drawDraftSteps(state.map, [])
       return
     }
     const route = state.routes.find((item) => item.id === Number(preferredRouteId)) || state.routes[0]
-    $routeSelect.value = String(route.id)
+    routeSelect.value = String(route.id)
     await selectRoute(route.id)
   } catch (error) {
     if (requestId !== state.placeLoadId) return
-    setMessage($status, `장소 데이터를 불러오지 못했습니다. ${error.message || ''}`, 'error')
+    setMessage(editorStatus, `장소 데이터를 불러오지 못했습니다. ${error.message || ''}`, 'error')
   }
 }
 
@@ -165,13 +165,13 @@ function snapshot(route) {
   return (route.steps || []).map(normalizeStep)
 }
 
-function pathCoordinates() {
+function routePath() {
   return state.route?.path?.coordinates || []
 }
 
 /** 경로 위 진행 위치 0~1000 (위치 슬라이더 값) */
-function stepProgress(step) {
-  return Math.round(fractionOnPath(pathCoordinates(), step.location.coordinates) * 1000)
+function stepSliderValue(step) {
+  return Math.round(fractionOnPath(routePath(), step.location.coordinates) * 1000)
 }
 
 /** 위치나 순서가 바뀌었나. 바뀌었으면 PATCH 로는 저장할 수 없고 PUT 을 써야 한다 */
@@ -221,7 +221,7 @@ function renderMeta() {
   if (!state.route) return
   const lot = state.place?.parking_lots?.find((item) => item.id === state.route.parking_lot_id)
   const entrance = state.place?.entrances?.find((item) => item.id === state.route.entrance_id)
-  $routeMeta.textContent = `${lot?.name || '주차장'} → ${entrance?.name || '입구'} · ${Math.round(state.route.distance_m)}m · ${state.route.walk_time_min}분 · 버전 ${state.route.updated_at || '없음'}`
+  routeMeta.textContent = `${lot?.name || '주차장'} → ${entrance?.name || '입구'} · ${Math.round(state.route.distance_m)}m · ${state.route.walk_time_min}분 · 버전 ${state.route.updated_at || '없음'}`
   $('#btn-preview').href = `/guide.html?${new URLSearchParams({ id: String(state.place.id), parking_lot_id: String(state.route.parking_lot_id), route: String(state.route.id) })}`
   $('#btn-preview').removeAttribute('aria-disabled')
 }
@@ -242,8 +242,8 @@ function stepCard(step, index) {
     <textarea id="ins-${index}" class="input step-instruction" rows="2" maxlength="200" data-field="instruction">${escapeHtml(step.instruction)}</textarea>
     <label class="label" for="landmark-${index}">랜드마크</label>
     <select id="landmark-${index}" class="input" data-field="landmark"><option value="">없음</option>${options}</select>
-    <label class="label" for="position-${index}">경로 위 위치 <span class="position-value">${(stepProgress(step) / 10).toFixed(1)}%</span></label>
-    <input id="position-${index}" class="position-slider" type="range" min="0" max="1000" step="1" value="${stepProgress(step)}" data-field="position" aria-label="${index + 1}단계 위치를 경로 따라 이동" />
+    <label class="label" for="position-${index}">경로 위 위치 <span class="position-value">${(stepSliderValue(step) / 10).toFixed(1)}%</span></label>
+    <input id="position-${index}" class="position-slider" type="range" min="0" max="1000" step="1" value="${stepSliderValue(step)}" data-field="position" aria-label="${index + 1}단계 위치를 경로 따라 이동" />
     <p class="coordinate-note">${point[1].toFixed(6)}, ${point[0].toFixed(6)}</p>
     <label class="camera-auto"><input type="checkbox" data-field="camera-auto" ${step.camera ? '' : 'checked'} /> 자동 카메라</label>
     <div class="camera-fields" ${step.camera ? '' : 'hidden'}>
@@ -256,35 +256,27 @@ function stepCard(step, index) {
 }
 
 function renderSteps() {
-  $stepList.innerHTML = state.steps.map(stepCard).join('')
+  stepList.innerHTML = state.steps.map(stepCard).join('')
   state.steps.forEach((_, index) => {
     const textarea = $(`#ins-${index}`)
     const counter = $(`#cnt-${index}`)
+    bindCharCounter(textarea, counter) // 글자 수 표시 (util.js, maxlength 200 과 같은 기준)
     textarea.addEventListener('input', () => {
       state.steps[index].instruction = textarea.value
-      bindCounter(textarea, counter)
       persistDraft()
     })
-    bindCounter(textarea, counter)
   })
   updateMap()
-}
-
-function bindCounter(textarea, counter) {
-  const length = textarea.value.length
-  counter.textContent = `${length}/200`
-  counter.classList.toggle('over', length > 200)
-  counter.classList.toggle('empty-text', textarea.value.trim() === '')
 }
 
 /** 저장하지 않은 초안이 있으면 복원, 삭제를 묻는다. 초안 저장 뒤 서버 버전이 바뀌었으면 그 사실도 알린다 */
 function showDraftRecovery(draft) {
   state.pendingDraft = draft
   const stale = draft.version !== state.route.updated_at
-  $recovery.innerHTML = `<b>${stale ? '서버 경로가 초안 저장 후 변경되었습니다.' : '저장하지 않은 초안이 있습니다.'}</b>
+  draftRecovery.innerHTML = `<b>${stale ? '서버 경로가 초안 저장 후 변경되었습니다.' : '저장하지 않은 초안이 있습니다.'}</b>
     <p>${escapeHtml(draft.savedAt || '')}${stale ? ' · 복원하면 최신 경로에 초안을 적용합니다.' : ''}</p>
     <div class="actions"><button class="btn btn-sm" type="button" data-action="restore-draft">초안 복원</button><button class="btn btn-sm" type="button" data-action="discard-draft">초안 삭제</button></div>`
-  $recovery.hidden = false
+  draftRecovery.hidden = false
 }
 
 /** 경로를 고르면 서버 단계로 편집 상태를 만들고, 다른 초안이 있으면 복원 안내를 띄운다 */
@@ -298,12 +290,12 @@ async function selectRoute(routeId) {
   $('#btn-save').disabled = false
   state.pendingDraft = null
   renderMeta()
-  const coordinates = pathCoordinates()
+  const coordinates = routePath()
   if (coordinates.length) flyTo(state.map, { center: coordinates[0], bearing: 0, pitch: 45, zoom: 17.5 })
   const draft = drafts.get(route.id)
-  $recovery.hidden = true
+  draftRecovery.hidden = true
   renderSteps()
-  setMessage($status, '')
+  setMessage(editorStatus, '')
   if (draft && draft.version !== route.updated_at || draft && JSON.stringify(draft.steps) !== JSON.stringify(state.steps)) showDraftRecovery(draft)
 }
 
@@ -319,7 +311,7 @@ function moveStep(from, to) {
 
 // 6. 저장 (PUT, PATCH, 409)
 function currentErrors() {
-  return checkDraft(state.steps, pathCoordinates())
+  return checkDraft(state.steps, routePath())
 }
 
 function showValidation(issues) {
@@ -327,7 +319,7 @@ function showValidation(issues) {
   if (firstError?.step > 0) {
     $(`#ins-${firstError.step - 1}`)?.focus()
   }
-  setMessage($status, issues.map((item) => item.message).join(' '), 'error')
+  setMessage(editorStatus, issues.map((item) => item.message).join(' '), 'error')
 }
 
 /** API 명세 3.7 StepIn 모양으로 바꾼다. 자동 카메라는 camera: null (서버 기본 카메라) */
@@ -369,19 +361,19 @@ async function saveAll(overwrite = false, expectedRoute = state.route) {
   }
   const warnings = issues.filter((item) => item.level === 'warning')
   if (warnings.length && !overwrite) {
-    $warning.innerHTML = `<section class="sheet-panel"><h2 id="warning-title">경로 검토</h2><p>다음 내용을 확인하고 전체 경로를 저장합니다.</p><ul>${warnings.map((item) => `<li>${escapeHtml(item.message)}</li>`).join('')}</ul><div class="actions"><button class="btn" data-action="cancel-warning">취소</button><button class="btn btn-primary" data-action="confirm-warning">계속 저장</button></div></section>`
-    $warning.hidden = false
+    warningDialog.innerHTML = `<section class="sheet-panel"><h2 id="warning-title">경로 검토</h2><p>다음 내용을 확인하고 전체 경로를 저장합니다.</p><ul>${warnings.map((item) => `<li>${escapeHtml(item.message)}</li>`).join('')}</ul><div class="actions"><button class="btn" data-action="cancel-warning">취소</button><button class="btn btn-primary" data-action="confirm-warning">계속 저장</button></div></section>`
+    warningDialog.hidden = false
     return
   }
   const author = getAuthor()
   if (!author) {
-    setMessage($status, '작성자 이름이 필요합니다.', 'error')
+    setMessage(editorStatus, '작성자 이름이 필요합니다.', 'error')
     $('#updated-by').focus()
     return
   }
   state.saving = true
   $('#btn-save').disabled = true
-  setMessage($status, '전체 경로를 저장하고 있습니다.')
+  setMessage(editorStatus, '전체 경로를 저장하고 있습니다.')
   const body = {
     expected_updated_at: expectedRoute.updated_at,
     updated_by: author,
@@ -391,7 +383,7 @@ async function saveAll(overwrite = false, expectedRoute = state.route) {
     const saved = await replaceSteps(state.route.id, body, state.key)
     acceptSavedRoute(saved)
     drafts.clear(saved.id)
-    setMessage($status, '전체 경로를 저장했습니다.', 'success')
+    setMessage(editorStatus, '전체 경로를 저장했습니다.', 'success')
   } catch (error) {
     if (error?.status === 409) {
       await openConflict(error, expectedRoute)
@@ -421,7 +413,7 @@ function acceptSavedRoute(route) {
 function showApiError(error) {
   const details = error?.details || []
   const text = details.length ? details.map((item) => item.message || `${item.field}: ${item.reason}`).join(' ') : error?.message || '저장에 실패했습니다.'
-  setMessage($status, `저장하지 못했습니다. ${text}`, 'error')
+  setMessage(editorStatus, `저장하지 못했습니다. ${text}`, 'error')
   const fieldMatch = details[0]?.field?.match(/steps\[(\d+)\]\.instruction/)
   if (fieldMatch) $(`#ins-${Number(fieldMatch[1])}`)?.focus()
 }
@@ -454,7 +446,7 @@ async function openConflict(error, baseRoute) {
   }
   const latest = state.conflictRoute
   if (!latest) {
-    setMessage($status, '다른 수정이 감지되었지만 최신 버전을 불러오지 못했습니다. 다시 불러와 주세요.', 'error')
+    setMessage(editorStatus, '다른 수정이 감지되었지만 최신 버전을 불러오지 못했습니다. 다시 불러와 주세요.', 'error')
     return
   }
   const serverSteps = snapshot(latest)
@@ -466,26 +458,26 @@ async function openConflict(error, baseRoute) {
     const changed = server !== local
     return `<div class="cmp-row ${changed ? 'diff' : ''}"><span>${index + 1}단계</span><div class="cmp"><div><b>서버 최신</b><br>${escapeHtml(server)}</div><div><b>내 수정</b><br>${escapeHtml(local)}</div></div></div>`
   }).join('')
-  $conflict.innerHTML = `<section class="sheet-panel"><h2 id="conflict-title">다른 관리자가 먼저 수정했습니다</h2><p>현재 버전 ${escapeHtml(latest.updated_at)}</p><div class="conflict-list">${comparison}</div>
+  conflictDialog.innerHTML = `<section class="sheet-panel"><h2 id="conflict-title">다른 관리자가 먼저 수정했습니다</h2><p>현재 버전 ${escapeHtml(latest.updated_at)}</p><div class="conflict-list">${comparison}</div>
     <div class="actions"><button class="btn" data-action="restore-latest">최신으로 되돌리기</button><button class="btn btn-primary" data-action="overwrite-latest">내 수정으로 덮어쓰기</button></div></section>`
-  $conflict.dataset.baseVersion = baseRoute.updated_at || ''
-  $conflict.dataset.errorMessage = error?.message || ''
-  $conflict.hidden = false
+  conflictDialog.dataset.baseVersion = baseRoute.updated_at || ''
+  conflictDialog.dataset.errorMessage = error?.message || ''
+  conflictDialog.hidden = false
 }
 
 /** 한 단계만 저장 (PATCH). 문장, 랜드마크, 카메라만 바꿀 수 있고 위치나 순서가 바뀌었으면 PUT 으로 안내한다 */
 async function patchOne(index) {
   const step = state.steps[index]
   if (!step?.id || hasLocationOrOrderChange(step, index)) {
-    setMessage($status, '위치나 단계 순서가 바뀐 경우에는 전체 저장(PUT)을 사용하세요.', 'error')
+    setMessage(editorStatus, '위치나 단계 순서가 바뀐 경우에는 전체 저장(PUT)을 사용하세요.', 'error')
     return
   }
   const author = getAuthor()
   if (!author) return
   const otherStepsDirty = state.steps.some((item, itemIndex) => itemIndex !== index && differsFromOriginal(item))
-  const invalid = checkDraft([step], pathCoordinates()).find((item) => item.level === 'error' && item.field !== 'steps')
+  const invalid = checkDraft([step], routePath()).find((item) => item.level === 'error' && item.field !== 'steps')
   if (invalid) {
-    setMessage($status, invalid.message, 'error')
+    setMessage(editorStatus, invalid.message, 'error')
     return
   }
   const camera = step.camera ? {
@@ -511,9 +503,9 @@ async function patchOne(index) {
     drafts.clear(state.route.id)
     renderMeta()
     renderSteps()
-    setMessage($status, `${index + 1}단계를 저장했습니다. 다른 수정 내용은 초안으로 남아 있습니다.`, 'success')
+    setMessage(editorStatus, `${index + 1}단계를 저장했습니다. 다른 수정 내용은 초안으로 남아 있습니다.`, 'success')
     if (otherStepsDirty) persistDraft()
-    else setMessage($status, `${index + 1}단계를 저장했습니다.`, 'success')
+    else setMessage(editorStatus, `${index + 1}단계를 저장했습니다.`, 'success')
   } catch (error) {
     if (error?.status === 409) await openConflict(error, state.route)
     else { persistDraft(); showApiError(error) }
@@ -540,154 +532,156 @@ function changeField(field, index, target) {
 }
 
 // 7. 이벤트
-$keyForm.addEventListener('submit', async (event) => {
-  event.preventDefault()
-  if ($key.value.trim()) await authenticate($key.value)
-})
+function bind() {
+  keyForm.addEventListener('submit', async (event) => {
+    event.preventDefault()
+    if (keyInput.value.trim()) await authenticate(keyInput.value)
+  })
 
-$keyClear.addEventListener('click', () => {
-  adminKey.set(null)
-  state.key = null
-  $editor.hidden = true
-  $keyForm.hidden = false
-  $keyClear.hidden = true
-  setMessage($keyStatus, '관리자 키를 지웠습니다.')
-  $key.focus()
-})
+  keyClearButton.addEventListener('click', () => {
+    adminKey.set(null)
+    state.key = null
+    editor.hidden = true
+    keyForm.hidden = false
+    keyClearButton.hidden = true
+    setMessage(keyStatus, '관리자 키를 지웠습니다.')
+    keyInput.focus()
+  })
 
-$placeSelect.addEventListener('change', () => loadPlace(Number($placeSelect.value)))
-$routeSelect.addEventListener('change', () => selectRoute(Number($routeSelect.value)))
-$('#updated-by').addEventListener('input', () => adminKey.setName($('#updated-by').value))
+  placeSelect.addEventListener('change', () => loadPlace(Number(placeSelect.value)))
+  routeSelect.addEventListener('change', () => selectRoute(Number(routeSelect.value)))
+  $('#updated-by').addEventListener('input', () => adminKey.setName($('#updated-by').value))
 
-// 새 단계는 마지막 단계보다 경로 5% 앞 지점에 둔다 (최대 30개)
-$('#btn-add-step').addEventListener('click', () => {
-  if (state.steps.length >= 30) return toast('안내 단계는 30개까지 추가할 수 있습니다.')
-  const coordinates = pathCoordinates()
-  const progress = state.steps.length ? Math.min(1, fractionOnPath(coordinates, state.steps.at(-1).location.coordinates) + 0.05) : 0
-  const location = pointAlong(coordinates, progress) || coordinates[0] || state.place.location.coordinates
-  state.steps.push({ id: null, step_order: state.steps.length + 1, instruction: '', landmark_id: null, location: { type: 'Point', coordinates }, camera: null })
-  state.steps.at(-1).location.coordinates = [...location]
-  state.activeStep = state.steps.length - 1
-  persistDraft()
-  renderSteps()
-})
-
-$('#btn-save').addEventListener('click', () => saveAll())
-
-// 위치 슬라이더는 움직일 때마다 경로 위 점으로 옮긴다. 문장 칸은 renderSteps 에서 따로 듣는다
-$stepList.addEventListener('input', (event) => {
-  const target = event.target
-  const card = target.closest('[data-index]')
-  if (!card) return
-  const index = Number(card.dataset.index)
-  const field = target.dataset.field
-  if (field === 'position') {
-    const fraction = Number(target.value) / 1000
-    const point = pointAlong(pathCoordinates(), fraction)
-    if (point) state.steps[index].location.coordinates = point
-    card.querySelector('.position-value').textContent = `${(fraction * 100).toFixed(1)}%`
-    const coordinates = state.steps[index].location.coordinates
-    card.querySelector('.coordinate-note').textContent = `${coordinates[1].toFixed(6)}, ${coordinates[0].toFixed(6)}`
-    const patchButton = card.querySelector('[data-action="patch"]')
-    if (patchButton) patchButton.disabled = hasLocationOrOrderChange(state.steps[index], index)
+  // 새 단계는 마지막 단계보다 경로 5% 앞 지점에 둔다 (최대 30개)
+  $('#btn-add-step').addEventListener('click', () => {
+    if (state.steps.length >= 30) return toast('안내 단계는 30개까지 추가할 수 있습니다.')
+    const coordinates = routePath()
+    const progress = state.steps.length ? Math.min(1, fractionOnPath(coordinates, state.steps.at(-1).location.coordinates) + 0.05) : 0
+    const location = pointAlong(coordinates, progress) || coordinates[0] || state.place.location.coordinates
+    state.steps.push({ id: null, step_order: state.steps.length + 1, instruction: '', landmark_id: null, location: { type: 'Point', coordinates }, camera: null })
+    state.steps.at(-1).location.coordinates = [...location]
+    state.activeStep = state.steps.length - 1
     persistDraft()
+    renderSteps()
+  })
+
+  $('#btn-save').addEventListener('click', () => saveAll())
+
+  // 위치 슬라이더는 움직일 때마다 경로 위 점으로 옮긴다. 문장 칸은 renderSteps 에서 따로 듣는다
+  stepList.addEventListener('input', (event) => {
+    const target = event.target
+    const card = target.closest('[data-index]')
+    if (!card) return
+    const index = Number(card.dataset.index)
+    const field = target.dataset.field
+    if (field === 'position') {
+      const fraction = Number(target.value) / 1000
+      const point = pointAlong(routePath(), fraction)
+      if (point) state.steps[index].location.coordinates = point
+      card.querySelector('.position-value').textContent = `${(fraction * 100).toFixed(1)}%`
+      const coordinates = state.steps[index].location.coordinates
+      card.querySelector('.coordinate-note').textContent = `${coordinates[1].toFixed(6)}, ${coordinates[0].toFixed(6)}`
+      const patchButton = card.querySelector('[data-action="patch"]')
+      if (patchButton) patchButton.disabled = hasLocationOrOrderChange(state.steps[index], index)
+      persistDraft()
+      updateMap()
+    } else if (field && field !== 'instruction') changeField(field, index, target)
+  })
+
+  stepList.addEventListener('focusin', (event) => {
+    const card = event.target.closest('[data-index]')
+    if (!card) return
+    state.activeStep = Number(card.dataset.index)
     updateMap()
-  } else if (field && field !== 'instruction') changeField(field, index, target)
-})
+  })
 
-$stepList.addEventListener('focusin', (event) => {
-  const card = event.target.closest('[data-index]')
-  if (!card) return
-  state.activeStep = Number(card.dataset.index)
-  updateMap()
-})
+  stepList.addEventListener('change', (event) => {
+    const target = event.target
+    const card = target.closest('[data-index]')
+    if (!card) return
+    const field = target.dataset.field
+    if (field && field !== 'position' && field !== 'instruction') changeField(field, Number(card.dataset.index), target)
+  })
 
-$stepList.addEventListener('change', (event) => {
-  const target = event.target
-  const card = target.closest('[data-index]')
-  if (!card) return
-  const field = target.dataset.field
-  if (field && field !== 'position' && field !== 'instruction') changeField(field, Number(card.dataset.index), target)
-})
+  stepList.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-action]')
+    if (!button) return
+    const card = button.closest('[data-index]')
+    const index = Number(card?.dataset.index)
+    if (button.dataset.action === 'up') moveStep(index, index - 1)
+    if (button.dataset.action === 'down') moveStep(index, index + 1)
+    if (button.dataset.action === 'delete') {
+      state.steps.splice(index, 1)
+      state.steps.forEach((item, position) => { item.step_order = position + 1 })
+      state.activeStep = Math.min(index, state.steps.length - 1)
+      persistDraft()
+      renderSteps()
+    }
+    if (button.dataset.action === 'patch') patchOne(index)
+  })
 
-$stepList.addEventListener('click', (event) => {
-  const button = event.target.closest('[data-action]')
-  if (!button) return
-  const card = button.closest('[data-index]')
-  const index = Number(card?.dataset.index)
-  if (button.dataset.action === 'up') moveStep(index, index - 1)
-  if (button.dataset.action === 'down') moveStep(index, index + 1)
-  if (button.dataset.action === 'delete') {
-    state.steps.splice(index, 1)
-    state.steps.forEach((item, position) => { item.step_order = position + 1 })
-    state.activeStep = Math.min(index, state.steps.length - 1)
-    persistDraft()
-    renderSteps()
-  }
-  if (button.dataset.action === 'patch') patchOne(index)
-})
+  draftRecovery.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-action]')?.dataset.action
+    if (!action || !state.pendingDraft) return
+    if (action === 'restore-draft') {
+      state.steps = state.pendingDraft.steps.map(normalizeStep)
+      state.activeStep = 0
+      persistDraft()
+      renderSteps()
+      setMessage(editorStatus, '초안을 복원했습니다. 저장 전에 내용을 확인하세요.')
+    } else {
+      drafts.clear(state.route.id)
+      setMessage(editorStatus, '저장하지 않은 초안을 삭제했습니다.')
+    }
+    state.pendingDraft = null
+    draftRecovery.hidden = true
+  })
 
-$recovery.addEventListener('click', (event) => {
-  const action = event.target.closest('[data-action]')?.dataset.action
-  if (!action || !state.pendingDraft) return
-  if (action === 'restore-draft') {
-    state.steps = state.pendingDraft.steps.map(normalizeStep)
-    state.activeStep = 0
-    persistDraft()
-    renderSteps()
-    setMessage($status, '초안을 복원했습니다. 저장 전에 내용을 확인하세요.')
-  } else {
-    drafts.clear(state.route.id)
-    setMessage($status, '저장하지 않은 초안을 삭제했습니다.')
-  }
-  state.pendingDraft = null
-  $recovery.hidden = true
-})
+  warningDialog.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-action]')?.dataset.action
+    if (action === 'cancel-warning' || event.target === warningDialog) warningDialog.hidden = true
+    if (action === 'confirm-warning') {
+      warningDialog.hidden = true
+      saveAll(true)
+    }
+  })
 
-$warning.addEventListener('click', (event) => {
-  const action = event.target.closest('[data-action]')?.dataset.action
-  if (action === 'cancel-warning' || event.target === $warning) $warning.hidden = true
-  if (action === 'confirm-warning') {
-    $warning.hidden = true
-    saveAll(true)
-  }
-})
+  // 409 대화상자: "최신으로 되돌리기" 는 서버 최신본으로 편집 상태를 바꾸고,
+  // "내 수정으로 덮어쓰기" 는 최신 updated_at 으로 내 수정을 다시 PUT 한다
+  conflictDialog.addEventListener('click', async (event) => {
+    const action = event.target.closest('[data-action]')?.dataset.action
+    if (!action || !state.conflictRoute) return
+    if (action === 'restore-latest') {
+      const latest = state.conflictRoute
+      state.route = latest
+      state.routes = state.routes.map((item) => item.id === latest.id ? latest : item)
+      state.steps = snapshot(latest)
+      state.activeStep = 0
+      drafts.clear(latest.id)
+      renderMeta()
+      renderSteps()
+      setMessage(editorStatus, '서버 최신 버전으로 되돌렸습니다.')
+      conflictDialog.hidden = true
+      return
+    }
+    if (action === 'overwrite-latest') {
+      const localSteps = state.steps.map((step) => ({ ...step, location: { type: 'Point', coordinates: [...step.location.coordinates] }, camera: step.camera ? { ...step.camera } : null }))
+      const latest = state.conflictRoute
+      state.route = latest
+      state.routes = state.routes.map((item) => item.id === latest.id ? latest : item)
+      state.steps = localSteps
+      conflictDialog.hidden = true
+      await saveAll(true, latest)
+    }
+  })
 
-// 409 대화상자: "최신으로 되돌리기" 는 서버 최신본으로 편집 상태를 바꾸고,
-// "내 수정으로 덮어쓰기" 는 최신 updated_at 으로 내 수정을 다시 PUT 한다
-$conflict.addEventListener('click', async (event) => {
-  const action = event.target.closest('[data-action]')?.dataset.action
-  if (!action || !state.conflictRoute) return
-  if (action === 'restore-latest') {
-    const latest = state.conflictRoute
-    state.route = latest
-    state.routes = state.routes.map((item) => item.id === latest.id ? latest : item)
-    state.steps = snapshot(latest)
-    state.activeStep = 0
-    drafts.clear(latest.id)
-    renderMeta()
-    renderSteps()
-    setMessage($status, '서버 최신 버전으로 되돌렸습니다.')
-    $conflict.hidden = true
-    return
-  }
-  if (action === 'overwrite-latest') {
-    const localSteps = state.steps.map((step) => ({ ...step, location: { type: 'Point', coordinates: [...step.location.coordinates] }, camera: step.camera ? { ...step.camera } : null }))
-    const latest = state.conflictRoute
-    state.route = latest
-    state.routes = state.routes.map((item) => item.id === latest.id ? latest : item)
-    state.steps = localSteps
-    $conflict.hidden = true
-    await saveAll(true, latest)
-  }
-})
+  $('#btn-preview').addEventListener('click', (event) => {
+    if (!state.route) { event.preventDefault(); return }
+  })
+}
 
-$('#btn-preview').addEventListener('click', (event) => {
-  if (!state.route) { event.preventDefault(); return }
-})
-
-// 8. 시작: 저장해 둔 키가 있으면 바로 확인한다
-function init() {
+// 8. 불러오기: 저장해 둔 키가 있으면 바로 확인하고 장소 목록을 불러온다
+function load() {
   renderLegend($('#map-legend'), ['entrance', 'landmark', 'route'])
   $('#updated-by').value = adminKey.getName()
   $('#btn-preview').href = '/guide.html'
@@ -695,4 +689,6 @@ function init() {
   if (existingKey) authenticate(existingKey)
 }
 
-init()
+// 9. 시작
+bind()
+load()

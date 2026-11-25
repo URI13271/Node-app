@@ -7,7 +7,7 @@ import { distanceM, fractionOnPath } from './geo.js'
 // 이웃한 두 단계 지점이 이보다 가까우면 경고
 export const MIN_STEP_GAP_M = 3
 // 서버 규칙: 제어 문자를 지우고 앞뒤 공백을 뺀 뒤 1~200자 (API 명세서 3.7)
-export const MAX_INSTRUCTION = 200
+export const MAX_INSTRUCTION_CHARS = 200
 const CAMERA_FIELDS = ['bearing', 'pitch', 'zoom']
 
 /** 서버(domain/steps.py)와 같은 방식으로 문장 정리: 탭, 줄바꿈을 뺀 제어 문자를 지우고 앞뒤 공백을 뺀다 */
@@ -21,7 +21,7 @@ export function instructionIssues(steps) {
   steps.forEach((step, index) => {
     const length = cleanInstruction(step.instruction).length
     if (length === 0) out.push({ step: index + 1, level: 'error', field: 'instruction', message: `${index + 1}단계 문장이 비어 있습니다.` })
-    else if (length > MAX_INSTRUCTION) out.push({ step: index + 1, level: 'error', field: 'instruction', message: `${index + 1}단계 문장이 ${MAX_INSTRUCTION}자를 넘습니다 (${length}자).` })
+    else if (length > MAX_INSTRUCTION_CHARS) out.push({ step: index + 1, level: 'error', field: 'instruction', message: `${index + 1}단계 문장이 ${MAX_INSTRUCTION_CHARS}자를 넘습니다 (${length}자).` })
   })
   return out
 }

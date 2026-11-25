@@ -301,10 +301,10 @@ export function createMap(container, view = {}) {
 
 // ---- 우리 레이어와 마커 (F-02 ~ F-05) ----
 
-const EMPTY_COLLECTION = () => ({ type: 'FeatureCollection', features: [] })
+const emptyCollection = () => ({ type: 'FeatureCollection', features: [] })
 const lineCollection = (coordinates) => (Array.isArray(coordinates) && coordinates.length >= 2
   ? { type: 'FeatureCollection', features: [{ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates } }] }
-  : EMPTY_COLLECTION())
+  : emptyCollection())
 
 /** 지도마다 마지막으로 그린 데이터. 스타일이 바뀌면 이 값으로 다시 그린다 */
 const drawData = new WeakMap()
@@ -329,7 +329,7 @@ function keepDrawing(map, name, draw) {
 /** 건물(2.5D), 목적 건물 강조 (F-02, F-03). buildings: GET /places/{id}/buildings 응답 (GeoJSON) */
 export function drawBuildings(map, buildings) {
   if (!map) return
-  dataOf(map).buildings = buildings || EMPTY_COLLECTION()
+  dataOf(map).buildings = buildings || emptyCollection()
   keepDrawing(map, 'buildings', () => {
     setSource(map, 'lm-buildings', dataOf(map).buildings)
     if (map.getLayer('lm-buildings')) return

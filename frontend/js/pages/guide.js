@@ -182,28 +182,31 @@ async function load() {
 }
 
 // 4. 이벤트
-$('#btn-prev').addEventListener('click', () => {
-  state.step = Math.max(-1, state.step - 1)
-  render()
-})
-$('#btn-next').addEventListener('click', () => {
-  const count = state.route?.steps.length || 0
-  // 마지막 단계(n-1)에서 누르면 n = 도착 완료
-  state.step = Math.min(count, state.step + 1)
-  render()
-})
-routeSwitcher.addEventListener('click', (event) => {
-  const button = event.target.closest('[data-route-id]')
-  if (!button) return
-  const route = state.routes.find((item) => item.id === Number(button.dataset.routeId))
-  if (!route) return
-  state.route = route
-  state.step = -1
-  state.error = ''
-  render()
-})
+function bind() {
+  $('#btn-prev').addEventListener('click', () => {
+    state.step = Math.max(-1, state.step - 1)
+    render()
+  })
+  $('#btn-next').addEventListener('click', () => {
+    const count = state.route?.steps.length || 0
+    // 마지막 단계(n-1)에서 누르면 n = 도착 완료
+    state.step = Math.min(count, state.step + 1)
+    render()
+  })
+  routeSwitcher.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-route-id]')
+    if (!button) return
+    const route = state.routes.find((item) => item.id === Number(button.dataset.routeId))
+    if (!route) return
+    state.route = route
+    state.step = -1
+    state.error = ''
+    render()
+  })
+}
 
 // 5. 시작
+bind()
 renderLegend($('#map-legend'), ['entrance', 'landmark', 'route'])
 render()
 load()

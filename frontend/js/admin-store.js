@@ -1,10 +1,10 @@
 // 관리자 키, 작성자 이름, 저장하지 못한 초안 보관 (설계서 2.7.1).
 // sessionStorage 에만 둔다. 탭을 닫으면 사라지고 쿠키를 쓰지 않는다.
 // 사생활 보호 모드에서는 저장소 접근이 예외를 던질 수 있어 읽고 쓸 때 모두 try/catch 로 감싼다.
-const ADMIN_KEY = 'majunggil.admin.key'
-const ADMIN_NAME = 'majunggil.admin.name'
-const LAST_DRAFT = 'majunggil.draft.last'
-const DRAFT_PREFIX = 'majunggil.draft.'
+const ADMIN_KEY_STORAGE_KEY = 'majunggil.admin.key'
+const ADMIN_NAME_STORAGE_KEY = 'majunggil.admin.name'
+const LAST_DRAFT_STORAGE_KEY = 'majunggil.draft.last'
+const DRAFT_STORAGE_KEY_PREFIX = 'majunggil.draft.'
 
 function storage() {
   try { return globalThis.sessionStorage || null } catch { return null }
@@ -27,14 +27,14 @@ function write(key, value) {
 
 /** 관리자 키와 작성자 이름(updated_by). set(null) 이나 빈 값은 지운다 */
 export const adminKey = {
-  get() { return read(ADMIN_KEY) },
-  set(value) { return write(ADMIN_KEY, String(value || '').trim() || null) },
-  getName() { return read(ADMIN_NAME) || '' },
-  setName(value) { return write(ADMIN_NAME, String(value || '').trim() || null) },
+  get() { return read(ADMIN_KEY_STORAGE_KEY) },
+  set(value) { return write(ADMIN_KEY_STORAGE_KEY, String(value || '').trim() || null) },
+  getName() { return read(ADMIN_NAME_STORAGE_KEY) || '' },
+  setName(value) { return write(ADMIN_NAME_STORAGE_KEY, String(value || '').trim() || null) },
 }
 
 function draftKey(routeId) {
-  return `${DRAFT_PREFIX}${routeId}`
+  return `${DRAFT_STORAGE_KEY_PREFIX}${routeId}`
 }
 
 /**
@@ -46,7 +46,7 @@ export const drafts = {
     if (!draft || !Number.isFinite(Number(draft.routeId))) return false
     const value = { ...draft, savedAt: draft.savedAt || new Date().toISOString() }
     if (!write(draftKey(draft.routeId), JSON.stringify(value))) return false
-    write(LAST_DRAFT, JSON.stringify({ placeId: draft.placeId, routeId: draft.routeId }))
+    write(LAST_DRAFT_STORAGE_KEY, JSON.stringify({ placeId: draft.placeId, routeId: draft.routeId }))
     return true
   },
   get(routeId) {
@@ -57,7 +57,7 @@ export const drafts = {
   },
   last() {
     try {
-      const value = JSON.parse(read(LAST_DRAFT) || 'null')
+      const value = JSON.parse(read(LAST_DRAFT_STORAGE_KEY) || 'null')
       return value && Number.isFinite(Number(value.placeId)) && Number.isFinite(Number(value.routeId))
         ? { placeId: Number(value.placeId), routeId: Number(value.routeId) }
         : null
@@ -66,7 +66,7 @@ export const drafts = {
   clear(routeId) {
     try { storage()?.removeItem(draftKey(routeId)) } catch { return false }
     const last = this.last()
-    if (last?.routeId === Number(routeId)) write(LAST_DRAFT, null)
+    if (last?.routeId === Number(routeId)) write(LAST_DRAFT_STORAGE_KEY, null)
     return true
   },
 }
