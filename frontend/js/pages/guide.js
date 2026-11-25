@@ -20,6 +20,11 @@ function activeEntrance() {
   return state.place?.entrances?.find((item) => item.id === state.route?.entrance_id) || null
 }
 
+/** 입구, 주차장, 랜드마크 마커. 고른 경로의 입구만 진하게, 다른 입구는 흐리게 */
+function drawPlaceMarkers() {
+  drawMarkers(map, state.place, { activeEntranceId: state.route?.entrance_id })
+}
+
 /**
  * 지금 단계의 카메라. 서버 camera 에는 center 가 없어 위치와 합친다
  *   개요 → 출발 주차장 camera, 단계 → steps[i].camera, 도착 → 입구 위치 + 마지막 단계 camera
@@ -159,7 +164,7 @@ async function load() {
     state.buildings = buildingResult.value
     drawBuildings(map, state.buildings)
   }
-  drawMarkers(map, state.place)
+  drawPlaceMarkers()
   renderLegend($('#map-legend'), ['entrance', 'landmark', 'route'])
   $('#btn-detail').href = `/place.html?id=${placeId}`
 
@@ -177,6 +182,7 @@ async function load() {
     || state.routes[0]
     || null
   state.step = startAtStep && state.route ? 0 : -1
+  drawPlaceMarkers()
   if (state.route && !state.route.steps?.length) state.error = '안내 단계가 아직 등록되지 않았습니다.'
   render()
 }
@@ -188,7 +194,7 @@ function bind() {
     render()
   })
   $('#btn-next').addEventListener('click', () => {
-    const count = state.route?.steps.length || 0
+    const count = state.route?.steps?.length || 0
     // 마지막 단계(n-1)에서 누르면 n = 도착 완료
     state.step = Math.min(count, state.step + 1)
     render()
@@ -200,6 +206,7 @@ function bind() {
     if (!route) return
     state.route = route
     state.step = -1
+    drawPlaceMarkers()
     state.error = ''
     render()
   })

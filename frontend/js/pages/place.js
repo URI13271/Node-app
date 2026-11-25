@@ -30,7 +30,7 @@ function guideUrl(route, { start = false } = {}) {
 }
 
 /**
- * 장소 정보, 주차장 목록, 3D 안내 버튼을 그린다. 경로를 받기 전에 한 번, 받은 뒤 한 번 더 부른다
+ * 장소 정보, 주차장 목록, 3D 안내 버튼을 그린다. 상세와 경로를 모두 받은 뒤 한 번 부른다
  * 주차장마다 도보 경로가 없으면 "입구까지 도보 경로를 준비 중" 을 보여 준다
  * 3D 안내 버튼은 내비 목적지 주차장의 경로를 먼저 고르고, 없으면 첫 경로. 경로가 하나도 없으면 비활성 + #route-notice
  */
@@ -82,7 +82,6 @@ function renderPlace() {
   guideButton.href = guideUrl(route)
   guideButton.setAttribute('aria-disabled', String(unavailable))
   $('#route-notice').hidden = !unavailable
-  if (route) guideButton.href = guideUrl(route)
 }
 
 // 3. 내비 연결 (F-04)
@@ -99,7 +98,7 @@ function renderNaviSheet() {
     <div class="sheet-handle" aria-hidden="true"></div>
     <h2>어느 앱으로 갈까요?</h2>
     <p class="sheet-description">목적지는 건물이 아니라 <b>${escapeHtml(target.name)}</b>입니다. 주차한 뒤 이 화면으로 돌아오세요.</p>
-    <ul class="list navi-options">${links.map((link) => `<li><a class="card navi-option" data-navi="${link.id}" href="${escapeHtml(link.url)}"><b>${escapeHtml(link.name)}</b><span>${escapeHtml(link.url)}</span></a></li>`).join('')}</ul>
+    <ul class="list navi-options">${links.map((link) => `<li><a class="card navi-option" data-navi="${link.id}" href="${escapeHtml(link.url)}"><b>${escapeHtml(link.name)}</b></a></li>`).join('')}</ul>
     <p class="sheet-footnote">앱별 링크 형식은 기기와 설치 상태에 따라 달라질 수 있습니다. 앱이 열리지 않으면 내비 앱에서 목적지를 검색하세요.</p>
     <button class="btn sheet-close" data-action="close-navi">닫기</button>
   </section>`
@@ -151,10 +150,8 @@ function showTripReturn() {
   const trip = loadTrip()
   if (!trip || Number(trip.placeId) !== placeId) return
   state.trip = trip
-  renderArrivalMessage('내비 앱에서 돌아오셨나요? 주차장에 도착했는지 확인해 보세요.')
-  arrivalBox.querySelector('[data-action="arrived-manually"]')?.remove()
-  const actions = arrivalBox.querySelector('.actions')
-  if (actions) actions.innerHTML = '<button class="btn btn-primary" data-action="check-arrival">현재 위치로 확인</button>'
+  renderArrivalMessage('내비 앱에서 돌아오셨나요? 주차장에 도착했는지 확인해 보세요.', false)
+  arrivalBox.insertAdjacentHTML('beforeend', '<div class="actions"><button class="btn btn-primary" data-action="check-arrival">현재 위치로 확인</button></div>')
 }
 
 /** 버튼을 누른 순간에만 위치를 한 번 받는다. 위치는 서버로 보내지 않는다 (ADR-006) */
@@ -174,6 +171,7 @@ async function checkArrivalNow() {
 }
 
 // 5. 불러오기
+// 상세, 건물, 경로를 함께 받고 한 번만 그린다 (경로를 받기 전에 "준비 중"이 깜빡이지 않게)
 // 장소 상세가 실패하면 홈 링크만 보여 주고 멈춘다. 건물, 경로는 실패해도 상세는 그대로 보여 준다
 async function load() {
   if (!Number.isInteger(placeId) || placeId < 1) {
@@ -184,19 +182,20 @@ async function load() {
   renderLegend($('#map-legend'))
   placeInfo.innerHTML = '<p class="empty" role="status">장소 정보를 불러오는 중입니다.</p>'
 
-  try {
-    state.place = await getPlace(placeId)
-  } catch (error) {
+  const [placeResult, buildingResult, routeResult] = await Promise.allSettled([
+    getPlace(placeId), getBuildings(placeId), getWalkRoutes(placeId),
+  ])
+  if (placeResult.status === 'rejected') {
+    const error = placeResult.reason
     placeInfo.innerHTML = `<div class="notice" role="status"><p>${escapeHtml(loadErrorMessage(error))}</p><a class="btn btn-sm" href="/">홈으로</a></div>`
     $('#btn-guide').setAttribute('aria-disabled', 'true')
     $('#btn-navi').disabled = true
     return
   }
 
-  renderPlace()
+  state.place = placeResult.value
   drawMarkers(state.map, state.place)
   flyTo(state.map, { center: state.place.location.coordinates, ...state.place.camera })
-  const [buildingResult, routeResult] = await Promise.allSettled([getBuildings(placeId), getWalkRoutes(placeId)])
   if (buildingResult.status === 'fulfilled') {
     state.buildings = buildingResult.value
     drawBuildings(state.map, state.buildings)

@@ -28,6 +28,7 @@ const conflictDialog = $('#conflict-dialog')
 const state = {
   key: null, map: null, places: [], place: null, route: null, routes: [], steps: [],
   activeStep: 0, saving: false, pendingDraft: null, conflictRoute: null, placeLoadId: 0,
+  baseVersion: null, // 지금 편집 내용이 기준으로 삼은 서버 버전. 저장할 때 expected_updated_at 으로 보낸다
 }
 
 // 2. 관리자 키 (N-04)
@@ -201,7 +202,7 @@ function draftPayload() {
   return {
     placeId: state.place?.id,
     routeId: state.route?.id,
-    version: state.route?.updated_at,
+    version: state.baseVersion,
     steps: state.steps.map((step) => ({ ...step, location: { type: 'Point', coordinates: [...step.location.coordinates] }, camera: step.camera ? { ...step.camera } : null })),
   }
 }
@@ -274,7 +275,7 @@ function showDraftRecovery(draft) {
   state.pendingDraft = draft
   const stale = draft.version !== state.route.updated_at
   draftRecovery.innerHTML = `<b>${stale ? '서버 경로가 초안 저장 후 변경되었습니다.' : '저장하지 않은 초안이 있습니다.'}</b>
-    <p>${escapeHtml(draft.savedAt || '')}${stale ? ' · 복원하면 최신 경로에 초안을 적용합니다.' : ''}</p>
+    <p>${escapeHtml(draft.savedAt || '')}${stale ? ' 복원한 뒤 저장하면 서버 최신본과 비교하는 화면이 먼저 뜹니다.' : ''}</p>
     <div class="actions"><button class="btn btn-sm" type="button" data-action="restore-draft">초안 복원</button><button class="btn btn-sm" type="button" data-action="discard-draft">초안 삭제</button></div>`
   draftRecovery.hidden = false
 }
@@ -285,6 +286,7 @@ async function selectRoute(routeId) {
   if (!route) return
   state.route = route
   state.steps = snapshot(route)
+  state.baseVersion = route.updated_at
   state.activeStep = 0
   $('#btn-add-step').disabled = false
   $('#btn-save').disabled = false
@@ -349,9 +351,9 @@ function getAuthor() {
 /**
  * 전체 저장 (PUT). 오류가 있으면 막고, 경고만 있으면 확인 대화상자를 띄운다
  * overwrite: 경고를 확인했거나 409 에서 "내 수정으로 덮어쓰기" 를 고른 경우
- * expectedRoute: expected_updated_at 으로 보낼 버전. 409 뒤에는 서버 최신본
+ * expected_updated_at 은 state.baseVersion. 오래된 초안을 복원했으면 그 초안의 버전이라 409 비교 화면이 뜬다
  */
-async function saveAll(overwrite = false, expectedRoute = state.route) {
+async function saveAll(overwrite = false) {
   if (!state.route || state.saving) return
   const issues = currentErrors()
   if (issues.some((item) => item.level === 'error')) {
@@ -375,7 +377,7 @@ async function saveAll(overwrite = false, expectedRoute = state.route) {
   $('#btn-save').disabled = true
   setMessage(editorStatus, '전체 경로를 저장하고 있습니다.')
   const body = {
-    expected_updated_at: expectedRoute.updated_at,
+    expected_updated_at: state.baseVersion,
     updated_by: author,
     steps: serializedSteps(),
   }
@@ -386,7 +388,7 @@ async function saveAll(overwrite = false, expectedRoute = state.route) {
     setMessage(editorStatus, '전체 경로를 저장했습니다.', 'success')
   } catch (error) {
     if (error?.status === 409) {
-      await openConflict(error, expectedRoute)
+      await openConflict(error)
     } else {
       persistDraft()
       showApiError(error)
@@ -404,6 +406,7 @@ function acceptSavedRoute(route) {
   else state.routes.push(route)
   state.route = route
   state.steps = snapshot(route)
+  state.baseVersion = route.updated_at
   state.activeStep = Math.min(state.activeStep, Math.max(0, state.steps.length - 1))
   renderMeta()
   renderSteps()
@@ -437,7 +440,7 @@ function stepSummary(step) {
 }
 
 /** 409 비교 화면: 단계마다 서버 최신과 내 수정을 나란히 놓고, 다른 단계는 .diff 로 표시한다 */
-async function openConflict(error, baseRoute) {
+async function openConflict(error) {
   persistDraft()
   try {
     state.conflictRoute = await fetchLatest()
@@ -460,7 +463,7 @@ async function openConflict(error, baseRoute) {
   }).join('')
   conflictDialog.innerHTML = `<section class="sheet-panel"><h2 id="conflict-title">다른 관리자가 먼저 수정했습니다</h2><p>현재 버전 ${escapeHtml(latest.updated_at)}</p><div class="conflict-list">${comparison}</div>
     <div class="actions"><button class="btn" data-action="restore-latest">최신으로 되돌리기</button><button class="btn btn-primary" data-action="overwrite-latest">내 수정으로 덮어쓰기</button></div></section>`
-  conflictDialog.dataset.baseVersion = baseRoute.updated_at || ''
+  conflictDialog.dataset.baseVersion = state.baseVersion || ''
   conflictDialog.dataset.errorMessage = error?.message || ''
   conflictDialog.hidden = false
 }
@@ -485,7 +488,7 @@ async function patchOne(index) {
   } : null
   try {
     const updated = await patchStep(step.id, {
-      expected_updated_at: state.route.updated_at,
+      expected_updated_at: state.baseVersion,
       updated_by: author,
       instruction: cleanInstruction(step.instruction),
       landmark_id: step.landmark_id == null || step.landmark_id === '' ? null : Number(step.landmark_id),
@@ -499,6 +502,7 @@ async function patchOne(index) {
       camera_is_default: updated.camera_is_default,
     })
     state.route.updated_at = updated.walk_route_updated_at
+    state.baseVersion = updated.walk_route_updated_at
     state.routes = state.routes.map((item) => item.id === state.route.id ? state.route : item)
     drafts.clear(state.route.id)
     renderMeta()
@@ -507,7 +511,7 @@ async function patchOne(index) {
     if (otherStepsDirty) persistDraft()
     else setMessage(editorStatus, `${index + 1}단계를 저장했습니다.`, 'success')
   } catch (error) {
-    if (error?.status === 409) await openConflict(error, state.route)
+    if (error?.status === 409) await openConflict(error)
     else { persistDraft(); showApiError(error) }
   }
 }
@@ -625,6 +629,7 @@ function bind() {
     if (!action || !state.pendingDraft) return
     if (action === 'restore-draft') {
       state.steps = state.pendingDraft.steps.map(normalizeStep)
+      state.baseVersion = state.pendingDraft.version || state.route.updated_at // 초안을 만들 때의 서버 버전
       state.activeStep = 0
       persistDraft()
       renderSteps()
@@ -656,6 +661,7 @@ function bind() {
       state.route = latest
       state.routes = state.routes.map((item) => item.id === latest.id ? latest : item)
       state.steps = snapshot(latest)
+      state.baseVersion = latest.updated_at
       state.activeStep = 0
       drafts.clear(latest.id)
       renderMeta()
@@ -670,8 +676,9 @@ function bind() {
       state.route = latest
       state.routes = state.routes.map((item) => item.id === latest.id ? latest : item)
       state.steps = localSteps
+      state.baseVersion = latest.updated_at // 최신본을 확인했으므로 그 버전 위에 덮어쓴다
       conflictDialog.hidden = true
-      await saveAll(true, latest)
+      await saveAll(true)
     }
   })
 
