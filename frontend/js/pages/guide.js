@@ -1,19 +1,29 @@
-// guide.html: 주차장에서 목적 건물 입구까지 경로와 단계별 카메라를 보여준다.
+// guide.html?id=1&parking_lot_id=&route=&start=1 (F-02~F-05 3D 안내)
+// 주차장에서 목적 건물 입구까지 경로와 단계별 카메라를 보여 준다. start=1 이면 개요를 건너뛰고 1단계부터
 import { getBuildings, getPlace, getWalkRoutes } from '../api.js'
 import { fractionOnPath } from '../geo.js'
 import { createMap, drawBuildings, drawMarkers, drawRoute, flyTo, renderLegend } from '../map.js'
 import { $, escapeHtml, loadErrorMessage, param } from '../util.js'
 
+// 1. 주소 값, 화면 상태
 const placeId = Number(param('id'))
 const startAtStep = param('start') === '1'
+// step: -1 도착 방향 개요, 0..n-1 단계, n 도착 완료
 const state = { place: null, buildings: null, routes: [], route: null, step: -1, error: '' }
 const map = createMap($('#map'))
 const routeSwitcher = $('#route-switcher')
 
+// 2. 그리기: state 만 보고 카드와 지도를 바꾼다
+
+/** 고른 경로의 도착 입구 */
 function activeEntrance() {
   return state.place?.entrances?.find((item) => item.id === state.route?.entrance_id) || null
 }
 
+/**
+ * 지금 단계의 카메라. 서버 camera 에는 center 가 없어 위치와 합친다
+ *   개요 → 출발 주차장 camera, 단계 → steps[i].camera, 도착 → 입구 위치 + 마지막 단계 camera
+ */
 function routeView() {
   const place = state.place
   const route = state.route
@@ -32,6 +42,7 @@ function routeView() {
   return { center: entrance?.location.coordinates || place.location.coordinates, ...camera }
 }
 
+/** 지나온 구간 비율(0~1): 현재 단계 지점을 경로 선에 내린 위치. 개요는 0, 도착은 1 */
 function completedFraction() {
   if (!state.route) return 0
   const steps = state.route.steps || []
@@ -40,6 +51,7 @@ function completedFraction() {
   return fractionOnPath(state.route.path.coordinates, steps[state.step].location.coordinates)
 }
 
+/** 경로가 2개 이상이면 "주차장 → 입구" 칩으로 고르게 한다 */
 function renderRouteSwitcher() {
   if (!state.place || state.routes.length < 2) {
     routeSwitcher.hidden = true
@@ -71,6 +83,7 @@ function renderSummary() {
   summary.innerHTML = `<b>${escapeHtml(place.name)}</b><span>${escapeHtml(parking?.name || '주차장')}에서 ${escapeHtml(entrance?.name || '입구')}까지 · 약 ${Math.round(state.route.distance_m)}m · ${state.route.walk_time_min}분</span>`
 }
 
+/** 진행 막대, 큰 번호와 문장, 버튼, 지도를 한 번에 맞춘다 */
 function render() {
   const steps = state.route?.steps || []
   const count = steps.length
@@ -79,6 +92,7 @@ function render() {
   const number = $('#step-num')
   const text = $('#step-text')
 
+  // 진행 막대: 단계 수만큼 칸, 지나온 단계까지 .on
   segments.innerHTML = steps.map((_, index) => `<i class="${index <= step ? 'on' : ''}"></i>`).join('')
   if (state.error) {
     number.textContent = ''
@@ -104,6 +118,7 @@ function render() {
     text.textContent = `${activeEntrance()?.name || '입구'}에 도착했습니다.`
   }
 
+  // 버튼: 개요에서는 이전 비활성, 마지막 단계에서는 "다음" 대신 "도착", 도착 완료에서는 완료 버튼 묶음
   const done = !!state.route && count > 0 && step >= count
   $('#step-actions').hidden = done
   $('#done-actions').hidden = !done
@@ -117,11 +132,14 @@ function render() {
   const attribution = $('#guide-attribution')
   attribution.textContent = attributions.length ? `건물 데이터: ${attributions.join(' · ')}` : ''
   attribution.hidden = !attributions.length
+  // 지도: 경로 선과 지나온 구간, 단계 카메라
   drawRoute(map, state.route, completedFraction())
   const view = routeView()
   if (view) flyTo(map, view)
 }
 
+// 3. 불러오기
+// 장소 상세가 실패하면 오류만 보여 준다. 건물은 실패해도 안내는 계속한다
 async function load() {
   if (!Number.isInteger(placeId) || placeId < 1) {
     state.error = '주소에 올바른 장소 번호가 없습니다.'
@@ -151,6 +169,7 @@ async function load() {
     return
   }
   state.routes = routeResult.value.items || []
+  // 처음 경로 고르기: route → parking_lot_id → 첫 경로
   const routeId = Number(param('route'))
   const parkingLotId = Number(param('parking_lot_id'))
   state.route = state.routes.find((route) => route.id === routeId)
@@ -162,12 +181,14 @@ async function load() {
   render()
 }
 
+// 4. 이벤트
 $('#btn-prev').addEventListener('click', () => {
   state.step = Math.max(-1, state.step - 1)
   render()
 })
 $('#btn-next').addEventListener('click', () => {
   const count = state.route?.steps.length || 0
+  // 마지막 단계(n-1)에서 누르면 n = 도착 완료
   state.step = Math.min(count, state.step + 1)
   render()
 })
@@ -182,6 +203,7 @@ routeSwitcher.addEventListener('click', (event) => {
   render()
 })
 
+// 5. 시작
 renderLegend($('#map-legend'), ['entrance', 'landmark', 'route'])
 render()
 load()

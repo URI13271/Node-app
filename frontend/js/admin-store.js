@@ -1,4 +1,6 @@
-// 관리자 정보와 저장하지 못한 초안은 탭이 닫히면 사라지는 sessionStorage에만 둔다.
+// 관리자 키, 작성자 이름, 저장하지 못한 초안 보관 (설계서 2.7.1).
+// sessionStorage 에만 둔다. 탭을 닫으면 사라지고 쿠키를 쓰지 않는다.
+// 사생활 보호 모드에서는 저장소 접근이 예외를 던질 수 있어 읽고 쓸 때 모두 try/catch 로 감싼다.
 const ADMIN_KEY = 'majunggil.admin.key'
 const ADMIN_NAME = 'majunggil.admin.name'
 const LAST_DRAFT = 'majunggil.draft.last'
@@ -12,6 +14,7 @@ function read(key) {
   try { return storage()?.getItem(key) ?? null } catch { return null }
 }
 
+/** 값이 비면 지운다. 저장했으면 true */
 function write(key, value) {
   try {
     const store = storage()
@@ -22,6 +25,7 @@ function write(key, value) {
   } catch { return false }
 }
 
+/** 관리자 키와 작성자 이름(updated_by). set(null) 이나 빈 값은 지운다 */
 export const adminKey = {
   get() { return read(ADMIN_KEY) },
   set(value) { return write(ADMIN_KEY, String(value || '').trim() || null) },
@@ -33,6 +37,10 @@ function draftKey(routeId) {
   return `${DRAFT_PREFIX}${routeId}`
 }
 
+/**
+ * 초안 {placeId, routeId, version, steps, savedAt} 를 경로별 키로 보관하고, 마지막 위치 {placeId, routeId} 를 따로 둔다
+ * version 은 서버가 준 route.updated_at 문자열 그대로 둔다 (마이크로초까지 있음. Date 로 바꾸면 저장할 때 409)
+ */
 export const drafts = {
   save(draft) {
     if (!draft || !Number.isFinite(Number(draft.routeId))) return false

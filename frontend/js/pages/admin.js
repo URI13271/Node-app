@@ -1,4 +1,5 @@
-// admin.html: API 계약을 지키며 경로 안내 단계를 편집한다.
+// admin.html (F-06 단계 문장 편집, N-04 관리자 키)
+// 흐름: 키 확인 → 장소, 경로 고르기 → 단계 편집 → 저장 전 검사 → PUT(전체) 또는 PATCH(한 단계) → 409 면 비교 화면
 import { checkAdminKey, getBuildings, getPlace, getPlaces, getWalkRoutes, patchStep, replaceSteps } from '../api.js'
 import { adminKey, drafts } from '../admin-store.js'
 import { checkDraft, cleanInstruction } from '../draft-checks.js'
@@ -6,6 +7,7 @@ import { fractionOnPath, pointAlong } from '../geo.js'
 import { createMap, drawBuildings, drawDraftSteps, drawMarkers, drawRoute, flyTo, renderLegend } from '../map.js'
 import { $, escapeHtml, param, toast } from '../util.js'
 
+// 1. 화면 요소, 상태
 const $keyForm = $('#key-form')
 const $key = $('#admin-key')
 const $keyStatus = $('#key-status')
@@ -21,11 +23,16 @@ const $map = $('#map')
 const $warning = $('#warning-dialog')
 const $conflict = $('#conflict-dialog')
 
+// route.updated_at 은 서버가 준 문자열 그대로 둔다 (마이크로초까지 있어 Date 로 바꾸면 저장할 때 409)
+// placeLoadId: 장소를 빠르게 바꿀 때 늦게 온 옛 응답을 버리기 위한 번호
 const state = {
   key: null, map: null, places: [], place: null, route: null, routes: [], steps: [],
   activeStep: 0, saving: false, pendingDraft: null, conflictRoute: null, placeLoadId: 0,
 }
 
+// 2. 관리자 키 (N-04)
+
+/** 상태 문구. kind: '' | 'error' | 'success' */
 function setMessage(element, message, kind = '') {
   element.textContent = message
   element.hidden = !message
@@ -33,6 +40,7 @@ function setMessage(element, message, kind = '') {
   element.classList.toggle('notice-success', kind === 'success')
 }
 
+/** 401 은 키 오류, 429 는 같은 IP 5회 실패 뒤 10분 잠금 (Retry-After 초를 분으로 바꿔 보여 준다) */
 function showKeyError(error) {
   if (error?.status === 401) return '관리자 키가 올바르지 않습니다.'
   if (error?.status === 429) {
@@ -42,6 +50,7 @@ function showKeyError(error) {
   return error?.message || '관리자 키를 확인하지 못했습니다.'
 }
 
+/** 키를 /admin/me 로 확인하고 편집기를 연다. 401 이면 저장해 둔 키를 지운다 */
 async function authenticate(key) {
   setMessage($keyStatus, '관리자 키를 확인하고 있습니다.')
   try {
@@ -63,6 +72,9 @@ async function authenticate(key) {
   }
 }
 
+// 3. 장소, 경로 불러오기
+
+/** 장소 목록. 주소 ?id= 또는 마지막 초안의 장소를 먼저 고른다 */
 async function loadPlaces() {
   setMessage($status, '장소 목록을 불러오는 중입니다.')
   try {
@@ -85,6 +97,7 @@ async function loadPlaces() {
   }
 }
 
+/** 장소 상세, 건물, 경로를 불러온다. 경로는 캐시를 무시한다 (fresh: 항상 서버 최신본) */
 async function loadPlace(placeId, preferredRouteId = null) {
   const requestId = ++state.placeLoadId
   const place = state.places.find((item) => item.id === Number(placeId))
@@ -133,6 +146,9 @@ async function loadPlace(placeId, preferredRouteId = null) {
   }
 }
 
+// 4. 단계 편집 상태
+
+/** 서버 단계 → 편집용 단계. 서버 기본 카메라(camera_is_default)는 null(자동 카메라)로 바꾼다 */
 function normalizeStep(step, index) {
   const coordinates = step.location?.coordinates || step.location
   return {
@@ -153,10 +169,12 @@ function pathCoordinates() {
   return state.route?.path?.coordinates || []
 }
 
+/** 경로 위 진행 위치 0~1000 (위치 슬라이더 값) */
 function stepProgress(step) {
   return Math.round(fractionOnPath(pathCoordinates(), step.location.coordinates) * 1000)
 }
 
+/** 위치나 순서가 바뀌었나. 바뀌었으면 PATCH 로는 저장할 수 없고 PUT 을 써야 한다 */
 function hasLocationOrOrderChange(step, index) {
   const original = state.route?.steps?.find((item) => item.id === step.id)
   if (!original) return true
@@ -165,6 +183,7 @@ function hasLocationOrOrderChange(step, index) {
   return step.step_order !== original.step_order || point[0] !== originalPoint[0] || point[1] !== originalPoint[1]
 }
 
+/** 서버 원본과 다른 단계인가 (한 단계 PATCH 뒤 다른 수정이 남았는지 볼 때) */
 function differsFromOriginal(step) {
   const original = state.route?.steps?.find((item) => item.id === step.id)
   if (!original) return true
@@ -177,6 +196,7 @@ function differsFromOriginal(step) {
     || JSON.stringify(step.camera) !== JSON.stringify(baseline.camera)
 }
 
+/** 초안 {placeId, routeId, version(서버 updated_at), steps}. 편집할 때마다, 저장에 실패하면 sessionStorage 에 남긴다 */
 function draftPayload() {
   return {
     placeId: state.place?.id,
@@ -196,6 +216,7 @@ function updateMap() {
   drawDraftSteps(state.map, state.steps, state.activeStep)
 }
 
+// 5. 그리기
 function renderMeta() {
   if (!state.route) return
   const lot = state.place?.parking_lots?.find((item) => item.id === state.route.parking_lot_id)
@@ -205,6 +226,7 @@ function renderMeta() {
   $('#btn-preview').removeAttribute('aria-disabled')
 }
 
+/** 단계 카드. 지점은 경로 선 위 비율(슬라이더)로만 옮긴다 (서버는 경로에서 30m 넘게 떨어진 지점을 400 으로 거부) */
 function stepCard(step, index) {
   const camera = step.camera || { bearing: '', pitch: '', zoom: '' }
   const point = step.location.coordinates
@@ -255,6 +277,7 @@ function bindCounter(textarea, counter) {
   counter.classList.toggle('empty-text', textarea.value.trim() === '')
 }
 
+/** 저장하지 않은 초안이 있으면 복원, 삭제를 묻는다. 초안 저장 뒤 서버 버전이 바뀌었으면 그 사실도 알린다 */
 function showDraftRecovery(draft) {
   state.pendingDraft = draft
   const stale = draft.version !== state.route.updated_at
@@ -264,6 +287,7 @@ function showDraftRecovery(draft) {
   $recovery.hidden = false
 }
 
+/** 경로를 고르면 서버 단계로 편집 상태를 만들고, 다른 초안이 있으면 복원 안내를 띄운다 */
 async function selectRoute(routeId) {
   const route = state.routes.find((item) => item.id === Number(routeId))
   if (!route) return
@@ -293,6 +317,7 @@ function moveStep(from, to) {
   renderSteps()
 }
 
+// 6. 저장 (PUT, PATCH, 409)
 function currentErrors() {
   return checkDraft(state.steps, pathCoordinates())
 }
@@ -305,6 +330,7 @@ function showValidation(issues) {
   setMessage($status, issues.map((item) => item.message).join(' '), 'error')
 }
 
+/** API 명세 3.7 StepIn 모양으로 바꾼다. 자동 카메라는 camera: null (서버 기본 카메라) */
 function serializedSteps() {
   return state.steps.map((step, index) => ({
     step_order: index + 1,
@@ -317,6 +343,7 @@ function serializedSteps() {
   }))
 }
 
+/** updated_by 에 넣을 작성자 이름. 비어 있으면 저장 전에 묻는다 */
 function getAuthor() {
   let name = $('#updated-by').value.trim() || adminKey.getName()
   if (!name) name = window.prompt('저장 기록에 표시할 작성자 이름을 입력하세요.')?.trim() || ''
@@ -327,6 +354,11 @@ function getAuthor() {
   return name
 }
 
+/**
+ * 전체 저장 (PUT). 오류가 있으면 막고, 경고만 있으면 확인 대화상자를 띄운다
+ * overwrite: 경고를 확인했거나 409 에서 "내 수정으로 덮어쓰기" 를 고른 경우
+ * expectedRoute: expected_updated_at 으로 보낼 버전. 409 뒤에는 서버 최신본
+ */
 async function saveAll(overwrite = false, expectedRoute = state.route) {
   if (!state.route || state.saving) return
   const issues = currentErrors()
@@ -373,6 +405,7 @@ async function saveAll(overwrite = false, expectedRoute = state.route) {
   }
 }
 
+/** 저장 응답(경로 전체, 새 updated_at)을 새 기준으로 삼는다 */
 function acceptSavedRoute(route) {
   const index = state.routes.findIndex((item) => item.id === route.id)
   if (index >= 0) state.routes[index] = route
@@ -384,6 +417,7 @@ function acceptSavedRoute(route) {
   renderSteps()
 }
 
+/** 400 details[].field (예: steps[2].instruction)로 그 단계 문장 칸에 초점을 옮긴다 */
 function showApiError(error) {
   const details = error?.details || []
   const text = details.length ? details.map((item) => item.message || `${item.field}: ${item.reason}`).join(' ') : error?.message || '저장에 실패했습니다.'
@@ -392,6 +426,7 @@ function showApiError(error) {
   if (fieldMatch) $(`#ins-${Number(fieldMatch[1])}`)?.focus()
 }
 
+/** 409 비교용 서버 최신본 (캐시 무시) */
 async function fetchLatest() {
   const result = await getWalkRoutes(state.place.id, null, { fresh: true })
   return (result.items || []).find((item) => item.id === state.route.id) || null
@@ -409,6 +444,7 @@ function stepSummary(step) {
   return [step.instruction || '문장 없음', landmark ? `랜드마크 ${landmark}` : '랜드마크 없음', position, camera].join(' · ')
 }
 
+/** 409 비교 화면: 단계마다 서버 최신과 내 수정을 나란히 놓고, 다른 단계는 .diff 로 표시한다 */
 async function openConflict(error, baseRoute) {
   persistDraft()
   try {
@@ -437,6 +473,7 @@ async function openConflict(error, baseRoute) {
   $conflict.hidden = false
 }
 
+/** 한 단계만 저장 (PATCH). 문장, 랜드마크, 카메라만 바꿀 수 있고 위치나 순서가 바뀌었으면 PUT 으로 안내한다 */
 async function patchOne(index) {
   const step = state.steps[index]
   if (!step?.id || hasLocationOrOrderChange(step, index)) {
@@ -483,6 +520,7 @@ async function patchOne(index) {
   }
 }
 
+/** 랜드마크, 자동 카메라, 카메라 칸 입력을 편집 상태에 반영하고 초안을 남긴다 */
 function changeField(field, index, target) {
   const step = state.steps[index]
   if (!step) return
@@ -501,6 +539,7 @@ function changeField(field, index, target) {
   }
 }
 
+// 7. 이벤트
 $keyForm.addEventListener('submit', async (event) => {
   event.preventDefault()
   if ($key.value.trim()) await authenticate($key.value)
@@ -520,6 +559,7 @@ $placeSelect.addEventListener('change', () => loadPlace(Number($placeSelect.valu
 $routeSelect.addEventListener('change', () => selectRoute(Number($routeSelect.value)))
 $('#updated-by').addEventListener('input', () => adminKey.setName($('#updated-by').value))
 
+// 새 단계는 마지막 단계보다 경로 5% 앞 지점에 둔다 (최대 30개)
 $('#btn-add-step').addEventListener('click', () => {
   if (state.steps.length >= 30) return toast('안내 단계는 30개까지 추가할 수 있습니다.')
   const coordinates = pathCoordinates()
@@ -534,6 +574,7 @@ $('#btn-add-step').addEventListener('click', () => {
 
 $('#btn-save').addEventListener('click', () => saveAll())
 
+// 위치 슬라이더는 움직일 때마다 경로 위 점으로 옮긴다. 문장 칸은 renderSteps 에서 따로 듣는다
 $stepList.addEventListener('input', (event) => {
   const target = event.target
   const card = target.closest('[data-index]')
@@ -612,6 +653,8 @@ $warning.addEventListener('click', (event) => {
   }
 })
 
+// 409 대화상자: "최신으로 되돌리기" 는 서버 최신본으로 편집 상태를 바꾸고,
+// "내 수정으로 덮어쓰기" 는 최신 updated_at 으로 내 수정을 다시 PUT 한다
 $conflict.addEventListener('click', async (event) => {
   const action = event.target.closest('[data-action]')?.dataset.action
   if (!action || !state.conflictRoute) return
@@ -643,6 +686,7 @@ $('#btn-preview').addEventListener('click', (event) => {
   if (!state.route) { event.preventDefault(); return }
 })
 
+// 8. 시작: 저장해 둔 키가 있으면 바로 확인한다
 function init() {
   renderLegend($('#map-legend'), ['entrance', 'landmark', 'route'])
   $('#updated-by').value = adminKey.getName()
