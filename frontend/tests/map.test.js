@@ -3,7 +3,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
-  BASEMAP_TIMEOUT_MS, ATTRIBUTION_OPTIONS, CONTEXT_ATTRIBUTION, attributionPosition,
+  BASEMAP_TIMEOUT_MS, TILE_ERROR_LIMIT, TILE_ERROR_WINDOW_MS, ATTRIBUTION_OPTIONS, CONTEXT_ATTRIBUTION, attributionPosition,
   createBasemapWatch, isBasemapError, decodeCampusContext, campusStyle, flyTo,
 } from '../js/map.js'
 
@@ -22,11 +22,12 @@ test('출처 위치: 3D 안내 화면은 오른쪽 위, 나머지는 오른쪽 �
   assert.equal(attributionPosition(box('map-preview')), 'bottom-right')
 })
 
-/** 가짜 시계: setTimeout 을 기억만 하고, tick(ms) 로 시간을 흘린다 */
+/** 가짜 시계: setTimeout 을 기억만 하고, tick(ms) 로 시간을 흘린다. now() 는 흘린 시간 */
 function fakeTimers() {
   let now = 0, id = 0
   const jobs = new Map()
   return {
+    now: () => now,
     setTimeout(fn, ms) { jobs.set(++id, { at: now + ms, fn }); return id },
     clearTimeout(k) { jobs.delete(k) },
     tick(ms) {
@@ -68,15 +69,79 @@ test('배경 지도 타일 오류는 대체 지도로 바꾸고, 우리 레이�
   assert.equal(isBasemapError({ error: new Error('style') }, false), true) // sourceId 없음 + load 전 = 스타일 주소 실패
   assert.equal(isBasemapError({ error: new Error('Layer already exists') }, true), false) // load 뒤 = 우리 코드 오류
 
-  // 감시와 함께: lm- 오류는 무시, 배경 타일 오류는 'error' 로 바로 (8초를 기다리지 않음)
+  // load 전: 배경 지도 오류는 'error' 로 바로 (8초를 기다리지 않음)
+  const t0 = fakeTimers()
+  const calls0 = []
+  const w0 = createBasemapWatch((r) => calls0.push(r), { timers: t0, now: t0.now, isOffline: () => false })
+  assert.equal(w0.error({ sourceId: 'openmaptiles' }), true)
+  assert.deepEqual(calls0, ['error'])
+
+  // load 뒤: lm- 오류는 무시, 배경 타일 오류는 5초 안에 3번 쌓여야 바꾼다
   const timers = fakeTimers()
   const calls = []
-  const watch = createBasemapWatch((r) => calls.push(r), { timers })
+  const watch = createBasemapWatch((r) => calls.push(r), { timers, now: timers.now, isOffline: () => false })
   watch.loaded()
   assert.equal(watch.error({ sourceId: 'lm-route' }), false)
+  for (let i = 1; i < TILE_ERROR_LIMIT; i++) {
+    assert.equal(watch.error({ sourceId: 'openmaptiles' }), false) // 1, 2번째: 타일 1장의 일시 오류일 수 있다
+    timers.tick(1000)
+  }
   assert.deepEqual(calls, [])
-  assert.equal(watch.error({ sourceId: 'openmaptiles' }), true)
+  assert.equal(watch.error({ sourceId: 'openmaptiles' }), true)  // 3번째 (5초 안)
   assert.deepEqual(calls, ['error'])
+})
+
+test('load 뒤 타일 오류: 띄엄띄엄 나면 바꾸지 않고, 오프라인이면 바로 바꾼다', () => {
+  // 5초 넘게 간격을 두고 나는 오류는 쌓이지 않는다
+  const timers = fakeTimers()
+  const calls = []
+  const watch = createBasemapWatch((r) => calls.push(r), { timers, now: timers.now, isOffline: () => false })
+  watch.loaded()
+  for (let i = 0; i < 10; i++) {
+    assert.equal(watch.error({ sourceId: 'openmaptiles' }), false)
+    timers.tick(TILE_ERROR_WINDOW_MS / 2 + 1) // 2.5초 남짓마다 1번 → 5초 폭 안에는 늘 2번 이하
+  }
+  assert.deepEqual(calls, [])
+
+  // 오프라인: 첫 오류에 바로 바꾼다
+  let offline = false
+  const t2 = fakeTimers()
+  const calls2 = []
+  const w2 = createBasemapWatch((r) => calls2.push(r), { timers: t2, now: t2.now, isOffline: () => offline })
+  w2.loaded()
+  assert.equal(w2.error({ sourceId: 'openmaptiles' }), false)
+  offline = true
+  assert.equal(w2.error({ sourceId: 'openmaptiles' }), true)
+  assert.deepEqual(calls2, ['error'])
+})
+
+test('resume: 전환을 취소하고 다시 감시한다', () => {
+  // load 전에 취소하면 대기 시간을 다시 잰다 (캠퍼스 지도를 못 받아 배경 지도를 기다리는 경우)
+  const timers = fakeTimers()
+  const calls = []
+  const watch = createBasemapWatch((r) => calls.push(r), { timers, now: timers.now, isOffline: () => false })
+  timers.tick(BASEMAP_TIMEOUT_MS)
+  assert.deepEqual(calls, ['timeout'])
+  watch.resume()
+  assert.equal(watch.fallen, false)
+  timers.tick(BASEMAP_TIMEOUT_MS - 1)
+  assert.deepEqual(calls, ['timeout'])
+  timers.tick(1)
+  assert.deepEqual(calls, ['timeout', 'timeout'])
+
+  // load 뒤에 취소하면 (캠퍼스 지도를 받는 사이 배경 지도가 뜬 경우) 시계는 다시 걸지 않고 오류 횟수는 0부터
+  const t2 = fakeTimers()
+  const calls2 = []
+  const w2 = createBasemapWatch((r) => calls2.push(r), { timers: t2, now: t2.now, isOffline: () => false })
+  t2.tick(BASEMAP_TIMEOUT_MS)
+  w2.loaded()
+  assert.equal(w2.styleLoaded, true)
+  w2.resume()
+  t2.tick(BASEMAP_TIMEOUT_MS * 2)
+  assert.deepEqual(calls2, ['timeout'])
+  for (let i = 1; i < TILE_ERROR_LIMIT; i++) assert.equal(w2.error({ sourceId: 'openmaptiles' }), false)
+  assert.equal(w2.error({ sourceId: 'openmaptiles' }), true)
+  assert.deepEqual(calls2, ['timeout', 'error'])
 })
 
 test('loadCampusContext: 원점 + 정수 x 단위 → [경도, 위도]', () => {
@@ -108,7 +173,7 @@ test('loadCampusContext: 원점 + 정수 x 단위 → [경도, 위도]', () => {
   // 실제 파일: 첫 건물 첫 점 (493, 1580) → [128.09 + 0.00493, 35.14 + 0.0158] = [128.09493, 35.1558]
   const real = decodeCampusContext(JSON.parse(readFileSync(new URL('../data/osm_context_gnu.json', import.meta.url), 'utf8')))
   assert.deepEqual(real.buildings.features[0].geometry.coordinates[0][0], [128.09493, 35.1558])
-  assert.equal(real.buildings.features.length, 94)
+  assert.ok(real.buildings.features.length > 0) // 건물 수는 데이터를 새로 받으면 바뀌므로 개수는 고정하지 않는다
 })
 
 test('대체 지도 스타일: 소스, 레이어 id 는 lm- 로 시작하고 출처 표기와 토큰 색을 쓴다', () => {

@@ -5,6 +5,9 @@ import { todo, toast } from './util.js'
 
 export const DEFAULT_BASEMAP_URL = 'https://tiles.openfreemap.org/styles/liberty'
 export const BASEMAP_TIMEOUT_MS = 8000 // 이 시간 안에 배경 지도가 안 오면 저장해 둔 캠퍼스 지도로 바꾼다
+// 배경 지도가 뜬 뒤에는 타일 오류가 이 시간 안에 이 횟수만큼 쌓여야 바꾼다 (타일 1장의 일시 오류로 지도 전체를 바꾸지 않게)
+export const TILE_ERROR_LIMIT = 3
+export const TILE_ERROR_WINDOW_MS = 5000
 export const CAMPUS_CONTEXT_URL = '/data/osm_context_gnu.json' // 저장해 둔 캠퍼스 지도 (형식은 data/README.md)
 export const CAMPUS_CONTEXT_BOUNDS = [128.0948, 35.1505, 128.1022, 35.1558] // [서, 남, 동, 북]
 export const CONTEXT_ATTRIBUTION = '© OpenMapTiles © OpenStreetMap contributors (저장해 둔 캠퍼스 지도)'  // 대체 지도 source 의 attribution 에 넣어야 모서리에 표시된다
@@ -82,7 +85,8 @@ export function loadCampusContext() {
  * 대체 지도 스타일 (MapLibre style spec). 글자 레이어가 없어 glyphs 주소가 필요 없다 (CSP 추가 없음).
  * 소스, 레이어 id 는 lm-ctx-* (우리 레이어 접두 lm-). 출처 표기는 소스 attribution 으로 모서리에 뜬다.
  * @param ctx   decodeCampusContext 결과
- * @param color 토큰 이름 → 색 값 함수. 화면에서는 cssVar (다크 모드 자동)
+ * @param color 토큰 이름 → 색 값 함수. 화면에서는 cssVar
+ *              (전환하는 순간의 테마 색을 읽는다. 전환 뒤 다크 모드를 바꿔도 지도 색은 그대로)
  */
 export function campusStyle(ctx, color) {
   const src = (data) => ({ type: 'geojson', data, attribution: CONTEXT_ATTRIBUTION })
@@ -124,31 +128,65 @@ export function isBasemapError(event, styleLoaded) {
 }
 
 /**
- * 배경 지도 감시. timeoutMs 안에 loaded() 가 안 오거나 배경 지도 오류가 나면 onFallback(이유) 를 한 번만 부른다.
+ * 배경 지도 감시. onFallback(이유) 를 한 번만 부른다.
+ * - load 전: timeoutMs 안에 loaded() 가 안 오면 'timeout', 배경 지도 오류가 나면 바로 'error'
+ * - load 뒤: 배경 지도 타일 오류가 windowMs 안에 limit 번 쌓이거나, 오프라인이면 'error'
  * @param {(reason: 'timeout' | 'error') => void} onFallback
- * @param {{timeoutMs?: number, timers?: {setTimeout: Function, clearTimeout: Function}}} [opt]  timers 는 테스트용 가짜 시계
+ * @param {object} [opt]
+ * @param {number} [opt.timeoutMs]
+ * @param {number} [opt.limit]     load 뒤 전환에 필요한 타일 오류 횟수
+ * @param {number} [opt.windowMs]  그 횟수를 세는 시간 폭
+ * @param {{setTimeout: Function, clearTimeout: Function}} [opt.timers]  테스트용 가짜 시계
+ * @param {() => number} [opt.now]         현재 시각(ms). 테스트용
+ * @param {() => boolean} [opt.isOffline]  오프라인인가. 테스트용
  */
-export function createBasemapWatch(onFallback, { timeoutMs = BASEMAP_TIMEOUT_MS, timers = globalThis } = {}) {
+export function createBasemapWatch(onFallback, {
+  timeoutMs = BASEMAP_TIMEOUT_MS,
+  limit = TILE_ERROR_LIMIT,
+  windowMs = TILE_ERROR_WINDOW_MS,
+  timers = globalThis,
+  now = () => Date.now(),
+  isOffline = () => globalThis.navigator?.onLine === false,
+} = {}) {
   let styleLoaded = false
   let fallen = false
   let timer = null
+  let tileErrors = [] // load 뒤 배경 지도 타일 오류 시각
   const fall = (reason) => {
     if (fallen) return
     fallen = true
     timers.clearTimeout(timer)
     onFallback(reason)
   }
-  timer = timers.setTimeout(() => { if (!styleLoaded) fall('timeout') }, timeoutMs)
+  const arm = () => { timer = timers.setTimeout(() => { if (!styleLoaded) fall('timeout') }, timeoutMs) }
+  arm()
   return {
     /** 배경 지도 load 이벤트 */
     loaded() { styleLoaded = true; timers.clearTimeout(timer) },
     /** 지도 error 이벤트. 이번 오류로 대체 지도로 바꾸면 true */
     error(event) {
       if (fallen || !isBasemapError(event, styleLoaded)) return false
+      if (styleLoaded && !isOffline()) {
+        const t = now()
+        tileErrors = tileErrors.filter((at) => t - at < windowMs)
+        tileErrors.push(t)
+        if (tileErrors.length < limit) return false
+      }
       fall('error')
       return true
     },
+    /**
+     * 전환을 취소하고 다시 감시한다. 대체 지도로 바꾸기 직전에 배경 지도가 떴거나,
+     * 저장해 둔 캠퍼스 지도를 받지 못해 배경 지도를 그대로 둘 때 부른다
+     */
+    resume() {
+      fallen = false
+      tileErrors = []
+      if (!styleLoaded) arm() // 아직 배경 지도가 안 떴으면 대기 시간을 다시 잰다
+    },
     get fallen() { return fallen },
+    /** 배경 지도 load 이벤트를 받았는가 */
+    get styleLoaded() { return styleLoaded },
   }
 }
 
@@ -182,16 +220,25 @@ function showMapNotice(container, text) {
   container.replaceChildren(p)
 }
 
-/** 저장해 둔 캠퍼스 지도로 바꾼다. 바꾼 뒤 lastDraw 에 기록된 우리 레이어를 다시 그린다 */
-async function switchToCampusMap(map, reason) {
+const CAMPUS_RETRY_MS = 10000 // 캠퍼스 지도를 못 받았을 때 다시 감시하기까지 (오류마다 재시도, 안내가 반복되지 않게)
+
+/**
+ * 저장해 둔 캠퍼스 지도로 바꾼다. 바꾼 뒤 lastDraw 에 기록된 우리 레이어를 다시 그린다.
+ * 캠퍼스 지도를 받는 동안 배경 지도가 떴으면 바꾸지 않는다 (이미 뜬 배경 지도를 덮어쓰지 않게)
+ */
+async function switchToCampusMap(map, reason, watch) {
   let ctx
   try {
     ctx = await loadCampusContext()
   } catch (e) {
     console.warn('저장해 둔 캠퍼스 지도를 불러오지 못했습니다', e)
-    toast('지도를 불러오지 못했습니다. 인터넷 연결을 확인하세요.', 4000)
+    setTimeout(() => watch.resume(), CAMPUS_RETRY_MS) // 배경 지도는 그대로 두고, 잠시 뒤 다시 감시한다 (다음 전환 때 캠퍼스 지도를 다시 받는다)
+    toast(reason === 'timeout'
+      ? '지도를 받는 데 시간이 걸리고 있습니다. 잠시 기다려 주세요.'
+      : '지도를 불러오지 못했습니다. 인터넷 연결을 확인하세요.', 4000)
     return
   }
+  if (reason === 'timeout' && watch.styleLoaded) { watch.resume(); return } // 기다리는 사이 배경 지도가 떴다
   map.once('style.load', () => { for (const redraw of Object.values(lastDraw.get(map) || {})) redraw() })
   map.setStyle(campusStyle(ctx, cssVar), { diff: false })
   toast(reason === 'timeout'
@@ -232,7 +279,7 @@ export function createMap(container, view = {}) {
   map.addControl(new maplibregl.AttributionControl(ATTRIBUTION_OPTIONS), attributionPosition(container))
 
   loadCampusContext().catch(() => {}) // 미리 받아 둔다 (약 18KB). 인터넷이 끊긴 뒤에도 바로 바꿀 수 있게
-  const watch = createBasemapWatch((reason) => switchToCampusMap(map, reason))
+  const watch = createBasemapWatch((reason) => switchToCampusMap(map, reason, watch))
   map.once('load', () => watch.loaded())
   map.on('error', (ev) => {
     if (!watch.error(ev)) console.warn('지도 오류', ev.sourceId || '', ev.error) // 우리 레이어 오류, 전환 뒤 오류는 기록만
