@@ -29,10 +29,36 @@ def test_admin_routes_registered_and_need_key(method, path):
     assert r.json()["error"]["code"] == "UNAUTHORIZED"
 
 
-@pytest.mark.parametrize("path", ["/", "/place.html", "/guide.html", "/admin.html", "/about.html", "/css/style.css", "/js/api.js"])
+@pytest.mark.parametrize("path", ["/", "/place", "/guide", "/admin", "/about", "/css/style.css", "/js/api.js"])
 def test_frontend_served(path):
-    r = client.get(path)
+    r = client.get(path, follow_redirects=False)
     assert r.status_code == 200
+
+
+def test_frontend_clean_url_serves_html():
+    r = client.get("/place?id=1", follow_redirects=False)
+    assert r.status_code == 200
+    assert r.headers["content-type"].startswith("text/html")
+    assert "content-security-policy-report-only" in r.headers
+
+
+@pytest.mark.parametrize(("old", "new"), [
+    ("/place.html?id=66", "/place?id=66"),
+    ("/guide.html?id=1&parking_lot_id=2&route=3&start=1", "/guide?id=1&parking_lot_id=2&route=3&start=1"),
+    ("/about.html", "/about"),
+    ("/index.html", "/"),
+    ("/index.html?mock=1", "/?mock=1"),
+])
+def test_frontend_old_html_url_redirects(old, new):
+    r = client.get(old, follow_redirects=False)
+    assert r.status_code == 302
+    assert r.headers["location"] == new
+
+
+def test_frontend_missing_clean_url_is_404_page():
+    r = client.get("/nope", follow_redirects=False)
+    assert r.status_code == 404
+    assert "없는 화면입니다" in r.text
 
 
 def test_frontend_missing_file_is_404_page():
@@ -63,7 +89,7 @@ def test_validation_error_is_400_invalid_input():
 
 
 def test_frontend_headers():
-    r = client.get("/guide.html")
+    r = client.get("/guide")
     assert r.headers["cache-control"] == "no-cache"
     # 개발(ENV=local) 기본값은 Report-Only: 막지 않고 보고만
     assert "worker-src 'self' blob:" in r.headers["content-security-policy-report-only"]
@@ -85,7 +111,7 @@ def _app_with(monkeypatch, **env):
 
 def test_csp_enforced_in_prod(monkeypatch):
     c = _app_with(monkeypatch, ENV="prod")
-    r = c.get("/index.html")
+    r = c.get("/")
     assert "content-security-policy" in r.headers
     assert "content-security-policy-report-only" not in r.headers
 
@@ -161,4 +187,5 @@ def test_http_exception_keeps_status():
 def test_head_requests():
     # HEAD /health 는 tests/unit/test_health.py 에서 본다
     assert client.head("/api/v1/places").status_code == 405
-    assert client.head("/index.html").status_code == 200
+    assert client.head("/").status_code == 200
+    assert client.head("/place").status_code == 200

@@ -1,4 +1,4 @@
-// place.html?id=1 (F-01 상세, F-03 목적 건물 강조, F-04 내비 연결, 도착 판정)
+// /place?id=1 (F-01 상세, F-03 목적 건물 강조, F-04 내비 연결, 도착 판정)
 // 불러오는 API: GET /places/{id}, /places/{id}/buildings, /places/{id}/walk-routes
 import { getBuildings, getPlace, getWalkRoutes } from '../api.js'
 import { createMap, drawBuildings, drawMarkers, flyTo, renderLegend } from '../map.js'
@@ -26,7 +26,7 @@ function guideUrl(route, { start = false } = {}) {
   if (!route) return '#'
   const query = new URLSearchParams({ id: String(placeId), parking_lot_id: String(route.parking_lot_id), route: String(route.id) })
   if (start) query.set('start', '1')
-  return `/guide.html?${query}`
+  return `/guide?${query}`
 }
 
 /**

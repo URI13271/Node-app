@@ -223,7 +223,7 @@ function renderMeta() {
   const lot = state.place?.parking_lots?.find((item) => item.id === state.route.parking_lot_id)
   const entrance = state.place?.entrances?.find((item) => item.id === state.route.entrance_id)
   routeMeta.textContent = `${lot?.name || '주차장'} → ${entrance?.name || '입구'} · ${Math.round(state.route.distance_m)}m · ${state.route.walk_time_min}분 · 버전 ${state.route.updated_at || '없음'}`
-  $('#btn-preview').href = `/guide.html?${new URLSearchParams({ id: String(state.place.id), parking_lot_id: String(state.route.parking_lot_id), route: String(state.route.id) })}`
+  $('#btn-preview').href = `/guide?${new URLSearchParams({ id: String(state.place.id), parking_lot_id: String(state.route.parking_lot_id), route: String(state.route.id) })}`
   $('#btn-preview').removeAttribute('aria-disabled')
 }
 
@@ -691,7 +691,7 @@ function bind() {
 function load() {
   renderLegend($('#map-legend'), ['entrance', 'landmark', 'route'])
   $('#updated-by').value = adminKey.getName()
-  $('#btn-preview').href = '/guide.html'
+  $('#btn-preview').href = '/guide'
   const existingKey = adminKey.get()
   if (existingKey) authenticate(existingKey)
 }

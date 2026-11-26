@@ -15,10 +15,10 @@ export const CONTEXT_ATTRIBUTION = '© OpenMapTiles © OpenStreetMap contributor
 
 // 지도 출처 표기 (OSM ODbL, OpenFreeMap 조건). 배경 지도 스타일에 든 출처는 MapLibre 가 자동으로 모은다.
 // compact: 처음에는 펼쳐 보이고, 지도를 끌면 (i) 버튼으로 접힌다 (MapLibre 4.7.1 동작, 배포 파일에서 확인).
-// 전체 목록은 정적 정보 페이지 about.html. 이 링크 문자열은 MapLibre 가 innerHTML 로 넣으므로 서버 글자를 섞지 않는다.
+// 전체 목록은 정적 정보 페이지 /about. 이 링크 문자열은 MapLibre 가 innerHTML 로 넣으므로 서버 글자를 섞지 않는다.
 export const ATTRIBUTION_OPTIONS = {
   compact: true,
-  customAttribution: '<a href="/about.html">출처 전체</a>',
+  customAttribution: '<a href="/about">출처 전체</a>',
 }
 
 // 처음 펼쳐진 출처 표기를 지도가 뜬 뒤 이 시간이 지나면 접는다 (끌기 전에도). 사용자가 그 전에 (i)를 누르면 자동으로 접지 않는다

@@ -11,7 +11,7 @@
   <script src="/vendor/maplibre-gl-4.7.1/maplibre-gl.js"></script>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
-<!-- F-01 장소 상세 + F-03 강조 + F-04 내비 연결. GET /places/{id}, /buildings, /walk-routes. 주소 예: place.html?id=1 -->
+<!-- F-01 장소 상세 + F-03 강조 + F-04 내비 연결. GET /places/{id}, /buildings, /walk-routes. 주소 예: /place?id=1 -->
 <body>
   <div class="app">
     <header class="topbar"><a class="btn btn-icon" href="/" aria-label="뒤로">←</a></header>
@@ -30,7 +30,7 @@
     <!-- 내비 앱에서 돌아왔을 때 도착 판정. 위치를 못 받거나(unavailable) 멀면(far) "주차장에 도착했어요" 버튼으로 직접 진행 -->
     <div id="arrival-check" class="card" role="status" hidden></div>
 
-    <footer class="site-footer"><a href="/about.html">서비스 정보, 출처</a></footer>
+    <footer class="site-footer"><a href="/about">서비스 정보, 출처</a></footer>
 
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>

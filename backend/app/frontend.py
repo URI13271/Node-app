@@ -1,6 +1,8 @@
 """HTML 프론트(frontend/)를 API와 같은 주소로 내보낸다. 같은 주소라 CORS 가 필요 없다.
 
 - /api 아래 없는 경로는 화면(404.html)이 아니라 JSON 404 로 돌려준다 (오류 형식은 core/errors.py).
+- 화면 주소에는 .html 을 붙이지 않는다. /place?id=1 → place.html 을 보여 준다.
+  옛 주소(/place.html?id=1, /index.html)는 쿼리를 그대로 둔 채 /place?id=1, / 로 보낸다 (302).
 - Cache-Control: no-cache. 빌드 없는 ES 모듈이라 배포 직후 옛 JS와 새 JS가 섞이지 않도록 매번 ETag 로 재검증한다.
 - 보안 정책(CSP): 지도(MapLibre)와 배경 지도, 글꼴이 쓰는 주소만 허용한다.
   개발 중(ENV=local)에는 Report-Only 로 막지 않고 위반만 /csp-report 로 받아 로그에 남긴다. 운영(ENV=prod)은 실제로 막는다.
@@ -9,9 +11,12 @@
 import json
 import logging
 import re
+import stat
 
+import anyio
 from fastapi import APIRouter, Request, Response
 from starlette.exceptions import HTTPException
+from starlette.responses import RedirectResponse
 from starlette.routing import Match, Mount
 from starlette.staticfiles import StaticFiles
 
@@ -67,11 +72,35 @@ class FrontendFiles(StaticFiles):
             # 라우터에 안 걸린 /api 요청. 경로는 있는데 메서드가 다르면(예: PUT 전용 경로에 GET) 405, HEAD 도 405,
             # 나머지는 없는 경로라 404 (core/errors.py 처리기가 {"error": {...}} 형식으로 감싼다)
             raise HTTPException(405 if scope["method"] == "HEAD" or _other_method_exists(scope) else 404)
+        redirect = await self._clean_url_redirect(url_path, scope)
+        if redirect:
+            return redirect
+        if await self._is_page(url_path + ".html") and not await self._is_file(url_path):
+            path = url_path + ".html"  # /place → place.html
         response = await super().get_response(path, scope)
         response.headers["Cache-Control"] = "no-cache"
         if self.csp_header and response.headers.get("content-type", "").startswith("text/html"):
             response.headers[self.csp_header] = CSP
         return response
+
+    async def _is_file(self, rel: str) -> bool:
+        if not rel:
+            return False
+        _, st = await anyio.to_thread.run_sync(self.lookup_path, rel)
+        return st is not None and stat.S_ISREG(st.st_mode)
+
+    async def _is_page(self, rel: str) -> bool:
+        """확장자 없는 화면 주소로 바꿔 줄 HTML 파일인지. 하위 폴더(vendor 등)의 html 은 대상이 아니다."""
+        return "/" not in rel and rel.endswith(".html") and await self._is_file(rel)
+
+    async def _clean_url_redirect(self, url_path: str, scope) -> RedirectResponse | None:
+        """/place.html?id=1 → /place?id=1, /index.html → /. 실제로 있는 화면 파일일 때만 (없으면 404 화면)."""
+        if not await self._is_page(url_path):
+            return None
+        clean = url_path[: -len(".html")]
+        target = "/" if clean == "index" else f"/{clean}"
+        query = scope.get("query_string", b"").decode("latin-1")
+        return RedirectResponse(f"{target}?{query}" if query else target, status_code=302)
 
 
 # --- CSP 위반 보고 받기 ---

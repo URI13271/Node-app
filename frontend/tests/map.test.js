@@ -13,7 +13,7 @@ test('배경 지도 대기 시간은 8초', () => {
 
 test('출처 표기는 접을 수 있게 두고 정보 페이지로 연결한다', () => {
   assert.equal(ATTRIBUTION_OPTIONS.compact, true)
-  assert.match(ATTRIBUTION_OPTIONS.customAttribution, /href="\/about\.html"/)
+  assert.match(ATTRIBUTION_OPTIONS.customAttribution, /href="\/about"/)
 })
 
 test('출처 위치: 3D 안내 화면은 오른쪽 위, 나머지는 오른쪽 아래', () => {

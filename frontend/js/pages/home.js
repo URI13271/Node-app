@@ -13,7 +13,7 @@ let seq = 0 // 늦게 도착한 옛 응답을 버리려고 요청마다 번호�
 function renderItems(q, data) {
   title.textContent = q ? `검색 결과 ${data.total}곳` : '시연 장소'
   list.innerHTML = data.items.length
-    ? data.items.map((p) => `<li><a class="card place-item" href="/place.html?id=${p.id}">
+    ? data.items.map((p) => `<li><a class="card place-item" href="/place?id=${p.id}">
         <b>${escapeHtml(p.name)}</b> <span class="chip">${escapeHtml(CATEGORY_LABEL[p.category] || '기타')}</span></a></li>`).join('')
     : `<li class="empty">“${escapeHtml(q)}”에 대한 결과가 없어요. 이름 일부만 넣어 보세요.</li>`
 }

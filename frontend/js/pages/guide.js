@@ -1,4 +1,4 @@
-// guide.html?id=1&parking_lot_id=&route=&start=1 (F-02~F-05 3D 안내)
+// /guide?id=1&parking_lot_id=&route=&start=1 (F-02~F-05 3D 안내)
 // 주차장에서 목적 건물 입구까지 경로와 단계별 카메라를 보여 준다. start=1 이면 개요를 건너뛰고 1단계부터
 import { getBuildings, getPlace, getWalkRoutes } from '../api.js'
 import { fractionOnPath } from '../geo.js'
@@ -162,7 +162,7 @@ async function load() {
   }
   drawPlaceMarkers()
   renderLegend($('#map-legend'), ['entrance', 'landmark', 'route'])
-  $('#btn-detail').href = `/place.html?id=${placeId}`
+  $('#btn-detail').href = `/place?id=${placeId}`
 
   if (routeResult.status === 'rejected') {
     state.error = loadErrorMessage(routeResult.reason)
