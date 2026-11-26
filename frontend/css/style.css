@@ -82,7 +82,7 @@ h2 { font-size: 15px; margin: 0 0 8px; }
 .place-summary { margin: 12px 0; }
 .place-heading, .parking-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .place-heading h1 { margin: 0; }
-.place-address, .place-description, .parking-detail, .map-attribution-note { margin: 8px 0 0; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+.place-address, .place-description, .parking-detail { margin: 8px 0 0; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
 .place-meta { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 12px; color: var(--muted); font-size: 12px; }
 .parking-card { border: 1px solid var(--line); box-shadow: none; }
 .parking-route { margin-top: 10px; }
@@ -154,7 +154,6 @@ h2 { font-size: 15px; margin: 0 0 8px; }
 .route-chip.selected { border-color: var(--accent); color: var(--accent); }
 .guide-card { max-height: 52vh; overflow-y: auto; }
 .guide-card .legend { margin-bottom: 0; }
-.guide-card .map-attribution-note { margin-top: 5px; }
 .mk-step { display: grid; place-items: center; width: 28px; height: 28px; border: 2px solid #fff; border-radius: 50%; background: var(--accent); color: #fff; font: 700 13px var(--mono); box-shadow: 0 1px 5px rgba(0, 0, 0, .35); }
 .mk-step.selected { width: 34px; height: 34px; outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent); }
 

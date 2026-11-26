@@ -38,7 +38,6 @@ function renderPlace() {
   const place = state.place
   if (!place) return
   const category = CATEGORY_LABEL[place.category] || '기타'
-  const attributions = (place.attributions || []).map(escapeHtml).join(' · ')
   placeInfo.innerHTML = `
     <article class="place-summary card">
       <div class="place-heading"><h1>${escapeHtml(place.name)}</h1><span class="chip">${escapeHtml(category)}</span></div>
@@ -49,7 +48,6 @@ function renderPlace() {
         <span>주차장 ${place.parking_lots?.length || 0}곳</span>
         ${place.last_verified_at ? `<span>확인 ${escapeHtml(place.last_verified_at.slice(0, 10))}</span>` : ''}
       </div>
-      ${attributions ? `<p class="map-attribution-note">건물 데이터: ${attributions}</p>` : ''}
     </article>`
 
   const routesByLot = new Map()

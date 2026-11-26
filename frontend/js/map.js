@@ -21,6 +21,32 @@ export const ATTRIBUTION_OPTIONS = {
   customAttribution: '<a href="/about.html">출처 전체</a>',
 }
 
+// 처음 펼쳐진 출처 표기를 지도가 뜬 뒤 이 시간이 지나면 접는다 (끌기 전에도). 사용자가 그 전에 (i)를 누르면 자동으로 접지 않는다
+export const ATTRIBUTION_AUTO_COLLAPSE_MS = 5000
+
+/**
+ * 펼쳐진 compact 출처 표기를 접는다. 지도를 끌 때 MapLibre 가 하는 동작(maplibregl-compact-show 클래스만 뺌)과 같다.
+ * MapLibre 4.7.1 배포 파일 기준. 버전을 올리면 클래스 이름을 다시 확인한다. 접었으면 true
+ * @param {{querySelector: Function}} container  지도 컨테이너
+ */
+export function collapseAttribution(container) {
+  const el = container?.querySelector?.('.maplibregl-ctrl-attrib.maplibregl-compact.maplibregl-compact-show')
+  if (!el) return false
+  el.classList.remove('maplibregl-compact-show')
+  return true
+}
+
+/** 지도 load 뒤 ATTRIBUTION_AUTO_COLLAPSE_MS 가 지나면 출처 표기를 접는다. 그 전에 출처 표기를 누르면 취소 */
+function autoCollapseAttribution(map, container) {
+  let timer = null
+  const cancel = () => { clearTimeout(timer); timer = null }
+  map.once('load', () => {
+    timer = setTimeout(() => { timer = null; collapseAttribution(container) }, ATTRIBUTION_AUTO_COLLAPSE_MS)
+    container.querySelector?.('.maplibregl-ctrl-attrib')?.addEventListener('click', cancel, { once: true })
+  })
+  map.once('remove', cancel)
+}
+
 /** 출처 표기 위치. 3D 안내 화면(.map-full)은 아래 안내 카드가 덮으므로 오른쪽 위 */
 export function attributionPosition(container) {
   return container.classList.contains('map-full') ? 'top-right' : 'bottom-right'
@@ -289,6 +315,7 @@ export function createMap(container, view = {}) {
   // 나침반: 지도를 돌리면 북쪽을 가리키고, 누르면 북쪽으로 되돌린다. 확대 버튼은 손가락 확대가 있어 뺀다
   map.addControl(new maplibregl.NavigationControl({ showZoom: false, visualizePitch: true }), 'top-right')
   map.addControl(new maplibregl.AttributionControl(ATTRIBUTION_OPTIONS), attributionPosition(container))
+  autoCollapseAttribution(map, container)
 
   loadCampusContext().catch(() => {}) // 미리 받아 둔다 (약 18KB). 인터넷이 끊긴 뒤에도 바로 바꿀 수 있게
   const watch = createBasemapWatch((reason) => switchToCampusContext(map, reason, watch))
@@ -313,10 +340,21 @@ function dataOf(map) {
   return drawData.get(map)
 }
 
-function setSource(map, id, data) {
+function setSource(map, id, data, attribution) {
   const source = map.getSource(id)
   if (source) source.setData(data)
-  else map.addSource(id, { type: 'geojson', data })
+  else map.addSource(id, { type: 'geojson', data, ...(attribution ? { attribution } : {}) })
+}
+
+/**
+ * 건물 응답의 출처 목록 → 지도 출처 표기 문자열. 예: ['© OpenStreetMap contributors', '공공 건물 데이터'] → '건물: © OpenStreetMap contributors, 공공 건물 데이터'
+ * 서버 문자열이 MapLibre 출처 칸에 innerHTML 로 들어가므로 HTML 특수문자를 바꾼다. 출처가 없으면 ''
+ */
+export function buildingAttribution(buildings) {
+  const list = (buildings?.attributions || []).filter((s) => typeof s === 'string' && s.trim())
+  if (!list.length) return ''
+  const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+  return `건물: ${list.map(esc).join(', ')}`
 }
 
 /** 레이어를 다시 그리는 함수를 기록하고, 스타일이 준비돼 있으면 바로 그린다 */
@@ -331,7 +369,8 @@ export function drawBuildings(map, buildings) {
   if (!map) return
   dataOf(map).buildings = buildings || emptyCollection()
   keepDrawing(map, 'buildings', () => {
-    setSource(map, 'lm-buildings', dataOf(map).buildings)
+    // 건물 출처(OSM, 공공 건물 데이터 등)는 소스 attribution 으로 넣어 지도 (i) 출처 표기에 함께 뜨게 한다
+    setSource(map, 'lm-buildings', dataOf(map).buildings, buildingAttribution(dataOf(map).buildings))
     if (map.getLayer('lm-buildings')) return
     map.addLayer({
       id: 'lm-buildings', type: 'fill-extrusion', source: 'lm-buildings',

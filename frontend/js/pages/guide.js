@@ -133,10 +133,6 @@ function render() {
 
   renderRouteSwitcher()
   renderSummary()
-  const attributions = state.place?.attributions || []
-  const attribution = $('#guide-attribution')
-  attribution.textContent = attributions.length ? `건물 데이터: ${attributions.join(' · ')}` : ''
-  attribution.hidden = !attributions.length
   // 지도: 경로 선과 지나온 구간, 단계 카메라
   drawRoute(map, state.route, completedFraction())
   const view = routeView()

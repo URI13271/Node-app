@@ -10,7 +10,7 @@
 </head>
 <!-- 정적 정보 페이지. 스크립트 없음 (서버 호출, 관리자 편집 없음). 출처를 바꾸면 이 파일을 직접 고친다.
      지도 화면의 출처는 이 페이지와 별도로 지도 모서리에 항상 표시한다 (js/map.js ATTRIBUTION_OPTIONS).
-     장소별 건물 데이터 출처는 API 응답(attributions)으로 장소 상세 화면에 표시한다. -->
+     장소별 건물 데이터 출처는 건물 API 응답(attributions)을 건물 레이어 소스 attribution 에 넣어 지도 (i) 출처 표기에 표시한다. -->
 <body>
   <div class="app">
     <header class="topbar"><a class="btn btn-icon" href="/" aria-label="처음으로">←</a></header>
@@ -36,7 +36,7 @@
       </li>
       <li class="card">
         <b>건물 데이터</b>
-        <p>장소마다 OpenStreetMap, 브이월드, 공공 건물 데이터, 직접 조사 중 사용한 출처를 장소 상세 화면에 표시합니다.</p>
+        <p>장소마다 OpenStreetMap, 브이월드, 공공 건물 데이터, 직접 조사 중 사용한 출처를 지도 오른쪽의 (i) 출처 표기에 표시합니다.</p>
       </li>
     </ul>
 

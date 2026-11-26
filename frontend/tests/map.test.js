@@ -220,7 +220,7 @@ test('drawRoute, drawBuildings: 스타일 준비 전에는 기록만 하고 styl
     addControl() {}
     isStyleLoaded() { return false } // 타일을 받는 중에는 false 다. 이 값에 기대지 않아야 한다
     getSource(id) { return this.sources[id] }
-    addSource(id, spec) { this.sources[id] = { data: spec.data, setData(d) { this.data = d; calls.push(['setData', id]) } } }
+    addSource(id, spec) { this.sources[id] = { data: spec.data, attribution: spec.attribution, setData(d) { this.data = d; calls.push(['setData', id]) } } }
     getLayer(id) { return this.layers.find((l) => l.id === id) }
     addLayer(layer, beforeId) { calls.push(['addLayer', layer.id, beforeId]); const i = beforeId ? this.layers.findIndex((l) => l.id === beforeId) : -1; i < 0 ? this.layers.push(layer) : this.layers.splice(i, 0, layer) }
   }
@@ -242,10 +242,32 @@ test('drawRoute, drawBuildings: 스타일 준비 전에는 기록만 하고 styl
     drawRoute(map, route, 1)
     assert.deepEqual(calls, [['setData', 'lm-route'], ['setData', 'lm-route-done']], 'isStyleLoaded 가 false 여도 바로 갱신')
 
-    drawBuildings(map, { type: 'FeatureCollection', features: [] })
+    drawBuildings(map, { type: 'FeatureCollection', features: [], attributions: ['© OpenStreetMap contributors', '공공 건물 데이터'] })
     assert.deepEqual(map.layers.map((l) => l.id), ['lm-buildings', 'lm-route', 'lm-route-done'], '건물은 경로 선 아래')
+    assert.equal(map.sources['lm-buildings'].attribution, '건물: © OpenStreetMap contributors, 공공 건물 데이터', '건물 출처는 (i) 출처 표기로')
   } finally {
     Object.assign(globalThis, saved)
     mock.timers.reset()
   }
+})
+
+test('buildingAttribution: 건물 출처를 (i) 표기 문자열로. 없으면 빈 문자열, HTML 특수문자는 바꾼다', async () => {
+  const { buildingAttribution } = await import('../js/map.js')
+  assert.equal(buildingAttribution({ attributions: ['© OpenStreetMap contributors', '직접 조사'] }), '건물: © OpenStreetMap contributors, 직접 조사')
+  assert.equal(buildingAttribution({ attributions: [] }), '')
+  assert.equal(buildingAttribution(null), '')
+  assert.equal(buildingAttribution({ attributions: ['<b>x</b>'] }), '건물: &lt;b&gt;x&lt;/b&gt;')
+})
+
+test('collapseAttribution: 펼쳐진 compact 출처 표기만 접는다', async () => {
+  const { collapseAttribution, ATTRIBUTION_AUTO_COLLAPSE_MS } = await import('../js/map.js')
+  assert.ok(ATTRIBUTION_AUTO_COLLAPSE_MS >= 3000, '읽을 시간은 남긴다')
+  const classes = new Set(['maplibregl-ctrl-attrib', 'maplibregl-compact', 'maplibregl-compact-show'])
+  const el = { classList: { remove: (c) => classes.delete(c) } }
+  const box = (found) => ({ querySelector: (sel) => (found && sel.split('.').filter(Boolean).every((c) => classes.has(c)) ? el : null) })
+  assert.equal(collapseAttribution(box(true)), true)
+  assert.equal(classes.has('maplibregl-compact-show'), false)
+  assert.equal(collapseAttribution(box(true)), false, '이미 접혔으면 그대로')
+  assert.equal(collapseAttribution(box(false)), false)
+  assert.equal(collapseAttribution(null), false)
 })
